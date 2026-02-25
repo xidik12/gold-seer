@@ -1,0 +1,145 @@
+{
+  "title": "Griffin Gold",
+  "prediction": {
+    "aiTitle": "AI 预测",
+    "quantTitle": "量化预测",
+    "compositeScore": "综合评分",
+    "signalBreakdown": "信号分解",
+    "activeSignals": "活跃信号",
+    "agreement": "一致性",
+    "noSignals": "暂无信号数据",
+    "timeframe": "时间周期",
+    "predicted": "预测值",
+    "change": "变化",
+    "aiModel": "AI 模型",
+    "modelDescription": "LSTM + XGBoost + 情绪分析",
+    "hideBreakdown": "隐藏信号分解",
+    "showBreakdown": "显示信号分解",
+    "bullishShort": "多",
+    "bearishShort": "空"
+  },
+  "priceWidget": {
+    "title": "XAU / USD",
+    "high24h": "24小时最高",
+    "low24h": "24小时最低",
+    "vol24h": "24小时成交量",
+    "timeframes": {
+      "1m": "1分",
+      "5m": "5分",
+      "15m": "15分",
+      "1h": "1时",
+      "4h": "4时",
+      "1d": "1日",
+      "1w": "1周",
+      "all": "全部"
+    }
+  },
+  "fearGreed": {
+    "title": "恐惧与贪婪指数",
+    "extremeFear": "极度恐惧",
+    "fear": "恐惧",
+    "neutral": "中性",
+    "greed": "贪婪",
+    "extremeGreed": "极度贪婪",
+    "last7Days": "近7天",
+    "marketSentiment": "市场情绪",
+    "tipExtremeFear": "极度恐惧可能预示着买入机会。",
+    "tipFear": "市场恐惧。可能的积累区间。",
+    "tipNeutral": "市场在恐惧与贪婪之间保持平衡。",
+    "tipGreed": "贪婪上升。新入场需谨慎。",
+    "tipExtremeGreed": "极度贪婪往往预示着回调。"
+  },
+  "signalPanel": {
+    "title": "交易信号",
+    "action": "操作",
+    "entry": "入场价",
+    "target": "目标价",
+    "stopLoss": "止损",
+    "confidence": "置信度",
+    "riskLevel": "风险等级",
+    "disclaimer": "AI 生成的信号，不构成投资建议。交易前请务必自行研究。",
+    "low": "低",
+    "high": "高"
+  },
+  "news": {
+    "title": "最新资讯",
+    "sources": "来源",
+    "new": "新",
+    "noNews": "暂无新闻"
+  },
+  "influencer": {
+    "title": "社交信号",
+    "monitoring": "正在监控 {{count}} 位意见领袖",
+    "weightedSentiment": "加权情绪",
+    "noData": "暂无意见领袖数据"
+  },
+  "onChain": {
+    "title": "市场结构指标",
+    "exchangeReserves": "机构持仓",
+    "largeTransactions": "大宗交易",
+    "activeAddresses": "活跃合约",
+    "hashRate": "矿企产量",
+    "inflows": "流入",
+    "outflows": "流出",
+    "24hUnique": "24小时独立交易方",
+    "networkSecurity": "市场深度",
+    "largeTxDesc": "单笔交易 > $10万（24小时）",
+    "whaleWatching": "大户监控"
+  },
+  "supply": {
+    "title": "黄金供应",
+    "mined": "已开采",
+    "remaining": "地下储量",
+    "totalSupply": "估计总量",
+    "dailyMining": "年度产量",
+    "blockReward": "开采成本",
+    "nextHalving": "下次FOMC会议",
+    "milestones": "供应里程碑",
+    "percentMined": "已开采 {{pct}}%",
+    "cap21M": "估计总储量",
+    "perBlock": "每吨",
+    "block": "年度"
+  },
+  "dominance": {
+    "title": "Gold 市场占比",
+    "change24h": "24小时变化",
+    "interpretation": "解读",
+    "riskOff": "避险：资金流入 Gold",
+    "riskOn": "冒险：资金流入风险资产",
+    "refresh": "刷新",
+    "highDesc": "高市场占比表明资金流入 Gold 作为避险资产。风险资产可能表现不佳。",
+    "lowDesc": "低市场占比表明资金流入风险资产。黄金相对吸引力下降。",
+    "moderateDesc": "适中的市场占比。市场在 Gold 和风险资产之间保持平衡。"
+  },
+  "macro": {
+    "title": "宏观看板",
+    "dxy": "DXY（美元指数）",
+    "gold": "黄金",
+    "sp500": "标普500",
+    "treasury10y": "10年期美债",
+    "nasdaq": "纳斯达克",
+    "vix": "VIX 恐慌指数",
+    "eurusd": "EUR/USD",
+    "updatesEvery5m": "每5分钟更新"
+  },
+  "halving": {
+    "title": "重大事件倒计时",
+    "nextHalving": "下次FOMC会议",
+    "block": "事件 {{number}}",
+    "days": "天",
+    "hours": "小时",
+    "minutes": "分钟",
+    "seconds": "秒",
+    "cycleProgress": "周期进度",
+    "rewardDrop": "利率从 {{from}} 调整至 {{to}}",
+    "last": "上次",
+    "next": "下次",
+    "historicalNote": "历史上，美联储利率决策通常对黄金价格产生显著的中长期影响。"
+  },
+  "accuracy": {
+    "title": "预测准确率",
+    "overall": "总体",
+    "trend30d": "30天趋势",
+    "byTimeframe": "按时间周期"
+  }
+}

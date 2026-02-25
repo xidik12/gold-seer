@@ -1,0 +1,423 @@
+{
+  "title": "关于 Griffin Gold",
+  "version": "版本",
+  "description": "AI 驱动的黄金和XAUUSD分析平台，具有自学习预测、聪明钱追踪等功能",
+  "heroSubtitle": "实时预测、交易信号、跨市场套利扫描、聪明钱追踪、预测竞猜和深度市场分析 — 由4模型 AI 集成系统驱动，分析覆盖13个数据类别的192个特征，具有时间对齐的自学习预测。",
+  "project": {
+    "title": "Incognito Generation",
+    "subtitle": "Incognito Generation 项目",
+    "description": "Griffin Gold 由 Salakhitdinov Khidayotullo 开发，是 Incognito Generation 项目的一部分 — 利用人工智能和机器学习为黄金交易者构建下一代工具。"
+  },
+  "whatIs": {
+    "title": "什么是 GRIFFIN GOLD？",
+    "p1": "Griffin Gold 是一个生产级黄金预测平台，分析覆盖13个类别的 <b>192个工程特征</b> — 技术指标、新闻情绪、市场结构指标、衍生品数据、宏观市场、ETF 资金流、机构持仓、央行储备变化、社交信号等。",
+    "p2": "它使用 <b>4模型集成</b> 在 <b>5个时间周期</b>（1小时、4小时、24小时、1周、1月）生成 <b>时间对齐的预测</b>：时序融合变换器 (40%)、XGBoost (25%)、LSTM (20%) 和 Google TimesFM (15%) — 权重根据模型表现自适应调整。",
+    "p3": "系统具有 <b>自学习反馈循环</b> — 评估每个预测，发现准确率模式，记录每个模型的性能日志，并根据学习结果自动调整置信度和方向。",
+    "p4": "除预测外，Griffin Gold 还提供覆盖三大交易时段的<b>跨市场套利扫描</b>、<b>聪明钱追踪</b>、<b>大户动向监控</b>、<b>价格提醒</b>、<b>每日AI简报</b>、互动式<b>预测竞猜游戏</b>、<b>贵金属板块追踪</b>和<b>新ETF上线检测</b> — 支持英文、俄文和中文。"
+  },
+  "selfLearning": {
+    "title": "自学习预测系统",
+    "intro": "Griffin Gold 不仅预测 — 它从每一个预测中学习。以下是完整的反馈循环：",
+    "step1_label": "预测：",
+    "step1_desc": " 时间对齐的预测在固定的 UTC 时间间隔生成 — 1小时每小时，4小时每4小时，24小时每天一次。存储前应用模式调整。",
+    "step2_label": "评估：",
+    "step2_desc": " 每个窗口关闭后，系统比较预测价格与实际价格，计算误差指标，分类波动率制度和趋势状态，创建详细的分析记录。",
+    "step3_label": "记录模型性能：",
+    "step3_desc": " 每个模型（TFT、LSTM、XGBoost、TimesFM）分别评分。这为调整集成权重的持续学习系统提供数据。",
+    "step4_label": "发现模式：",
+    "step4_desc": " 每6小时，模式引擎分析所有评估结果，发现准确率模式 — 模型分歧效应、波动率制度影响、RSI 阈值行为、置信度校准差距和时间偏差。",
+    "step5_label": "应用学习成果：",
+    "step5_desc": " 发现的模式自动修改未来预测 — 当模式表明准确率较低时降低置信度，当条件有利于模型时提高置信度。"
+  },
+  "timeAligned": {
+    "title": "时间对齐预测",
+    "intro": "预测现在在固定的 UTC 时间生成，而非任意间隔，确保每个时间周期正确对齐：",
+    "1h": "每小时 :00 UTC 生成。窗口关闭后 :05 评估。",
+    "4h": "每4小时生成（00:02、04:02、08:02、12:02、16:02、20:02 UTC）。:07 评估。",
+    "24h": "每天 00:04 UTC 生成一次。包含1周和1月时间周期。00:09 评估。",
+    "note": "仪表盘上的倒计时显示下一个预测何时到达。"
+  },
+  "byTheNumbers": {
+    "title": "数据一览",
+    "features": "特征",
+    "aiModels": "AI 模型",
+    "dataSources": "数据源",
+    "timeframes": "时间周期",
+    "backgroundJobs": "后台任务",
+    "retrainCycle": "重训周期",
+    "pages": "页面",
+    "exchanges": "交易所",
+    "languages": "语言"
+  },
+  "howToUse": {
+    "title": "如何使用 GRIFFIN GOLD",
+    "subtitle": "新用户？按以下5个步骤开始：",
+    "step1_label": "从仪表盘开始",
+    "step1_desc": " — 查看实时 Gold 价格、带倒计时的双预测卡片（AI + 量化）、交易信号和市场概览。",
+    "step2_label": "阅读信号",
+    "step2_desc": " — 查看 AI 生成的入场价、目标价和止损位，附带置信度评分和风险评级。",
+    "step3_label": "查看情绪",
+    "step3_desc": " — 浏览新闻情绪、恐惧与贪婪指数、KOL 情绪和社交量，判断市场情绪。",
+    "step4_label": "深入研究",
+    "step4_desc": " — 探索技术分析（45+ 指标）、幂律模型、艾略特波浪、爆仓地图、市场结构指标和 ETF 资金流。",
+    "step5_label": "查看准确率",
+    "step5_desc": " — 查看历史页面的分析标签，了解每个模型的准确率、误差分布、活跃模式和7天滚动准确率趋势。"
+  },
+  "architecture": {
+    "title": "AI 集成架构",
+    "aiEnsemble": "AI 集成模型",
+    "models": {
+      "tft": "时序融合变换器",
+      "xgboost": "XGBoost 梯度提升",
+      "lstm": "长短期记忆网络",
+      "timesfm": "TimesFM 基础模型"
+    },
+    "tftDesc": "多视野注意力模型 — 捕捉长程依赖关系和变量重要性权重",
+    "xgboostDesc": "梯度提升树 — 擅长基于192个工程特征进行分类",
+    "lstmDesc": "循环神经网络 — 检测168小时（1周）回溯窗口中的序列模式",
+    "timesfmDesc": "零样本基础模型 — 基于预训练的时间序列知识提供基线",
+    "adaptiveNote": "权重自适应调整 — 持续学习系统根据每个模型的近期准确率从性能日志中重新分配权重。情绪修正因子（最高 ±50%）根据实时市场情绪放大或抑制集成信号。发现的模式在检测到特定市场条件时进一步调整置信度。",
+    "features": "{{count}} 个特征，涵盖 {{categories}} 个数据类别",
+    "dataCategories": "数据类别"
+  },
+  "featuresCategories": {
+    "title": "192个特征，涵盖13个类别",
+    "technical": {
+      "name": "技术指标 (111)",
+      "desc": "EMA、RSI、MACD、布林带、一目均衡、唐奇安、肯特纳、GARCH 波动率、Hurst 指数、小波分析、K线形态和45个 Pandas-TA 指标"
+    },
+    "sentiment": {
+      "name": "情绪 (13)",
+      "desc": "新闻情绪 1小时/4小时/24小时、Reddit 和社交情绪、看涨/看跌百分比、恐惧与贪婪指数"
+    },
+    "derivativesExt": {
+      "name": "扩展衍生品 (12)",
+      "desc": "多空比、主动买卖量、爆仓、DVOL、杠杆率、顶级交易者持仓"
+    },
+    "exchangeFlows": {
+      "name": "交易所资金流 (9)",
+      "desc": "交易所储备、NVT 信号、MVRV Z 值、SOPR、Puell 倍数、币天销毁"
+    },
+    "macro": {
+      "name": "宏观 (8)",
+      "desc": "美元指数、黄金、标普500、纳斯达克、VIX、欧元/美元、10年期国债"
+    },
+    "onChain": {
+      "name": "市场结构 (7)",
+      "desc": "央行储备、COMEX库存、LBMA交割量、矿企产量、活跃合约数、难度、大宗交易数"
+    },
+    "eventMemory": {
+      "name": "事件记忆 (7)",
+      "desc": "预期影响 1小时/4小时/24小时、置信度、严重程度、情绪预测性、活跃事件数"
+    },
+    "etfFlows": {
+      "name": "ETF 资金流 (6)",
+      "desc": "净流入、总持仓、IBIT (贝莱德)、FGold (富达)、GGold (灰度)、ETF 交易量"
+    },
+    "stablecoin": {
+      "name": "货币环境 (5)",
+      "desc": "美元流动性、实际利率、通胀预期、7天利率变化、黄金ETF总规模"
+    },
+    "dominance": {
+      "name": "市占率 (4)",
+      "desc": "Gold 市占率、ETH 市占率、总市值、市值变化"
+    },
+    "supplyMining": {
+      "name": "供应/开采 (4)",
+      "desc": "已开采总量占比、年度开采量、矿企成本曲线、回收金供应"
+    },
+    "derivatives": {
+      "name": "衍生品 (3)",
+      "desc": "资金费率、未平仓合约、标记/指数价差"
+    },
+    "phraseAnalysis": {
+      "name": "短语分析 (3)",
+      "desc": "热门看涨/看跌短语评分、基于新闻语言模式的净情绪信号"
+    }
+  },
+  "dataPipeline": {
+    "title": "实时数据管道",
+    "items": [
+      {
+        "freq": "每1分钟",
+        "desc": "来自多个数据源的 Gold 价格（OHLCV K线）"
+      },
+      {
+        "freq": "每2分钟",
+        "desc": "来自25+ RSS 源、Kitco News、Reuters、彭博社公告的新闻"
+      },
+      {
+        "freq": "每2分钟",
+        "desc": "贵金属价格（白银、铂金、钯金等）"
+      },
+      {
+        "freq": "每3分钟",
+        "desc": "套利扫描器 — 跨三大交易时段和多个市场检测价差"
+      },
+      {
+        "freq": "每5分钟",
+        "desc": "事件分类 — 新闻分为监管、技术、市场、宏观、供应、交易所事件"
+      },
+      {
+        "freq": "每5分钟",
+        "desc": "聪明钱与大户交易监控 — Gold 大宗交易及机构资金进出"
+      },
+      {
+        "freq": "每5分钟",
+        "desc": "新黄金ETF和衍生品产品上线检测"
+      },
+      {
+        "freq": "每10分钟",
+        "desc": "KOL 推文 — 按市场影响力加权（Peter Schiff、Ray Dalio、Jeffrey Gundlach、Cathie Wood 等）"
+      },
+      {
+        "freq": "每10分钟",
+        "desc": "贵金属追踪器 — 白银、铂金、钯金价格、风险评分、交易量异动"
+      },
+      {
+        "freq": "每30分钟",
+        "desc": "来自 COMEX 期货的资金费率、未平仓合约和衍生品数据"
+      },
+      {
+        "freq": "每1小时",
+        "desc": "1小时预测 + 量化、宏观指标、市场结构指标、Gold 市占率、技术快照、短语分析"
+      },
+      {
+        "freq": "每4小时",
+        "desc": "4小时预测 + 量化，在 00/04/08/12/16/20 UTC"
+      },
+      {
+        "freq": "每天 00:04",
+        "desc": "24小时/1周/1月预测 + 量化，数据清理，订阅检查"
+      },
+      {
+        "freq": "每天 06:00",
+        "desc": "AI 每日简报 — 市场总结、核心指标、趋势展望及重要事件"
+      },
+      {
+        "freq": "每6小时",
+        "desc": "自动重训、持续学习、A/B 测试、模式发现"
+      },
+      {
+        "freq": "实时",
+        "desc": "用户自定义价格阈值触发后通过 Telegram 推送价格提醒"
+      }
+    ]
+  },
+  "howAiWorks": {
+    "title": "AI 如何运作",
+    "step1_label": "集成投票：",
+    "step1_desc": " 4个模型独立分析192个特征，对每个预测进行投票。TFT 以40%领先，但权重根据近期表现自适应调整 — 降低单一模型偏差。",
+    "step2_label": "持续学习：",
+    "step2_desc": " 模型每6小时使用最新市场数据自动重训。如果准确率低于55%或评估了50+新预测，将立即触发重训。",
+    "step3_label": "模型性能记录：",
+    "step3_desc": " 每次评估分别记录每个模型的预测。这为权重调整系统提供数据 — 表现好的模型获得更多影响力，退化的模型获得更少。",
+    "step4_label": "模式发现：",
+    "step4_desc": " 每6小时，系统分析所有预测评估以发现准确率模式 — 波动率制度效应、模型分歧信号、RSI 阈值行为、置信度校准误差和时间偏差。",
+    "step5_label": "事件记忆：",
+    "step5_desc": " 系统存储多达500个历史事件，追踪其在1小时、4小时、24小时和7天的实际影响。当类似事件发生时，系统进行模式匹配以预测预期影响。",
+    "step6_label": "短语分析器：",
+    "step6_desc": " 学习哪些特定新闻词汇和短语历史上推动了市场。随着时间推移，构建语言-价格关联图谱，提高情绪预测准确性。",
+    "step7_label": "A/B 测试：",
+    "step7_desc": " 新候选模型在上线前与生产模型竞争。只有优于当前集成的模型才会部署 — 确保质量永不下降。",
+    "step8_label": "热替换：",
+    "step8_desc": " 当重训产生更好的权重时，集成系统在不停止预测管道的情况下热替换。零停机，持续改进。",
+    "step9_label": "深度误差分析：",
+    "step9_desc": " 每个预测都有详细的事后分析 — 误差百分比、波动率制度、趋势状态、每模型分解、模型一致性评分和最具影响力的特征。全部可在历史分析标签中查看。"
+  },
+  "howItHelps": {
+    "title": "如何帮助您",
+    "coinsMarket": "贵金属与市场数据",
+    "coinsMarketDesc": "追踪 Gold、白银、铂金、钯金等 — 搜索任意贵金属，生成 AI 分析报告",
+    "accuracyTransparency": "准确率与透明度",
+    "accuracyTransparencyDesc": "每个预测对照实际结果评分 — 查看每模型准确率、误差分布、发现的模式和置信度校准（分析标签）",
+    "smartMoney": "聪明钱追踪",
+    "smartMoneyDesc": "追踪大户和机构资金流向 — 大宗交易、机构持仓变化、聪明钱实时动态",
+    "predictionGame": "预测竞猜",
+    "predictionGameDesc": "与其他用户竞猜 Gold 价格走势 — 赢取积分，冲击排行榜，锻炼市场直觉",
+    "priceAlerts": "价格提醒",
+    "priceAlertsDesc": "设置自定义价格阈值，目标触发后通过 Telegram 即时推送通知",
+    "dailyBriefings": "每日简报",
+    "dailyBriefingsDesc": "AI 生成的每日市场简报，涵盖核心指标、趋势总结、重要事件和短期展望",
+    "arbitrageScanner": "套利扫描器",
+    "arbitrageScannerDesc": "实时分析亚洲、伦敦、纽约三大交易时段的金价差异 — 对比现货、期货和 ETF 市场的价差及扣除手续费后的净利润",
+    "whales": "巨鲸追踪",
+    "whalesDesc": "监控 Gold 大户持仓动向、机构吸筹/派发模式及大宗交易记录",
+    "memecoins": "贵金属追踪",
+    "memecoinsDesc": "追踪白银、铂金、钯金等贵金属，包含风险评分、交易量异动和市场热度指标",
+    "newListings": "新产品上线",
+    "newListingsDesc": "抢先发现新上线的黄金ETF和衍生品产品 — 第一时间捕获新的交易机会",
+    "referral": "合作与推荐",
+    "referralDesc": "推荐好友赚取佣金 — 合作伙伴仪表盘提供数据分析、收益追踪和推荐链接",
+    "multiLang": "多语言支持",
+    "multiLangDesc": "完整应用支持英文、俄文和中文 — 一键切换，所有内容完整翻译",
+    "subscriptions": "订阅等级",
+    "subscriptionsDesc": "免费版、高级版和专业版 — 根据需求解锁高级功能、更快更新和优先支持"
+  },
+  "whatsInside": {
+    "title": "功能一览",
+    "dashboard": {
+      "name": "仪表盘",
+      "desc": "实时 Gold 价格、带倒计时的双预测卡片、交易信号、恐惧与贪婪、新闻、市场结构、市占率、供应和宏观概览"
+    },
+    "signals": {
+      "name": "信号",
+      "desc": "可操作的入场/目标/止损位，附带置信度、风险评级和信号强度"
+    },
+    "advisor": {
+      "name": "顾问",
+      "desc": "AI 驱动的交易计划，含仓位大小、风险管理和反转检测"
+    },
+    "technical": {
+      "name": "技术",
+      "desc": "图表含45+指标 — RSI、MACD、布林带、一目均衡、GARCH、小波分析等"
+    },
+    "powerLaw": {
+      "name": "幂律模型",
+      "desc": "基于 Gold 对数采用增长的长期公允价值模型"
+    },
+    "elliottWave": {
+      "name": "艾略特波浪",
+      "desc": "基于波浪的市场结构分析、趋势阶段和反转点"
+    },
+    "liquidations": {
+      "name": "爆仓",
+      "desc": "杠杆持仓集群和爆仓级联风险区域"
+    },
+    "coins": {
+      "name": "币种",
+      "desc": "追踪 Gold、白银、铂金、钯金 — 搜索任意贵金属，生成 AI 分析报告"
+    },
+    "news": {
+      "name": "新闻",
+      "desc": "来自25+来源的实时新闻，附 AI 情绪评分和短语分析"
+    },
+    "events": {
+      "name": "事件",
+      "desc": "市场事件与基于历史模式匹配的 AI 影响预测"
+    },
+    "history": {
+      "name": "历史",
+      "desc": "过往预测与分析标签 — 每模型准确率、误差指标、活跃模式、学习进度"
+    },
+    "paperTrading": {
+      "name": "模拟交易",
+      "desc": "使用虚拟资金练习 — 无风险追踪盈亏"
+    },
+    "learn": {
+      "name": "学习",
+      "desc": "交易教育 — 基础知识、策略、技术分析、心理学和形态"
+    },
+    "tools": {
+      "name": "工具",
+      "desc": "仓位大小、风险管理和交易计划的计算器和实用工具"
+    },
+    "resources": {
+      "name": "资源",
+      "desc": "为黄金交易者精选的链接、指南和参考资料"
+    },
+    "settings": {
+      "name": "设置",
+      "desc": "自定义提醒、通知和显示偏好"
+    },
+    "premium": {
+      "name": "高级版",
+      "desc": "免费版、高级版和专业版，不同等级解锁不同功能"
+    },
+    "smartMoney": {
+      "name": "聪明钱",
+      "desc": "大户和机构资金流追踪 — 大宗交易、机构持仓变化、聪明钱动态"
+    },
+    "predictionGame": {
+      "name": "预测竞猜",
+      "desc": "互动式 Gold 价格预测游戏 — 与用户竞争，赢取积分，冲击排行榜"
+    },
+    "priceAlerts": {
+      "name": "价格提醒",
+      "desc": "自定义价格提醒，触发阈值后通过 Telegram 推送通知"
+    },
+    "dailyBriefings": {
+      "name": "每日简报",
+      "desc": "AI 生成的每日市场总结，涵盖核心指标、趋势展望和重要事件"
+    },
+    "arbitrage": {
+      "name": "套利",
+      "desc": "跨三大交易时段的套利检测 — 实时价差和扣除手续费后的净利润"
+    },
+    "whales": {
+      "name": "巨鲸",
+      "desc": "大户持仓追踪、大宗交易监控及吸筹/派发模式分析"
+    },
+    "memecoins": {
+      "name": "贵金属",
+      "desc": "贵金属追踪器，包含风险评分、交易量数据和市场热度"
+    },
+    "newListings": {
+      "name": "新产品上线",
+      "desc": "新上线的黄金ETF和衍生品 — 抢先发现新交易机会"
+    },
+    "referral": {
+      "name": "推荐",
+      "desc": "合作伙伴与推荐系统 — 赚取佣金、追踪推荐、合作伙伴数据分析"
+    }
+  },
+  "features": {
+    "title": "功能",
+    "predictions": "AI 价格预测",
+    "predictionsDesc": "基于4个机器学习模型集成的时间对齐多周期预测，具有自学习功能",
+    "signals": "交易信号",
+    "signalsDesc": "可操作的买卖信号，含入场价、目标价和止损",
+    "technical": "技术分析",
+    "technicalDesc": "45+ 指标，附带通俗易懂的解释",
+    "onChain": "市场结构分析",
+    "onChainDesc": "大户追踪、机构持仓流向及市场指标",
+    "news": "新闻情绪",
+    "newsDesc": "实时新闻聚合与 AI 情绪分析",
+    "paperTrading": "模拟交易",
+    "paperTradingDesc": "使用 $10,000 虚拟资金和真实数据练习交易",
+    "advisor": "交易顾问",
+    "advisorDesc": "AI 驱动的交易建议与风险管理",
+    "elliott": "艾略特波浪",
+    "elliottDesc": "波浪形态分析与斐波那契目标",
+    "powerLaw": "幂律模型",
+    "powerLawDesc": "基于历史趋势的黄金公允价值模型",
+    "liquidations": "爆仓地图",
+    "liquidationsDesc": "衍生品市场风险可视化",
+    "quantTheory": "量化理论",
+    "accuracyTracking": "准确率追踪",
+    "coinsTokens": "贵金属品种",
+    "etfFlows": "ETF 资金流",
+    "learnEducate": "学习与教育",
+    "eventMemory": "事件记忆",
+    "selfLearning": "自学习 AI",
+    "smartMoney": "聪明钱",
+    "predictionGame": "预测竞猜",
+    "priceAlerts": "价格提醒",
+    "dailyBriefings": "每日简报",
+    "arbitrage": "套利扫描器",
+    "whales": "巨鲸追踪",
+    "memecoins": "贵金属",
+    "newListings": "新产品上线",
+    "referral": "推荐系统",
+    "multiLang": "多语言支持"
+  },
+  "credits": {
+    "title": "作者与社区",
+    "createdBy": "由 <b>Salakhitdinov Khidayotullo</b> 创建 — 全栈开发者、AI 研究员和黄金市场爱好者。",
+    "projectNote": "Incognito Generation 项目的一部分",
+    "builtWith": "使用 React、Python 和对黄金的热爱构建",
+    "poweredBy": "由多个 AI 模型和实时市场数据驱动",
+    "joinCounsil": "GRIFFIN GOLD COUNSIL",
+    "joinTelegram": "Telegram 机器人"
+  },
+  "donate": {
+    "title": "支持 Griffin Gold",
+    "description": "帮助改进平台 — 支持开发、服务器费用和新功能。",
+    "copy": "复制",
+    "copied": "已复制！"
+  },
+  "disclaimer": {
+    "title": "免责声明",
+    "text": "Griffin Gold 是一款教育工具。本应用中的任何内容均不构成投资建议。AI 预测可能不准确。在做出任何投资决策前，请务必自行研究（DYOR）。过往表现不代表未来收益。"
+  }
+}

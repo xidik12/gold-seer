@@ -1,0 +1,25 @@
+{
+  "title": "ដៃគូ",
+  "create": "បង្កើតដៃគូ",
+  "name": "ឈ្មោះដៃគូ",
+  "code": "កូដបញ្ជូន",
+  "commission": "កម្រៃជើងសារ %",
+  "email": "អ៊ីមែលទំនាក់ទំនង",
+  "telegram": "Telegram ទំនាក់ទំនង",
+  "notes": "កំណត់ចំណាំ",
+  "active": "សកម្ម",
+  "inactive": "អសកម្ម",
+  "referrals": "ការបញ្ជូន",
+  "conversions": "ការបម្លែង",
+  "conversionRate": "អត្រាបម្លែង",
+  "totalCommission": "កម្រៃជើងសារសរុប",
+  "noPartners": "មិនទាន់មានដៃគូទេ។ បង្កើតមួយដើម្បីចាប់ផ្តើម។",
+  "createSuccess": "បង្កើតដៃគូបានជោគជ័យ",
+  "deactivated": "ដៃគូត្រូវបានបិទ",
+  "stats": {
+    "totalReferred": "បញ្ជូនសរុប",
+    "premiumConversions": "ការបម្លែង Premium",
+    "totalStars": "Stars សរុប",
+    "pendingPayout": "ការទូទាត់រង់ចាំ"
+  }
+}

@@ -1,0 +1,815 @@
+import logging
+import time
+from datetime import datetime, timedelta
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import select, desc
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database import get_session, Price, MacroData, IndicatorSnapshot
+from app.collectors.market import GoldMarketCollector as MarketCollector
+from app.collectors.macro import MacroCollector
+
+logger = logging.getLogger(__name__)
+
+# ── Simple TTL cache for expensive endpoints ──
+_cache: dict[str, tuple[dict, float]] = {}
+
+
+def _get_cached(key: str) -> dict | None:
+    if key in _cache:
+        data, expires = _cache[key]
+        if time.monotonic() < expires:
+            return data
+        del _cache[key]
+    return None
+
+
+def _set_cache(key: str, data, ttl: int) -> None:
+    _cache[key] = (data, time.monotonic() + ttl)
+
+
+async def _get_macro_trio(session: AsyncSession):
+    """Fetch latest, 1h-ago, and 24h-ago MacroData rows with shared cache."""
+    cached = _get_cached("_macro_trio")
+    if cached is not None:
+        return cached
+
+    result = await session.execute(
+        select(MacroData).order_by(desc(MacroData.timestamp)).limit(1)
+    )
+    macro = result.scalar_one_or_none()
+    if not macro:
+        return None, None, None
+
+    prev_result = await session.execute(
+        select(MacroData)
+        .where(MacroData.timestamp <= macro.timestamp - timedelta(minutes=50))
+        .order_by(desc(MacroData.timestamp))
+        .limit(1)
+    )
+    prev_macro = prev_result.scalar_one_or_none()
+
+    daily_result = await session.execute(
+        select(MacroData)
+        .where(MacroData.timestamp <= macro.timestamp - timedelta(hours=23))
+        .order_by(desc(MacroData.timestamp))
+        .limit(1)
+    )
+    daily_macro = daily_result.scalar_one_or_none()
+
+    _set_cache("_macro_trio", (macro, prev_macro, daily_macro), 120)
+    return macro, prev_macro, daily_macro
+
+
+router = APIRouter(prefix="/api/market", tags=["market"])
+
+# Shared collectors for live API fallback
+_market_collector = MarketCollector()
+_macro_collector = MacroCollector()
+
+# Minimum candles needed per timeframe to consider local data sufficient
+_MIN_CANDLES = {"1m": 2, "5m": 2, "15m": 2, "1h": 5, "4h": 5, "1d": 10, "1w": 20, "1mo": 20, "1y": 50, "all": 50}
+
+# Yahoo Finance interval + limit for each timeframe (used as API fallback)
+_API_FALLBACK = {
+    "1d": ("1h", 24),
+    "1w": ("1h", 168),
+    "1mo": ("4h", 180),
+    "1y": ("1d", 365),
+    "all": ("1d", 1000),
+}
+
+
+@router.get("/price")
+async def get_current_price(session: AsyncSession = Depends(get_session)):
+    """Get latest gold price data."""
+    result = await session.execute(
+        select(Price).order_by(desc(Price.timestamp)).limit(1)
+    )
+    price = result.scalar_one_or_none()
+
+    if not price:
+        return {"price": None, "message": "No price data available"}
+
+    # Get 24h ago price for change calculation
+    yesterday = price.timestamp - timedelta(hours=24)
+    result_24h = await session.execute(
+        select(Price)
+        .where(Price.timestamp <= yesterday)
+        .order_by(desc(Price.timestamp))
+        .limit(1)
+    )
+    price_24h = result_24h.scalar_one_or_none()
+
+    change_24h = None
+    change_24h_pct = None
+    if price_24h and price_24h.close:
+        change_24h = price.close - price_24h.close
+        change_24h_pct = (change_24h / price_24h.close) * 100
+
+    return {
+        "price": price.close,
+        "open": price.open,
+        "high": price.high,
+        "low": price.low,
+        "volume": price.volume,
+        "change_24h": round(change_24h, 2) if change_24h else None,
+        "change_24h_pct": round(change_24h_pct, 2) if change_24h_pct else None,
+        "timestamp": price.timestamp.isoformat(),
+    }
+
+
+@router.get("/stats")
+async def get_price_stats(
+    timeframe: str = Query("1d", pattern="^(1m|5m|15m|1h|4h|1d|1w|1mo|1y|all)$"),
+    session: AsyncSession = Depends(get_session),
+):
+    """Get price statistics for a specific timeframe.
+
+    Timeframes: 1m, 5m, 15m, 1h, 4h, 1d (day), 1w (week), 1mo (month), 1y (year), all (lifetime)
+    """
+    cached = _get_cached(f"stats:{timeframe}")
+    if cached is not None:
+        return cached
+
+    # Map timeframe to timedelta
+    timeframe_map = {
+        "1m": timedelta(minutes=1),
+        "5m": timedelta(minutes=5),
+        "15m": timedelta(minutes=15),
+        "1h": timedelta(hours=1),
+        "4h": timedelta(hours=4),
+        "1d": timedelta(days=1),
+        "1w": timedelta(weeks=1),
+        "1mo": timedelta(days=30),
+        "1y": timedelta(days=365),
+        "all": None,  # All time
+    }
+
+    # Get current price
+    result_current = await session.execute(
+        select(Price).order_by(desc(Price.timestamp)).limit(1)
+    )
+    current = result_current.scalar_one_or_none()
+
+    if not current:
+        return {"error": "No price data available"}
+
+    # Get historical data for timeframe
+    delta = timeframe_map[timeframe]
+    if delta:
+        since = current.timestamp - delta
+        result_historical = await session.execute(
+            select(Price)
+            .where(Price.timestamp >= since)
+            .order_by(Price.timestamp)
+        )
+    else:
+        # All time — cap at 8640 rows (6 days of 1-min candles) to avoid unbounded scan
+        result_historical = await session.execute(
+            select(Price).order_by(desc(Price.timestamp)).limit(8640)
+        )
+
+    prices = result_historical.scalars().all()
+
+    # "all" query uses DESC+LIMIT, reverse to ascending order for downstream code
+    if not delta and prices:
+        prices = list(reversed(prices))
+
+    min_needed = _MIN_CANDLES.get(timeframe, 5)
+
+    # Fallback to Yahoo Finance API if local data is insufficient
+    if len(prices) < min_needed and timeframe in _API_FALLBACK:
+        logger.info(f"Stats: Local data insufficient ({len(prices)} candles) for {timeframe}, fetching from Yahoo Finance")
+        try:
+            api_interval, api_limit = _API_FALLBACK[timeframe]
+            klines = await _market_collector.get_historical_klines(
+                interval=api_interval, limit=api_limit
+            )
+            if klines and len(klines) > min_needed:
+                current_price = current.close
+                first_k = klines[0]
+                open_price = first_k["open"]
+                high_price = max(k["high"] for k in klines)
+                low_price = min(k["low"] for k in klines)
+                total_volume = sum(k["volume"] for k in klines)
+                last_k = klines[-1]
+
+                price_change = last_k["close"] - open_price
+                price_change_pct = (price_change / open_price * 100) if open_price else 0
+
+                max_candles = 500
+                step = max(1, len(klines) // max_candles)
+                candles = [
+                    {
+                        "timestamp": k["timestamp"].isoformat() if hasattr(k["timestamp"], "isoformat") else str(k["timestamp"]),
+                        "open": k["open"],
+                        "high": k["high"],
+                        "low": k["low"],
+                        "close": k["close"],
+                        "volume": k["volume"],
+                    }
+                    for k in klines[::step]
+                ]
+
+                result = {
+                    "timeframe": timeframe,
+                    "current_price": current_price,
+                    "open": open_price,
+                    "high": high_price,
+                    "low": low_price,
+                    "volume": total_volume,
+                    "change": round(price_change, 2),
+                    "change_pct": round(price_change_pct, 2),
+                    "num_candles": len(klines),
+                    "candles": candles,
+                    "timestamp": current.timestamp.isoformat(),
+                    "period_start": candles[0]["timestamp"],
+                    "period_end": candles[-1]["timestamp"],
+                    "source": "yahoo_finance_api",
+                }
+                _set_cache(f"stats:{timeframe}", result, 30)
+                return result
+        except Exception as e:
+            logger.warning(f"Yahoo Finance fallback failed: {e}")
+
+    if not prices:
+        return {"error": "No historical data available"}
+
+    # Calculate stats from local DB data
+    first_price = prices[0]
+    current_price = current.close
+    open_price = first_price.close
+    high_price = max(p.high for p in prices)
+    low_price = min(p.low for p in prices)
+    total_volume = sum(p.volume for p in prices)
+
+    price_change = current_price - open_price
+    price_change_pct = (price_change / open_price * 100) if open_price else 0
+
+    # Get candle data for chart (limit to reasonable number of points)
+    max_candles = 1000
+    step = max(1, len(prices) // max_candles)
+    candles = [
+        {
+            "timestamp": p.timestamp.isoformat(),
+            "open": p.open,
+            "high": p.high,
+            "low": p.low,
+            "close": p.close,
+            "volume": p.volume,
+        }
+        for p in prices[::step]
+    ]
+
+    result = {
+        "timeframe": timeframe,
+        "current_price": current_price,
+        "open": open_price,
+        "high": high_price,
+        "low": low_price,
+        "volume": total_volume,
+        "change": round(price_change, 2),
+        "change_pct": round(price_change_pct, 2),
+        "num_candles": len(prices),
+        "candles": candles,
+        "timestamp": current.timestamp.isoformat(),
+        "period_start": first_price.timestamp.isoformat(),
+        "period_end": current.timestamp.isoformat(),
+    }
+    _set_cache(f"stats:{timeframe}", result, 30)
+    return result
+
+
+@router.get("/indicators")
+async def get_indicators(
+    session: AsyncSession = Depends(get_session),
+):
+    """Get current technical indicators calculated from recent price data."""
+    cached = _get_cached("indicators")
+    if cached is not None:
+        return cached
+
+    import pandas as pd
+    from app.features.technical import TechnicalFeatures
+
+    # Need at least 350 candles for long SMAs
+    since = datetime.utcnow() - timedelta(hours=400)
+    result = await session.execute(
+        select(Price).where(Price.timestamp >= since).order_by(Price.timestamp)
+    )
+    prices = result.scalars().all()
+
+    if len(prices) < 30:
+        return {"error": "Not enough price data for indicators", "candle_count": len(prices)}
+
+    df = pd.DataFrame([
+        {"open": p.open, "high": p.high, "low": p.low, "close": p.close, "volume": p.volume}
+        for p in prices
+    ])
+
+    import asyncio
+    loop = asyncio.get_event_loop()
+    df = await loop.run_in_executor(None, TechnicalFeatures.calculate_all, df)
+
+    # Get latest row
+    latest = df.iloc[-1]
+
+    def safe(val):
+        if pd.isna(val):
+            return None
+        return round(float(val), 4)
+
+    current_price = safe(latest["close"])
+
+    # Gold market context placeholder
+    gold_market_ctx = None
+
+    result = {
+        "timestamp": prices[-1].timestamp.isoformat(),
+        "current_price": current_price,
+        "candle_count": len(prices),
+        "gold_market_context": gold_market_ctx,
+        "moving_averages": {
+            "ema_9": safe(latest.get("ema_9")),
+            "ema_21": safe(latest.get("ema_21")),
+            "ema_50": safe(latest.get("ema_50")),
+            "ema_200": safe(latest.get("ema_200")),
+            "sma_20": safe(latest.get("sma_20")),
+            "sma_111": safe(latest.get("sma_111")),
+            "sma_200": safe(latest.get("sma_200")),
+            "sma_350": safe(latest.get("sma_350")),
+        },
+        "momentum": {
+            "rsi": safe(latest.get("rsi")),
+            "rsi_7": safe(latest.get("rsi_7")),
+            "rsi_30": safe(latest.get("rsi_30")),
+            "macd": safe(latest.get("macd")),
+            "macd_signal": safe(latest.get("macd_signal")),
+            "macd_histogram": safe(latest.get("macd_hist")),
+            "adx": safe(latest.get("adx")),
+            "momentum_10": safe(latest.get("momentum_10")),
+            "momentum_20": safe(latest.get("momentum_20")),
+            "roc_1": safe(latest.get("roc_1")),
+            "roc_6": safe(latest.get("roc_6")),
+            "roc_12": safe(latest.get("roc_12")),
+            "roc_24": safe(latest.get("roc_24")),
+        },
+        "volatility": {
+            "bb_upper": safe(latest.get("bb_upper")),
+            "bb_middle": safe(latest.get("bb_middle")),
+            "bb_lower": safe(latest.get("bb_lower")),
+            "bb_width": safe(latest.get("bb_width")),
+            "bb_position": safe(latest.get("bb_position")),
+            "atr": safe(latest.get("atr")),
+            "volatility_24h": safe(latest.get("volatility_24h")),
+        },
+        "volume": {
+            "obv": safe(latest.get("obv")),
+            "vwap": safe(latest.get("vwap")),
+            "volume_sma_20": safe(latest.get("volume_sma_20")),
+            "volume_ratio": safe(latest.get("volume_ratio")),
+        },
+        "levels": {
+            "pivot": safe(latest.get("pivot")),
+            "support_1": safe(latest.get("support_1")),
+            "resistance_1": safe(latest.get("resistance_1")),
+        },
+        "advanced": {
+            "mayer_multiple": safe(latest.get("mayer_multiple")),
+            "pi_cycle_ratio": safe(latest.get("pi_cycle_ratio")),
+            "ema_cross": safe(latest.get("ema_cross")),
+            "zscore_20": safe(latest.get("zscore_20")),
+            "price_vs_ema9": safe(latest.get("price_vs_ema9")),
+            "price_vs_ema21": safe(latest.get("price_vs_ema21")),
+            "price_vs_ema50": safe(latest.get("price_vs_ema50")),
+        },
+        "candle": {
+            "body_size": safe(latest.get("body_size")),
+            "upper_shadow": safe(latest.get("upper_shadow")),
+            "lower_shadow": safe(latest.get("lower_shadow")),
+        },
+        "stochastic_rsi": {
+            "k": safe(latest.get("stoch_rsi_k")),
+            "d": safe(latest.get("stoch_rsi_d")),
+        },
+        "williams_r": safe(latest.get("williams_r")),
+        "ichimoku": {
+            "tenkan": safe(latest.get("ichimoku_tenkan")),
+            "kijun": safe(latest.get("ichimoku_kijun")),
+            "senkou_a": safe(latest.get("ichimoku_senkou_a")),
+            "senkou_b": safe(latest.get("ichimoku_senkou_b")),
+        },
+        "candlestick_patterns": {
+            "doji": int(latest.get("candle_doji", 0)),
+            "hammer": int(latest.get("candle_hammer", 0)),
+            "inverted_hammer": int(latest.get("candle_inverted_hammer", 0)),
+            "bullish_engulfing": int(latest.get("candle_bullish_engulfing", 0)),
+            "bearish_engulfing": int(latest.get("candle_bearish_engulfing", 0)),
+            "morning_star": int(latest.get("candle_morning_star", 0)),
+            "evening_star": int(latest.get("candle_evening_star", 0)),
+        },
+        "trend": {
+            "short_term": int(latest.get("trend_short", 0)),
+            "medium_term": int(latest.get("trend_medium", 0)),
+            "long_term": int(latest.get("trend_long", 0)),
+        },
+    }
+    _set_cache("indicators", result, 60)
+    return result
+
+
+@router.get("/candles")
+async def get_candles(
+    hours: int = Query(168, ge=1, le=720),
+    session: AsyncSession = Depends(get_session),
+):
+    """Get historical candle data with automatic downsampling."""
+    cached = _get_cached(f"candles:{hours}")
+    if cached is not None:
+        return cached
+
+    since = datetime.utcnow() - timedelta(hours=hours)
+
+    result = await session.execute(
+        select(Price)
+        .where(Price.timestamp >= since)
+        .order_by(Price.timestamp)
+    )
+    prices = result.scalars().all()
+
+    # Downsample to max 500 candles to keep response fast
+    max_candles = 500
+    step = max(1, len(prices) // max_candles)
+    candles = [
+        {
+            "timestamp": p.timestamp.isoformat(),
+            "open": p.open,
+            "high": p.high,
+            "low": p.low,
+            "close": p.close,
+            "volume": p.volume,
+        }
+        for p in prices[::step]
+    ]
+
+    result_data = {
+        "count": len(candles),
+        "total_raw": len(prices),
+        "candles": candles,
+    }
+    _set_cache(f"candles:{hours}", result_data, 60)
+    return result_data
+
+
+def build_macro_item(current_val, prev_val, daily_val):
+    """Build macro item with price and change data."""
+    if current_val is None:
+        return None
+    item = {"price": current_val}
+    if prev_val and prev_val > 0:
+        item["change_1h"] = round((current_val - prev_val) / prev_val * 100, 4)
+    if daily_val and daily_val > 0:
+        item["change_24h"] = round((current_val - daily_val) / daily_val * 100, 4)
+    return item
+
+
+@router.get("/macro")
+async def get_macro_data(session: AsyncSession = Depends(get_session)):
+    """Get latest macro market data with price changes."""
+    cached = _get_cached("macro")
+    if cached is not None:
+        return cached
+
+    try:
+        macro, prev_macro, daily_macro = await _get_macro_trio(session)
+    except Exception as e:
+        logger.warning(f"Macro DB query failed: {e}")
+        macro = None
+
+    if not macro:
+        # Live fallback: fetch directly from APIs when DB is empty
+        try:
+            live = await _macro_collector.collect()
+            return {
+                "dxy": live.get("dxy"),
+                "gold": live.get("gold"),
+                "sp500": live.get("sp500"),
+                "treasury_10y": live.get("treasury_10y"),
+                "nasdaq": live.get("nasdaq"),
+                "vix": live.get("vix"),
+                "eurusd": live.get("eurusd"),
+                "fear_greed_index": None,
+                "fear_greed_label": None,
+                "timestamp": live.get("timestamp"),
+            }
+        except Exception as e:
+            logger.warning(f"Live macro fallback failed: {e}")
+            return {
+                "dxy": None, "gold": None, "sp500": None, "treasury_10y": None,
+                "nasdaq": None, "vix": None, "eurusd": None,
+                "fear_greed_index": None, "fear_greed_label": None, "timestamp": None,
+            }
+
+    # Build all macro items using getattr for dynamic key access
+    all_macro_keys = [
+        "dxy", "gold", "sp500", "treasury_10y", "nasdaq", "vix", "eurusd",
+        "gbpusd", "usdjpy", "usdchf", "audusd", "usdcad", "nzdusd",
+        "wti_oil", "silver", "copper", "natural_gas",
+        "dow_jones", "russell_2000", "dax", "nikkei_225", "ftse_100",
+        "treasury_2y", "treasury_5y", "treasury_30y",
+    ]
+    result = {}
+    for key in all_macro_keys:
+        result[key] = build_macro_item(
+            getattr(macro, key, None),
+            getattr(prev_macro, key, None) if prev_macro else None,
+            getattr(daily_macro, key, None) if daily_macro else None,
+        )
+    result["fear_greed_index"] = macro.fear_greed_index
+    result["fear_greed_label"] = macro.fear_greed_label
+    result["timestamp"] = macro.timestamp.isoformat()
+
+    _set_cache("macro", result, 300)
+    return result
+
+
+@router.get("/onchain")
+async def get_onchain_data():
+    """Deprecated: On-chain metrics not applicable for gold. Returns macro metrics instead."""
+    return {"message": "On-chain metrics not applicable for gold trading. Use /api/market/macro instead."}
+
+
+@router.get("/funding")
+async def get_funding_data():
+    """Deprecated: Crypto funding rates not applicable for gold."""
+    return {"message": "Funding rates not applicable for gold trading. Use /api/cot for positioning data."}
+
+
+@router.get("/dominance")
+async def get_dominance_data():
+    """Deprecated: Crypto dominance not applicable for gold."""
+    return {"message": "Dominance metrics not applicable for gold trading."}
+
+
+@router.get("/fear-greed")
+async def get_fear_greed(
+    days: int = Query(30, ge=1, le=365),
+):
+    """Get Fear & Greed Index from alternative.me (free API)."""
+    cached = _get_cached(f"fear_greed:{days}")
+    if cached is not None:
+        return cached
+
+    import aiohttp
+
+    url = f"https://api.alternative.me/fng/?limit={days}&format=json"
+    try:
+        async with aiohttp.ClientSession() as sess:
+            async with sess.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                if resp.status != 200:
+                    return {"error": "Failed to fetch Fear & Greed data"}
+                raw = await resp.json(content_type=None)
+
+        data_list = raw.get("data", [])
+        if not data_list:
+            return {"current": None, "history": []}
+
+        current = data_list[0]
+        history = [
+            {
+                "value": int(d["value"]),
+                "label": d["value_classification"],
+                "timestamp": int(d["timestamp"]),
+            }
+            for d in data_list
+        ]
+
+        result = {
+            "current": {
+                "value": int(current["value"]),
+                "label": current["value_classification"],
+                "timestamp": int(current["timestamp"]),
+            },
+            "history": history,
+        }
+        _set_cache(f"fear_greed:{days}", result, 300)
+        return result
+    except Exception as e:
+        logger.warning(f"Fear & Greed fetch failed: {e}")
+        return {"current": None, "history": [], "error": str(e)}
+
+
+@router.get("/indicator-history")
+async def get_indicator_history(
+    hours: int = Query(168, ge=1, le=720),
+    session: AsyncSession = Depends(get_session),
+):
+    """Get historical indicator snapshots for trend analysis."""
+    cached = _get_cached(f"indicator_history:{hours}")
+    if cached is not None:
+        return cached
+
+    since = datetime.utcnow() - timedelta(hours=hours)
+
+    result = await session.execute(
+        select(IndicatorSnapshot)
+        .where(IndicatorSnapshot.timestamp >= since)
+        .order_by(IndicatorSnapshot.timestamp)
+    )
+    snapshots = result.scalars().all()
+
+    if not snapshots:
+        return {"snapshots": [], "count": 0}
+
+    data = {
+        "snapshots": [
+            {
+                "timestamp": s.timestamp.isoformat(),
+                "price": s.price,
+                "indicators": s.indicators,
+            }
+            for s in snapshots
+        ],
+        "count": len(snapshots),
+    }
+    _set_cache(f"indicator_history:{hours}", data, 300)
+    return data
+
+
+@router.get("/supply")
+async def get_gold_supply():
+    """Get gold supply data: above-ground stock, annual mine production, central bank reserves."""
+    cached = _get_cached("supply")
+    if cached is not None:
+        return cached
+
+    # World Gold Council estimates (updated annually)
+    TOTAL_ABOVE_GROUND = 212_582  # tonnes (WGC 2024 estimate)
+    ANNUAL_MINE_PRODUCTION = 3_644  # tonnes per year
+    CENTRAL_BANK_RESERVES = 36_699  # tonnes held by central banks
+    ANNUAL_GROWTH_PCT = 1.7  # supply growth rate
+
+    result = {
+        "total_above_ground_tonnes": TOTAL_ABOVE_GROUND,
+        "annual_mine_production_tonnes": ANNUAL_MINE_PRODUCTION,
+        "annual_growth_pct": ANNUAL_GROWTH_PCT,
+        "central_bank_reserves_tonnes": CENTRAL_BANK_RESERVES,
+        "central_bank_pct": round(CENTRAL_BANK_RESERVES / TOTAL_ABOVE_GROUND * 100, 1),
+        "supply_breakdown": {
+            "jewellery": {"tonnes": 95_547, "pct": 44.9},
+            "investment": {"tonnes": 47_435, "pct": 22.3},
+            "central_banks": {"tonnes": CENTRAL_BANK_RESERVES, "pct": 17.3},
+            "technology": {"tonnes": 29_808, "pct": 14.0},
+            "other": {"tonnes": 3_093, "pct": 1.5},
+        },
+        "top_producers": [
+            {"country": "China", "tonnes_annual": 370},
+            {"country": "Australia", "tonnes_annual": 310},
+            {"country": "Russia", "tonnes_annual": 310},
+            {"country": "Canada", "tonnes_annual": 200},
+            {"country": "USA", "tonnes_annual": 170},
+        ],
+        "top_central_bank_holders": [
+            {"country": "USA", "tonnes": 8_133},
+            {"country": "Germany", "tonnes": 3_352},
+            {"country": "Italy", "tonnes": 2_452},
+            {"country": "France", "tonnes": 2_437},
+            {"country": "Russia", "tonnes": 2_333},
+            {"country": "China", "tonnes": 2_264},
+        ],
+        "source": "World Gold Council 2024",
+    }
+    _set_cache("supply", result, 600)
+    return result
+
+
+# ── New TradingView-style endpoints ──
+
+NEW_MACRO_KEYS = [
+    "gbpusd", "usdjpy", "usdchf", "audusd", "usdcad", "nzdusd",
+    "wti_oil", "silver", "copper", "natural_gas",
+    "dow_jones", "russell_2000", "dax", "nikkei_225", "ftse_100",
+    "treasury_2y", "treasury_5y", "treasury_30y",
+]
+
+
+@router.get("/forex")
+async def get_forex_data(session: AsyncSession = Depends(get_session)):
+    """Get forex pairs with price and changes."""
+    cached = _get_cached("forex")
+    if cached is not None:
+        return cached
+
+    forex_keys = ["eurusd", "gbpusd", "usdjpy", "usdchf", "audusd", "usdcad", "nzdusd"]
+
+    macro, prev_macro, daily_macro = await _get_macro_trio(session)
+    if not macro:
+        return {k: None for k in forex_keys}
+
+    data = {}
+    for key in forex_keys:
+        data[key] = build_macro_item(
+            getattr(macro, key, None),
+            getattr(prev_macro, key, None) if prev_macro else None,
+            getattr(daily_macro, key, None) if daily_macro else None,
+        )
+
+    data["timestamp"] = macro.timestamp.isoformat()
+    _set_cache("forex", data, 300)
+    return data
+
+
+@router.get("/commodities")
+async def get_commodities_data(session: AsyncSession = Depends(get_session)):
+    """Get commodities with price and changes."""
+    cached = _get_cached("commodities")
+    if cached is not None:
+        return cached
+
+    commodity_keys = ["gold", "wti_oil", "silver", "copper", "natural_gas"]
+
+    macro, prev_macro, daily_macro = await _get_macro_trio(session)
+    if not macro:
+        return {k: None for k in commodity_keys}
+
+    data = {}
+    for key in commodity_keys:
+        data[key] = build_macro_item(
+            getattr(macro, key, None),
+            getattr(prev_macro, key, None) if prev_macro else None,
+            getattr(daily_macro, key, None) if daily_macro else None,
+        )
+
+    data["timestamp"] = macro.timestamp.isoformat()
+    _set_cache("commodities", data, 300)
+    return data
+
+
+@router.get("/yields")
+async def get_yield_curve(session: AsyncSession = Depends(get_session)):
+    """Get treasury yield curve (2Y, 5Y, 10Y, 30Y) with 30-day history."""
+    cached = _get_cached("yields")
+    if cached is not None:
+        return cached
+
+    yield_keys = ["treasury_2y", "treasury_5y", "treasury_10y", "treasury_30y"]
+
+    macro, _, _ = await _get_macro_trio(session)
+
+    current = {}
+    if macro:
+        for key in yield_keys:
+            val = getattr(macro, key, None)
+            current[key] = val
+
+    # 30-day history for chart
+    history_result = await session.execute(
+        select(MacroData)
+        .where(MacroData.timestamp >= datetime.utcnow() - timedelta(days=30))
+        .order_by(MacroData.timestamp)
+    )
+    history_rows = history_result.scalars().all()
+
+    history = []
+    for row in history_rows:
+        entry = {"timestamp": row.timestamp.isoformat()}
+        for key in yield_keys:
+            entry[key] = getattr(row, key, None)
+        history.append(entry)
+
+    # Inversion detection
+    t2y = current.get("treasury_2y")
+    t10y = current.get("treasury_10y")
+    inverted = t2y is not None and t10y is not None and t2y > t10y
+
+    data = {
+        "current": current,
+        "inverted": inverted,
+        "history": history,
+        "timestamp": macro.timestamp.isoformat() if macro else None,
+    }
+    _set_cache("yields", data, 300)
+    return data
+
+
+@router.get("/ta-summary")
+async def get_ta_summary(session: AsyncSession = Depends(get_session)):
+    """Get TradingView-style TA summary rating."""
+    cached = _get_cached("ta_summary")
+    if cached is not None:
+        return cached
+
+    from app.features.ta_summary import TASummaryRating
+
+    # Reuse the indicators endpoint logic internally
+    try:
+        indicators = await get_indicators(session)
+    except Exception as e:
+        logger.error(f"TA summary indicator fetch error: {e}")
+        return {"error": "Failed to compute TA summary"}
+
+    result = TASummaryRating.compute(indicators)
+    _set_cache("ta_summary", result, 60)
+    return result

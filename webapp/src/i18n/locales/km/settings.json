@@ -1,0 +1,102 @@
+{
+  "title": "ការកំណត់",
+  "language": {
+    "title": "ភាសា",
+    "en": "EN",
+    "ru": "RU",
+    "zh": "ZH",
+    "km": "KM"
+  },
+  "alerts": {
+    "title": "ការជូនដំណឹងតម្លៃ",
+    "enable": "បើកការជូនដំណឹង",
+    "interval": "ចន្លោះពេលជូនដំណឹង",
+    "intervalOptions": {
+      "1h": "1ម៉ោង",
+      "4h": "4ម៉ោង",
+      "24h": "24ម៉ោង"
+    },
+    "save": "រក្សាទុក",
+    "saved": "បានរក្សាទុកការកំណត់!",
+    "saveFailed": "បរាជ័យក្នុងការរក្សាទុកការកំណត់",
+    "loading": "កំពុងផ្ទុកការកំណត់ការជូនដំណឹង..."
+  },
+  "subscription": {
+    "title": "គម្រោង Premium",
+    "manage": "គ្រប់គ្រងការជាវ",
+    "manageDesc": "មើលស្ថានភាព ថ្ងៃផុតកំណត់ និងប្រវត្តិបង់ប្រាក់",
+    "tapToPlan": "ចុចគម្រោងដើម្បីជាវភ្លាមៗតាម Telegram Stars។",
+    "subscribe": "ជាវ",
+    "subscribeTo": "ជាវ Premium",
+    "processing": "កំពុងដំណើរការ...",
+    "paymentSuccess": "បង់ប្រាក់ជោគជ័យ!",
+    "premiumActive": "ការចូលប្រើ Premium របស់អ្នកកំពុងដំណើរការហើយ។",
+    "paymentFailed": "ការបង់ប្រាក់បរាជ័យ។ សូមព្យាយាមម្តងទៀត។",
+    "couldNotStart": "មិនអាចចាប់ផ្តើមការបង់ប្រាក់បានទេ។ សូមព្យាយាមម្តងទៀតនៅពេលក្រោយ។",
+    "paymentVia": "បង់ប្រាក់តាម Telegram Stars។ សុវត្ថិភាព និងភ្លាមៗ។",
+    "whatYouGet": "អ្វីដែលអ្នកទទួលបាន",
+    "bestValue": "ល្អបំផុត",
+    "cancel": "បោះបង់",
+    "monthly": "ប្រចាំខែ",
+    "quarterly": "3 ខែ",
+    "yearly": "ប្រចាំឆ្នាំ",
+    "days30": "30 ថ្ងៃ",
+    "days90": "90 ថ្ងៃ",
+    "days365": "365 ថ្ងៃ",
+    "stars": "Stars",
+    "perMonth": "/ខែ",
+    "save17": "សន្សំ 17%",
+    "save25": "សន្សំ 25%",
+    "pricing": {
+      "monthly": "$9.99",
+      "monthlyPerMonth": "$9.99",
+      "quarterly": "$24.99",
+      "quarterlyPerMonth": "$8.33",
+      "yearly": "$89.99",
+      "yearlyPerMonth": "$7.50"
+    },
+    "features": {
+      "predictions": "ការព្យាករណ៍តម្លៃដោយ AI (1h, 4h, 24h)",
+      "signals": "សញ្ញាជួញដូរពេញលេញជាមួយ entry/target/SL",
+      "advisor": "ទីប្រឹក្សាជួញដូរជាមួយគម្រោងស្វ័យប្រវត្តិ",
+      "sentiment": "ការវិភាគអារម្មណ៍ព័ត៌មានក្នុងពេលជាក់ស្តែង",
+      "alerts": "ការជូនដំណឹងតម្លៃផ្ទាល់ខ្លួន",
+      "analytics": "ការវិភាគ Fundamental និងម៉ាក្រូ",
+      "elliott": "ការវិភាគ Elliott Wave",
+      "powerlaw": "ការតាមដាន Power Law"
+    }
+  },
+  "referral": {
+    "title": "អញ្ជើញមិត្តភក្តិ",
+    "subtitle": "ចែករំលែកកូដរបស់អ្នក — ទាំងពីរទទួលបាន +7 ថ្ងៃ Premium",
+    "yourCode": "កូដរបស់អ្នក",
+    "copy": "ចម្លង",
+    "copied": "បានចម្លង!",
+    "friendsReferred": "មិត្តភក្តិដែលបញ្ជូន",
+    "bonusEarned": "ប្រាក់រង្វាន់ទទួលបាន",
+    "shareLink": "ចែករំលែកតំណអញ្ជើញ",
+    "shareText": "ចូលរួម Griffin Gold — ការវិភាគ Gold និង XAUUSD ដោយ AI! ប្រើតំណរបស់ខ្ញុំដើម្បីទទួលបាន 7 ថ្ងៃ Premium ឥតគិតថ្លៃ៖",
+    "showLeaderboard": "បង្ហាញតារាងចំណាត់ថ្នាក់",
+    "hideLeaderboard": "លាក់តារាងចំណាត់ថ្នាក់",
+    "refs": "ការបញ្ជូន",
+    "noReferrals": "មិនទាន់មានការបញ្ជូនទេ — ជាអ្នកដំបូង!",
+    "referredBy": "បញ្ជូនដោយ"
+  },
+  "subscriptionPage": {
+    "title": "ការជាវ",
+    "tier": "កម្រិត",
+    "status": "ស្ថានភាព",
+    "daysRemaining": "ថ្ងៃនៅសល់",
+    "daysShort": "ថ្ងៃ",
+    "memberSince": "សមាជិកតាំងពី",
+    "paymentHistory": "ប្រវត្តិបង់ប្រាក់",
+    "free": "ឥតគិតថ្លៃ",
+    "trial": "សាកល្បង",
+    "premium": "Premium",
+    "active": "សកម្ម",
+    "expired": "ផុតកំណត់",
+    "expires": "ផុតកំណត់ {{date}}",
+    "trialEnds": "ការសាកល្បងបញ្ចប់ {{date}}",
+    "noPayments": "មិនមានប្រវត្តិបង់ប្រាក់"
+  }
+}

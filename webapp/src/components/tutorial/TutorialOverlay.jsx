@@ -1,0 +1,178 @@
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import TutorialTooltip from './TutorialTooltip'
+import getTutorialSteps from './tutorialSteps'
+
+const HIGHLIGHT_CLASS = 'tutorial-highlight'
+
+export default function TutorialOverlay({ tutorial }) {
+  const { t } = useTranslation()
+  const { step, totalSteps, next, prev, skip, active } = tutorial
+  const [targetRect, setTargetRect] = useState(null)
+  const prevTargetRef = useRef(null)
+
+  const tutorialSteps = getTutorialSteps(t)
+  const stepData = tutorialSteps[step] || tutorialSteps[0]
+
+  // Remove highlight class from previously highlighted element
+  const clearHighlight = useCallback(() => {
+    if (prevTargetRef.current) {
+      prevTargetRef.current.classList.remove(HIGHLIGHT_CLASS)
+      prevTargetRef.current = null
+    }
+  }, [])
+
+  // Apply highlight class to the current target element
+  const applyHighlight = useCallback((el) => {
+    clearHighlight()
+    if (el) {
+      el.classList.add(HIGHLIGHT_CLASS)
+      prevTargetRef.current = el
+    }
+  }, [clearHighlight])
+
+  const updatePosition = useCallback(() => {
+    if (!stepData?.target) {
+      setTargetRect(null)
+      clearHighlight()
+      return
+    }
+    const el = document.querySelector(stepData.target)
+    if (el) {
+      applyHighlight(el)
+      setTargetRect(el.getBoundingClientRect())
+    } else {
+      setTargetRect(null)
+      clearHighlight()
+    }
+  }, [stepData?.target, applyHighlight, clearHighlight])
+
+  useEffect(() => {
+    if (!active) return
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+    const observer = new ResizeObserver(updatePosition)
+    observer.observe(document.body)
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+      observer.disconnect()
+    }
+  }, [updatePosition, active])
+
+  // Scroll target into view only on step changes (not on every scroll event)
+  useEffect(() => {
+    if (!active || !stepData?.target) return
+    const el = document.querySelector(stepData.target)
+    if (el) {
+      const rect = el.getBoundingClientRect()
+      const vh = window.innerHeight
+      if (rect.top < 60 || rect.bottom > vh - 60) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        // Re-measure after scroll
+        setTimeout(() => {
+          setTargetRect(el.getBoundingClientRect())
+        }, 350)
+      }
+    }
+  }, [step, active, stepData?.target])
+
+  // Clean up highlight class when tutorial ends or component unmounts
+  useEffect(() => {
+    if (!active) {
+      clearHighlight()
+    }
+    return () => clearHighlight()
+  }, [active, clearHighlight])
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'Enter') next()
+      else if (e.key === 'ArrowLeft') prev()
+      else if (e.key === 'Escape') skip()
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [next, prev, skip])
+
+  if (!active) return null
+
+  const pad = 6
+
+  // Build clip path to cut out the highlighted area
+  const clipPath = targetRect
+    ? `polygon(
+        0% 0%, 0% 100%, 100% 100%, 100% 0%, 0% 0%,
+        ${targetRect.left - pad}px ${targetRect.top - pad}px,
+        ${targetRect.left - pad}px ${targetRect.bottom + pad}px,
+        ${targetRect.right + pad}px ${targetRect.bottom + pad}px,
+        ${targetRect.right + pad}px ${targetRect.top - pad}px,
+        ${targetRect.left - pad}px ${targetRect.top - pad}px
+      )`
+    : undefined
+
+  return (
+    <>
+      {/* Backdrop with cutout */}
+      <div
+        className="fixed inset-0 z-[9999] transition-all duration-300"
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
+          clipPath,
+        }}
+        onClick={next}
+      />
+
+      {/* Highlight ring */}
+      {targetRect && (
+        <div
+          className="fixed z-[10000] pointer-events-none rounded-xl"
+          style={{
+            top: targetRect.top - pad,
+            left: targetRect.left - pad,
+            width: targetRect.width + pad * 2,
+            height: targetRect.height + pad * 2,
+            boxShadow: '0 0 0 2px #00d68f, 0 0 12px rgba(0, 214, 143, 0.3)',
+            animation: 'tutorialPulse 2s ease-in-out infinite',
+          }}
+        />
+      )}
+
+      {/* Tooltip */}
+      <TutorialTooltip
+        step={step}
+        totalSteps={totalSteps}
+        stepData={stepData}
+        onNext={next}
+        onPrev={prev}
+        onSkip={skip}
+        position={stepData?.position || 'bottom'}
+        targetRect={targetRect}
+      />
+
+      {/* Pulse animation + highlight styles */}
+      <style>{`
+        @keyframes tutorialPulse {
+          0%, 100% { box-shadow: 0 0 0 2px #00d68f, 0 0 12px rgba(0, 214, 143, 0.3); }
+          50% { box-shadow: 0 0 0 3px #00d68f, 0 0 20px rgba(0, 214, 143, 0.5); }
+        }
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.25s ease-out;
+        }
+        .tutorial-highlight {
+          position: relative !important;
+          z-index: 10000 !important;
+          box-shadow: 0 0 20px rgba(0, 214, 143, 0.4), 0 0 40px rgba(0, 214, 143, 0.15) !important;
+          border-radius: 12px !important;
+          transition: box-shadow 0.3s ease !important;
+        }
+      `}</style>
+    </>
+  )
+}

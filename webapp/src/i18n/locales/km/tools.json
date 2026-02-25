@@ -1,0 +1,94 @@
+{
+  "title": "ឧបករណ៍ជួញដូរ",
+  "positionSize": {
+    "title": "ម៉ាស៊ីនគណនាទំហំទីតាំង",
+    "description": "គណនាទំហំទីតាំងល្អបំផុតរបស់អ្នកផ្អែកលើហានិភ័យគណនី។ អ្នកជំនាញប្រឈមហានិភ័យ 1-2% ក្នុងមួយការជួញដូរ។",
+    "accountBalance": "សមតុល្យគណនី ($)",
+    "riskPercent": "ហានិភ័យក្នុងមួយការជួញដូរ (%)",
+    "entryPrice": "តម្លៃចូល ($)",
+    "stopLoss": "Stop Loss ($)",
+    "calculate": "គណនា",
+    "result": "ទំហំទីតាំង",
+    "riskAmount": "ចំនួនហានិភ័យ",
+    "stopDistance": "ចម្ងាយ Stop",
+    "positionValue": "តម្លៃទីតាំង"
+  },
+  "pnl": {
+    "title": "ម៉ាស៊ីនគណនា P&L",
+    "entryPrice": "តម្លៃចូល ($)",
+    "exitPrice": "តម្លៃចេញ ($)",
+    "positionSize": "ទំហំទីតាំង ($)",
+    "leverage": "Leverage",
+    "direction": "ទិសដៅ",
+    "long": "Long",
+    "short": "Short",
+    "calculate": "គណនា",
+    "profit": "ចំណេញ",
+    "loss": "ខាត",
+    "pnl": "P&L",
+    "roi": "ROI",
+    "breakEven": "ចំណុចដោះលែង"
+  },
+  "riskReward": {
+    "title": "ម៉ាស៊ីនគណនាហានិភ័យ/ផល",
+    "description": "អ្នកជំនាញមានគោលដៅយ៉ាងហោចណាស់ 1:2 R:R។ អនុបាតខ្ពស់មានន័យថាអ្នកអាចខុសកាន់តែច្រើន ហើយនៅតែចំណេញ។",
+    "entryPrice": "តម្លៃចូល ($)",
+    "stopLoss": "Stop Loss ($)",
+    "takeProfit": "Take Profit ($)",
+    "calculate": "គណនា",
+    "ratio": "អនុបាត R:R",
+    "riskPercent": "ហានិភ័យ %",
+    "rewardPercent": "ផល %",
+    "winRateNeeded": "អត្រាឈ្នះដែលត្រូវការ",
+    "quality": "គុណភាព",
+    "qualityExcellent": "ល្អឥតខ្ចោះ",
+    "qualityGood": "ល្អ",
+    "qualityFair": "មធ្យម",
+    "qualityPoor": "អន់"
+  },
+  "dca": {
+    "title": "ម៉ាស៊ីនគណនា DCA",
+    "description": "Dollar Cost Averaging កាត់បន្ថយហានិភ័យពេលវេលា។ ការទិញជាប់លាប់ដោយមិនគិតពីតម្លៃ។",
+    "investmentAmount": "ការវិនិយោគក្នុងមួយរយៈពេល ($)",
+    "frequency": "ប្រេកង់",
+    "duration": "រយៈពេល (ខែ)",
+    "startPrice": "តម្លៃចាប់ផ្តើម ($)",
+    "endPrice": "តម្លៃបញ្ចប់ ($)",
+    "calculate": "គណនា",
+    "totalInvested": "វិនិយោគសរុប",
+    "finalValue": "តម្លៃចុងក្រោយ",
+    "avgPrice": "តម្លៃមធ្យម",
+    "totalBtc": "Gold សរុប",
+    "totalBuys": "ការទិញសរុប",
+    "roi": "ROI",
+    "daily": "ប្រចាំថ្ងៃ",
+    "weekly": "ប្រចាំសប្តាហ៍",
+    "biweekly": "ពីរសប្តាហ៍ម្តង",
+    "monthly": "ប្រចាំខែ",
+    "priceScenarios": "សេណារីយ៉ូតម្លៃ",
+    "scenarioBear": "ផ្សារធ្លាក់ (-30%)",
+    "scenarioFlat": "ផ្ទាល (-0%)",
+    "scenarioBull": "ផ្សារឡើង (+50%)",
+    "scenarioMoon": "Moon (+100%)"
+  },
+  "proRules": {
+    "title": "ច្បាប់គ្រប់គ្រងហានិភ័យអ្នកជំនាញ",
+    "rules": {
+      "rule1": "កុំប្រឈមហានិភ័យលើសពី 1-2% នៃផលប័ត្រក្នុងមួយការជួញដូរ",
+      "rule2": "ប្រើ stop loss ជានិច្ច — គ្មានការលើកលែង",
+      "rule3": "មានគោលដៅអប្បបរមា 2:1 ផល​ទល់នឹងហានិភ័យ",
+      "rule4": "កំណត់ទំហំទីតាំងផ្អែកលើចម្ងាយ stop loss មិនមែនការជឿជាក់ទេ",
+      "rule5": "កាត់បន្ថយទំហំទីតាំងក្នុងបរិយាកាសប្រែប្រួលខ្ពស់"
+    }
+  },
+  "mistakes": {
+    "title": "កំហុសធម្មតាដែលត្រូវជៀសវាង",
+    "items": {
+      "item1": "ប្រើ leverage ច្រើនពេក — អ្នកសម្លាប់គណនីលេខ 1",
+      "item2": "ផ្លាស់ប្តូរ stop loss ដើម្បីជៀសវាងការខាត",
+      "item3": "ទិញបន្ថែមនៅពេលការជួញដូរកំពុងខាត",
+      "item4": "ជួញដូរដោយគ្មានផែនការ ឬយុទ្ធសាស្ត្រ",
+      "item5": "ជួញដូរសងសឹកបន្ទាប់ពីខាត"
+    }
+  }
+}

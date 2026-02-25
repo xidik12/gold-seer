@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+backend/venv/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+
+# Database
+*.db
+/data/
+
+# ML model weights & training data
+backend/ml/data/
+backend/app/models/weights/
+/data/weights/
+
+# Node
+webapp/node_modules/
+webapp/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
