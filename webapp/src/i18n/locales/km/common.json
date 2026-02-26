@@ -54,7 +54,8 @@
     "closePosition": "បិទទីតាំង",
     "openPosition": "បើក {{direction}}",
     "opening": "កំពុងបើក...",
-    "btcUsdt": "XAU/USD"
+    "btcUsdt": "XAU/USD",
+    "xauusd": "XAU/USD"
   },
   "category": {
     "trading": "ជួញដូរ",
@@ -67,9 +68,7 @@
     "advisor": "ទីប្រឹក្សា",
     "paperTrade": "Paper Trade",
     "technical": "បច្ចេកទេស",
-    "powerLaw": "Power Law",
     "elliottWave": "Elliott Wave",
-    "liquidations": "Liquidations",
     "coins": "កាក់",
     "news": "ព័ត៌មាន",
     "events": "ព្រឹត្តិការណ៍",
@@ -81,16 +80,15 @@
     "settings": "ការកំណត់",
     "about": "អំពី",
     "admin": "Admin",
-    "whales": "តាមដាន Whale",
-    "arbitrage": "Arbitrage",
-    "listings": "បញ្ជីថ្មី",
-    "memecoins": "ធនាគារកណ្តាល",
     "signalsChannel": "ឆានែលសញ្ញា",
     "alerts": "ការជូនដំណឹងតម្លៃ",
     "briefing": "សង្ខេបប្រចាំថ្ងៃ",
     "game": "ល្បែងព្យាករណ៍",
-    "smartMoney": "Smart Money",
-    "markets": "ទីផ្សារ"
+    "markets": "ទីផ្សារ",
+    "cotData": "ការវិភាគ COT",
+    "sessions": "វេនជួញដូរ",
+    "calculators": "ម៉ាស៊ីនគណនាមាស",
+    "correlation": "ទំនាក់ទំនង"
   },
   "btn": {
     "cancel": "បោះបង់",
@@ -102,6 +100,7 @@
   },
   "price": {
     "btcPrice": "តម្លៃ Gold",
+    "goldPrice": "តម្លៃមាស",
     "price": "តម្លៃ",
     "high": "ខ្ពស់",
     "low": "ទាប",
@@ -121,6 +120,7 @@
     "noData": "គ្មានទិន្នន័យតារាង",
     "loadingChart": "កំពុងផ្ទុកតារាង...",
     "btcChart": "តារាង Gold",
+    "goldChart": "តារាងមាស",
     "failedToLoad": "បរាជ័យក្នុងការផ្ទុកតារាង",
     "timeframe": {
       "24h": "24H",
@@ -304,17 +304,16 @@
     "yahoo": "Yahoo Finance",
     "fred": "FRED",
     "blockchain": "World Gold Council",
-    "mempool": "Mempool.space",
-    "blockchair": "Blockchair",
     "feargreed": "Fear & Greed",
-    "coinglass": "CFTC",
-    "defillama": "ETFs Llama",
-    "deribit": "Deribit",
     "cryptopanic": "Kitco News",
     "reddit": "Reddit",
     "rss": "RSS Feeds",
     "ols": "OLS Regression",
     "ta": "វិភាគបច្ចេកទេស",
-    "ai": "គំរូ AI"
+    "ai": "គំរូ AI",
+    "worldgoldcouncil": "World Gold Council",
+    "cftc": "CFTC",
+    "cme": "CME",
+    "kitco": "Kitco"
   }
 }

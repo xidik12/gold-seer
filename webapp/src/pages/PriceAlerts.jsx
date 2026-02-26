@@ -29,7 +29,7 @@ export default function PriceAlerts() {
   const initData = tg?.initData
 
   const fetchAlerts = useCallback(() => {
-    if (!initData) return
+    if (!initData) { setLoading(false); return }
     api.getUserAlerts(initData)
       .then((res) => {
         setAlerts(res.alerts || [])

@@ -94,13 +94,13 @@
     "remaining": "នៅសល់",
     "totalSupply": "បរិមាណសរុប",
     "dailyMining": "ការផលិតប្រចាំថ្ងៃ",
-    "blockReward": "រង្វាន់ Block",
-    "nextHalving": "FOMC Meeting បន្ទាប់",
+    "annualProduction": "ការផលិតប្រចាំឆ្នាំ",
+    "nextFOMC": "កិច្ចប្រជុំ FOMC បន្ទាប់",
     "milestones": "ចំណុចសំខាន់បរិមាណ",
     "percentMined": "{{pct}}% រុករក",
-    "cap21M": "ដែនកំណត់ 21M",
-    "perBlock": "ក្នុង block",
-    "block": "block"
+    "totalAboveGround": "ស្តុកមាសសរុបលើដី",
+    "tonnesPerYear": "តោន/ឆ្នាំ",
+    "centralBankReserves": "បម្រុងធនាគារកណ្តាល"
   },
   "dominance": {
     "title": "Gold Dominance",
@@ -144,24 +144,24 @@
     "showAll": "បង្ហាញទាំង 25 ទ្រព្យ",
     "showLess": "បង្ហាញតិច"
   },
-  "halving": {
-    "title": "ការរាប់ថយទីផ្សារ Gold",
-    "nextHalving": "FOMC Meeting បន្ទាប់",
-    "block": "Block {{number}}",
-    "days": "ថ្ងៃ",
-    "hours": "ម៉ោង",
-    "minutes": "នាទី",
-    "seconds": "វិនាទី",
-    "cycleProgress": "វឌ្ឍនភាពវដ្ត",
-    "rewardDrop": "រង្វាន់ធ្លាក់ពី {{from}} ទៅ {{to}} Gold",
-    "last": "ចុងក្រោយ",
-    "next": "បន្ទាប់",
-    "historicalNote": "ជាប្រវត្តិសាស្ត្រ rate decisions ជាមុន bull runs ខ្លាំងក្នុង 12-18 ខែ។"
-  },
   "accuracy": {
     "title": "ភាពត្រឹមត្រូវនៃការព្យាករណ៍",
     "overall": "សរុប",
     "trend30d": "និន្នាការ 30 ថ្ងៃ",
     "byTimeframe": "តាមពេលវេលា"
+  },
+  "fomcCountdown": {
+    "title": "រាប់ថយ FOMC",
+    "nextMeeting": "កិច្ចប្រជុំ FOMC បន្ទាប់",
+    "meetingDate": "កិច្ចប្រជុំ {{date}}",
+    "days": "ថ្ងៃ",
+    "hours": "ម៉ោង",
+    "minutes": "នាទី",
+    "seconds": "វិនាទី",
+    "cycleProgress": "វឌ្ឍនៗភាពវដ្ត",
+    "rateChange": "ការផ្លាស់ប្តូរអៀតរាពី {{from}} ទៅ {{to}}",
+    "last": "ចុងក្រោយ",
+    "next": "បន្ទាប់",
+    "historicalNote": "ជាប្រវត្តិសាស្ត្រ rate decisions មានឥទ្ធិពលសំខាន់លើតម្លៃមាសក្នុង 12-18 ខែ។"
   }
 }

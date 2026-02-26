@@ -54,7 +54,8 @@
     "closePosition": "Закрыть позицию",
     "openPosition": "Открыть {{direction}}",
     "opening": "Открытие...",
-    "btcUsdt": "XAU/USD"
+    "btcUsdt": "XAU/USD",
+    "xauusd": "XAU/USD"
   },
   "category": {
     "trading": "Торговля",
@@ -67,9 +68,7 @@
     "advisor": "Советник",
     "paperTrade": "Бумажная торговля",
     "technical": "Теханализ",
-    "powerLaw": "Power Law",
     "elliottWave": "Волны Эллиотта",
-    "liquidations": "Ликвидации",
     "coins": "Активы",
     "news": "Новости",
     "events": "События",
@@ -81,15 +80,15 @@
     "settings": "Настройки",
     "about": "О приложении",
     "admin": "Админ",
-    "whales": "Наблюдатель китов",
-    "arbitrage": "Арбитраж",
-    "listings": "Новые продукты",
-    "memecoins": "Драгметаллы",
     "signalsChannel": "Канал сигналов",
     "alerts": "Оповещения о цене",
     "briefing": "Ежедневный обзор",
     "game": "Игра-прогноз",
-    "smartMoney": "Умные деньги"
+    "markets": "Рынки",
+    "cotData": "Анализ COT",
+    "sessions": "Торговые сессии",
+    "calculators": "Калькуляторы золота",
+    "correlation": "Корреляции"
   },
   "btn": {
     "cancel": "Отмена",
@@ -101,6 +100,7 @@
   },
   "price": {
     "btcPrice": "Цена Gold",
+    "goldPrice": "Цена золота",
     "price": "Цена",
     "high": "Максимум",
     "low": "Минимум",
@@ -120,6 +120,7 @@
     "noData": "Нет данных графика",
     "loadingChart": "Загрузка графика...",
     "btcChart": "График Gold",
+    "goldChart": "График золота",
     "failedToLoad": "Не удалось загрузить график",
     "timeframe": {
       "24h": "24Ч",
@@ -302,17 +303,16 @@
     "yahoo": "Yahoo Finance",
     "fred": "FRED",
     "blockchain": "World Gold Council",
-    "mempool": "COMEX",
-    "blockchair": "LBMA",
     "feargreed": "Страх и жадность",
-    "coinglass": "CFTC",
-    "defillama": "ETF Flows",
-    "deribit": "CME Group",
     "cryptopanic": "Kitco News",
     "reddit": "Reddit",
     "rss": "RSS-ленты",
     "ols": "OLS-регрессия",
     "ta": "Теханализ",
-    "ai": "ИИ-модели"
+    "ai": "ИИ-модели",
+    "worldgoldcouncil": "World Gold Council",
+    "cftc": "CFTC",
+    "cme": "CME",
+    "kitco": "Kitco"
   }
 }

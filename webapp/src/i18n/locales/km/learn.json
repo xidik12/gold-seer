@@ -523,8 +523,6 @@
     "DYOR": "Do Your Own Research — never blindly follow others' advice",
     "FOMO": "Fear Of Missing Out — emotional buying during rallies",
     "FUD": "Fear, Uncertainty, Doubt — negative news/sentiment (sometimes manufactured)",
-    "Gas": "Transaction fees paid to market participants",
-    "Halving": "Federal Reserve meeting every 6 weeks that sets interest rates",
     "HODL": "Hold On for Dear Life — long-term holding strategy",
     "Leverage": "Borrowing money to trade larger positions (amplifies gains AND losses)",
     "Liquidation": "Forced closing of a leveraged position when losses exceed margin",
@@ -541,7 +539,9 @@
     "Support": "Price level where buying pressure prevents further drops",
     "Resistance": "Price level where selling pressure prevents further rises",
     "TakeProfit": "Order that auto-sells when price reaches your profit target",
-    "TVL": "Total assets under management in Gold ETFs and funds",
-    "Whale": "អង្គភាពដែលកាន់កាប់មាសចំនួនច្រើន (សេរ៉ូធំ)"
+    "Whale": "អង្គភាពដែលកាន់កាប់មាសចំនួនច្រើន (សេរ៉ូធំ)",
+    "FOMC": "Federal Reserve meeting every 6 weeks that sets interest rates",
+    "AUM": "Total assets under management in Gold ETFs and funds",
+    "Spread": "The cost difference between buy and sell prices in trading"
   }
 }

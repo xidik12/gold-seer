@@ -261,7 +261,17 @@
       "deathCross": "50周期均线在200周期均线之下（{{value}}）。这被称为「死叉」— 最著名的看跌信号之一。短期趋势表现不佳。历史上这预示着进一步下跌。",
       "zScoreHigh": "在 {{value}} 个标准差高于均值 — 价格向上偏离过大。像橡皮筋一样，它倾向于弹回。预期价格向均值回调。",
       "zScoreLow": "在 {{value}} 个标准差低于均值 — 价格向下偏离过大。像橡皮筋一样，它倾向于向上弹回。好的买入机会。",
-      "zScoreNormal": "在 {{value}} 个标准差范围内 — 在正常区间。没有任何方向的极端偏离。"
+      "zScoreNormal": "在 {{value}} 个标准差范围内 — 在正常区间。没有任何方向的极端偏离。",
+      "goldSilverRatio": "金银比",
+      "dxySignal": "DXY 信号",
+      "goldSilverHigh": "在 {{value}} 时，金银比非常高。白银历史上被低估。",
+      "goldSilverElevated": "在 {{value}} 时，金银比偏高。黄金超越白银，防御性布局。",
+      "goldSilverNormal": "在 {{value}} 时，金银比在正常范围。平衡的贵金属需求。",
+      "goldSilverLow": "在 {{value}} 时，金银比偏低。白银表现优于黄金。",
+      "goldSilverVeryLow": "在 {{value}} 时，金银比非常低。白银显著超越黄金。",
+      "dxyBearishGold": "DXY 在 {{value}} — 美元强势。强势美元历史上利空黄金。",
+      "dxyNeutralGold": "DXY 在 {{value}} — 美元中性。对黄金无明显方向性压力。",
+      "dxyBullishGold": "DXY 在 {{value}} — 美元美弱。美元走弱历史上利好黄金。"
     },
     "rateOfChange": {
       "title": "变化率",

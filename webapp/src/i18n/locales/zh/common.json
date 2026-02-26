@@ -54,7 +54,8 @@
     "closePosition": "平仓",
     "openPosition": "开{{direction}}仓",
     "opening": "开仓中...",
-    "btcUsdt": "XAU/USD"
+    "btcUsdt": "XAU/USD",
+    "xauusd": "XAU/USD"
   },
   "category": {
     "trading": "交易",
@@ -67,9 +68,7 @@
     "advisor": "顾问",
     "paperTrade": "模拟交易",
     "technical": "技术分析",
-    "powerLaw": "幂律模型",
     "elliottWave": "艾略特波浪",
-    "liquidations": "爆仓地图",
     "coins": "币种",
     "news": "新闻",
     "events": "事件",
@@ -81,15 +80,15 @@
     "settings": "设置",
     "about": "关于",
     "admin": "管理",
-    "whales": "鲸鱼观察器",
-    "arbitrage": "套利",
-    "listings": "新上市",
-    "memecoins": "贵金属",
     "signalsChannel": "信号频道",
     "alerts": "价格提醒",
     "briefing": "每日简报",
     "game": "预测游戏",
-    "smartMoney": "聪明资金"
+    "markets": "市场",
+    "cotData": "COT分析",
+    "sessions": "交易时段",
+    "calculators": "黄金计算器",
+    "correlation": "相关性"
   },
   "btn": {
     "cancel": "取消",
@@ -101,6 +100,7 @@
   },
   "price": {
     "btcPrice": "Gold 价格",
+    "goldPrice": "黄金价格",
     "price": "价格",
     "high": "最高价",
     "low": "最低价",
@@ -120,6 +120,7 @@
     "noData": "暂无图表数据",
     "loadingChart": "加载图表中...",
     "btcChart": "Gold 图表",
+    "goldChart": "黄金图表",
     "failedToLoad": "图表加载失败",
     "timeframe": {
       "24h": "24小时",
@@ -302,17 +303,16 @@
     "yahoo": "Yahoo Finance",
     "fred": "FRED",
     "blockchain": "World Gold Council",
-    "mempool": "LBMA",
-    "blockchair": "COMEX",
     "feargreed": "恐慌与贪婪",
-    "coinglass": "CME Group",
-    "defillama": "ETF.com",
-    "deribit": "CFTC",
     "cryptopanic": "Kitco News",
     "reddit": "Reddit",
     "rss": "RSS 订阅",
     "ols": "OLS 回归",
     "ta": "技术分析",
-    "ai": "AI 模型"
+    "ai": "AI 模型",
+    "worldgoldcouncil": "World Gold Council",
+    "cftc": "CFTC",
+    "cme": "CME",
+    "kitco": "Kitco"
   }
 }

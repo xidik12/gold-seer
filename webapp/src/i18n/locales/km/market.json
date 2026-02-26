@@ -261,7 +261,17 @@
       "deathCross": "The 50-period average is BELOW the 200-period average ({{value}}). This is called a \"Death Cross\" — one of the most famous bearish signals. The short-term trend is underperforming. Historically, this precedes further declines.",
       "zScoreHigh": "At {{value}} standard deviations above average — price has stretched TOO FAR above normal. Like a rubber band, it tends to snap back. Expect a pullback toward the average.",
       "zScoreLow": "At {{value}} standard deviations below average — price has dropped TOO FAR below normal. Like a rubber band, it tends to snap back UP. Good buying opportunity.",
-      "zScoreNormal": "At {{value}} standard deviations from average — within normal range. No extreme stretching in either direction."
+      "zScoreNormal": "At {{value}} standard deviations from average — within normal range. No extreme stretching in either direction.",
+      "goldSilverRatio": "អនុបាតមាស/ប្រាក់",
+      "dxySignal": "សញ្ញា DXY",
+      "goldSilverHigh": "នៅ {{value}} អនុបាតមាស/ប្រាក់ខ្ពស់ខ្org org org org org org org org",
+      "goldSilverElevated": "At {{value}}, the Gold/Silver ratio is elevated. Gold is outperforming silver, indicating defensive market positioning. Moderately bullish for gold.",
+      "goldSilverNormal": "At {{value}}, the Gold/Silver ratio is in the normal historical range. Balanced precious metals demand — no extreme signal.",
+      "goldSilverLow": "At {{value}}, the Gold/Silver ratio is low. Silver is outperforming gold, indicating industrial demand and risk-on sentiment. Could mean gold is undervalued or silver is overheated.",
+      "goldSilverVeryLow": "At {{value}}, the Gold/Silver ratio is very low. Silver is significantly outperforming — historically this has been a buying opportunity for gold.",
+      "dxyBearishGold": "DXY at {{value}} — dollar is strong. A strong dollar is historically bearish for gold. Gold tends to fall when the dollar rises as they are inversely correlated.",
+      "dxyNeutralGold": "DXY at {{value}} — dollar is neutral. No strong directional pressure on gold from the dollar at this level.",
+      "dxyBullishGold": "DXY at {{value}} — dollar is weak. A weak dollar is historically bullish for gold. Gold tends to rally when the dollar declines."
     },
     "rateOfChange": {
       "title": "Rate of Change",
@@ -292,7 +302,9 @@
     "ichimokuDescription": "A Japanese trading system that shows support, resistance, momentum, and trend direction all at once. The 'cloud' is a shaded zone between two lines. Price ABOVE the cloud = bullish (strong uptrend). BELOW = bearish. INSIDE = no clear trend. The Tenkan/Kijun cross gives buy/sell signals.",
     "candlestickDescription": "Each 'candle' on a chart shows the opening price, closing price, highest price, and lowest price for a time period. Certain shapes have names and predict what comes next. Like reading tea leaves — but these patterns have been used by traders for centuries.",
     "advancedDescription": "These are specialized tools used by experienced traders to spot major market turning points. They look at longer-term patterns that can signal whether Gold is at a cycle top (time to sell) or cycle bottom (time to buy).",
-    "rateOfChangeDescription": "Simply: how much did the price change over different time periods? Positive = price went up. Negative = price went down. Bigger numbers = faster movement. This tells you the SPEED of the price change."
+    "rateOfChangeDescription": "Simply: how much did the price change over different time periods? Positive = price went up. Negative = price went down. Bigger numbers = faster movement. This tells you the SPEED of the price change.",
+    "goldCorrelation": "Gold Correlations",
+    "goldCorrelationDescription": "Gold correlations show how gold moves relative to key macro assets like the US Dollar (DXY), silver, real yields, VIX, and equities. Understanding these relationships helps traders anticipate gold's direction based on macro shifts."
   },
   "powerLaw": {
     "title": "Power Law Model",

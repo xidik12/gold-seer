@@ -424,9 +424,9 @@ function Glossary() {
   const { t } = useTranslation(['learn'])
   const termKeys = [
     'ATH', 'ATL', 'Bearish', 'Bullish', 'Candle', 'DCA', 'DeFi', 'DYOR',
-    'FOMO', 'FUD', 'Gas', 'Halving', 'HODL', 'Leverage', 'Liquidation',
+    'FOMO', 'FUD', 'FOMC', 'HODL', 'Leverage', 'Liquidation',
     'Long', 'MACD', 'MarketCap', 'MVRV', 'OI', 'RSI', 'Satoshi', 'Short',
-    'Slippage', 'StopLoss', 'Support', 'Resistance', 'TakeProfit', 'TVL', 'Whale',
+    'Slippage', 'StopLoss', 'Support', 'Resistance', 'TakeProfit', 'AUM', 'Whale',
   ]
 
   // Display names for glossary terms (some differ from JSON keys)

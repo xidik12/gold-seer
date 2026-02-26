@@ -42,7 +42,7 @@ export default function TradingBot() {
   const handleClosePosition = async (positionId) => {
     setClosingId(positionId)
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || '/api'}/broker/positions/${positionId}/close`, {
+      await fetch(`${import.meta.env.VITE_API_URL || '/api'}/broker/close/${positionId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       })
@@ -56,7 +56,7 @@ export default function TradingBot() {
 
   const handleExecuteTrade = async (trade) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || '/api'}/broker/trade`, {
+      await fetch(`${import.meta.env.VITE_API_URL || '/api'}/broker/order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(trade),

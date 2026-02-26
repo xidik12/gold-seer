@@ -83,11 +83,11 @@ function EventCard({ event }) {
     >
       <div className="flex items-start gap-2">
         <span className="text-base mt-0.5">
-          {event.category === 'regulation' ? '&#x2696;&#xFE0F;' :
-           event.category === 'etf' ? '&#x1F4C8;' :
-           event.category === 'hack' ? '&#x1F6A8;' :
-           event.category === 'adoption' ? '&#x1F680;' :
-           event.category === 'macro' ? '&#x1F30D;' : '&#x1F4F0;'}
+          {event.category === 'regulation' ? '⚖️' :
+           event.category === 'etf' ? '📈' :
+           event.category === 'geopolitical' ? '🌐' :
+           event.category === 'monetary_policy' ? '🚀' :
+           event.category === 'macro' ? '🌍' : '📰'}
         </span>
         <div className="flex-1 min-w-0">
           <p className="text-sm text-text-primary leading-snug line-clamp-2">{event.title || event.summary}</p>
