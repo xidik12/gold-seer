@@ -1103,6 +1103,7 @@ class BrokerAccount(Base):
     telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, index=True)
     broker_type: Mapped[str] = mapped_column(String(20), default="demo")  # demo, metaapi
     account_id: Mapped[str] = mapped_column(String(200), nullable=True)
+    metaapi_token: Mapped[str] = mapped_column(String(500), nullable=True)  # encrypted/stored token
     login: Mapped[str] = mapped_column(String(100), nullable=True)
     server: Mapped[str] = mapped_column(String(200), nullable=True)
     balance: Mapped[float] = mapped_column(Float, nullable=True)

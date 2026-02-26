@@ -400,4 +400,17 @@ export const api = {
   likeTrade: (tradeId) => fetchAPI(`/community/trades/${tradeId}/like`, {
     method: 'POST',
   }),
+
+  // Broker Settings (user-specific, no cache)
+  getBrokerSettings: () => fetchAPI('/broker/settings'),
+  saveBrokerSettings: (body) => fetchAPI('/broker/settings', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  }),
+  deleteBrokerSettings: () => fetchAPI('/broker/settings', {
+    method: 'DELETE',
+  }),
+  connectBroker: () => fetchAPI('/broker/connect', { method: 'POST' }),
+  disconnectBroker: () => fetchAPI('/broker/disconnect', { method: 'POST' }),
+  getBrokerAccount: () => fetchAPI('/broker/account'),
 }

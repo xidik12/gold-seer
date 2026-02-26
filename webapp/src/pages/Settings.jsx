@@ -6,6 +6,7 @@ import { useTelegram } from '../hooks/useTelegram'
 import { useLanguageSwitch } from '../i18n/useLanguage'
 import AlertSettings from '../components/AlertSettings'
 import ReferralCard from '../components/ReferralCard'
+import BrokerSettings from '../components/BrokerSettings'
 
 const TIERS = [
   {
@@ -206,6 +207,8 @@ export default function Settings() {
           ))}
         </div>
       </div>
+
+      <BrokerSettings />
 
       <AlertSettings />
 
