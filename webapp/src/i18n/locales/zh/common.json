@@ -88,7 +88,18 @@
     "cotData": "COT分析",
     "sessions": "交易时段",
     "calculators": "黄金计算器",
-    "correlation": "相关性"
+    "correlation": "相关性",
+    "tradingBot": "交易机器人",
+    "goldETF": "黄金ETF",
+    "calendar": "日历",
+    "journal": "交易日记",
+    "quantAnalysis": "量化分析"
+  },
+  "markets": {
+    "gold": "黄金",
+    "indices": "指数",
+    "forex": "外汇",
+    "commodities": "大宗商品"
   },
   "btn": {
     "cancel": "取消",

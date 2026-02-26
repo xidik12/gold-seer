@@ -88,7 +88,18 @@
     "cotData": "COT Analysis",
     "sessions": "Trading Sessions",
     "calculators": "Gold Calculators",
-    "correlation": "Correlations"
+    "correlation": "Correlations",
+    "tradingBot": "Trading Bot",
+    "goldETF": "Gold ETF",
+    "calendar": "Calendar",
+    "journal": "Trade Journal",
+    "quantAnalysis": "Quant Analysis"
+  },
+  "markets": {
+    "gold": "Gold",
+    "indices": "Indices",
+    "forex": "Forex",
+    "commodities": "Commodities"
   },
   "btn": {
     "cancel": "Cancel",

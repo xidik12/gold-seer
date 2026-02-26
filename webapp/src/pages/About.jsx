@@ -30,7 +30,7 @@ export default function About() {
     { value: '6h', labelKey: 'about:byTheNumbers.retrainCycle' },
     { value: '30+', labelKey: 'about:byTheNumbers.pages' },
     { value: '19', labelKey: 'about:byTheNumbers.exchanges' },
-    { value: '3', labelKey: 'about:byTheNumbers.languages' },
+    { value: '4', labelKey: 'about:byTheNumbers.languages' },
   ]
 
   const steps = [1, 2, 3, 4, 5].map((n) => ({
@@ -73,7 +73,7 @@ export default function About() {
     <div className="px-4 pt-4 space-y-3 pb-4">
       {/* Hero */}
       <div className="bg-bg-card rounded-2xl p-5 gradient-border text-center slide-up">
-        <img src="/griffin-gold.jpeg" alt="Griffin Gold" className="w-full rounded-xl mb-4" />
+        <img src="/griffin-gold.png" alt="Griffin Gold" className="w-full rounded-xl mb-4" />
         <h1 className="text-xl font-bold mb-1 text-shimmer-gold">{t('common:app.title')}</h1>
         <p className="text-text-secondary text-sm">{t('about:description')}</p>
         <div className="flex items-center justify-center gap-2 mt-2">

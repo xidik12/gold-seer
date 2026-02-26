@@ -88,7 +88,18 @@
     "cotData": "Анализ COT",
     "sessions": "Торговые сессии",
     "calculators": "Калькуляторы золота",
-    "correlation": "Корреляции"
+    "correlation": "Корреляции",
+    "tradingBot": "Торговый бот",
+    "goldETF": "Золотые ETF",
+    "calendar": "Календарь",
+    "journal": "Торговый журнал",
+    "quantAnalysis": "Квант-анализ"
+  },
+  "markets": {
+    "gold": "Золото",
+    "indices": "Индексы",
+    "forex": "Форекс",
+    "commodities": "Сырьё"
   },
   "btn": {
     "cancel": "Отмена",

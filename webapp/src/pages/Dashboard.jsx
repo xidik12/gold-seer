@@ -233,7 +233,6 @@ const CATEGORIES = [
     titleKey: 'category.analysis',
     links: [
       { path: '/technical', labelKey: 'link.technical', icon: 'technical' },
-      { path: '/technical', labelKey: 'link.quantAnalysis', icon: 'quant' },
       { path: '/elliott-wave', labelKey: 'link.elliottWave', icon: 'elliott' },
       { path: '/cot', labelKey: 'link.cotData', icon: 'cot' },
       { path: '/sessions', labelKey: 'link.sessions', icon: 'sessions' },
@@ -244,7 +243,7 @@ const CATEGORIES = [
     links: [
       { path: '/markets', labelKey: 'link.markets', icon: 'market' },
       { path: '/gold-etf', labelKey: 'link.goldETF', icon: 'etf' },
-      { path: '/calendar', labelKey: 'link.calendar', icon: 'calendar' },
+      { path: '/calendar-full', labelKey: 'link.calendar', icon: 'calendar' },
       { path: '/news', labelKey: 'link.news', icon: 'news' },
       { path: '/events', labelKey: 'link.events', icon: 'events' },
       { path: '/history', labelKey: 'link.history', icon: 'history' },

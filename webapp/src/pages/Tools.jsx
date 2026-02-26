@@ -444,13 +444,13 @@ export default function Tools() {
   const [activeCalc, setActiveCalc] = useState('position')
 
   const calcs = [
-    { key: 'position', labelKey: 'tools:positionSize.title' },
-    { key: 'pnl', labelKey: 'tools:pnl.title' },
-    { key: 'rr', labelKey: 'tools:riskReward.title' },
-    { key: 'dca', labelKey: 'tools:dca.title' },
-    { key: 'weight', labelKey: 'Weight Convert' },
-    { key: 'melt', labelKey: 'Melt Value' },
-    { key: 'pip', labelKey: 'Pip Value' },
+    { key: 'position', label: t('tools:positionSize.title') },
+    { key: 'pnl', label: t('tools:pnl.title') },
+    { key: 'rr', label: t('tools:riskReward.title') },
+    { key: 'dca', label: t('tools:dca.title') },
+    { key: 'weight', label: 'Weight Convert' },
+    { key: 'melt', label: 'Melt Value' },
+    { key: 'pip', label: 'Pip Value' },
   ]
 
   return (
@@ -458,18 +458,20 @@ export default function Tools() {
       <SubTabBar tabs={MARKET_TABS.map(tab => ({ ...tab, label: t(tab.labelKey) }))} />
       <h1 className="text-lg font-bold">{t('tools:title')}</h1>
 
-      {/* Calculator tabs */}
-      <div className="flex gap-1 bg-bg-card rounded-xl p-1 border border-white/5">
-        {calcs.map(c => (
-          <button key={c.key} onClick={() => setActiveCalc(c.key)}
-            className={`flex-1 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
-              activeCalc === c.key
-                ? 'bg-accent-gold/20 text-accent-gold border border-accent-gold/30'
-                : 'text-text-muted'
-            }`}>
-            {t(c.labelKey)}
-          </button>
-        ))}
+      {/* Calculator tabs — horizontally scrollable on mobile */}
+      <div className="overflow-x-auto">
+        <div className="flex gap-1 bg-bg-card rounded-xl p-1 border border-white/5 min-w-max">
+          {calcs.map(c => (
+            <button key={c.key} onClick={() => setActiveCalc(c.key)}
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all whitespace-nowrap ${
+                activeCalc === c.key
+                  ? 'bg-accent-gold/20 text-accent-gold border border-accent-gold/30'
+                  : 'text-text-muted'
+              }`}>
+              {c.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {activeCalc === 'position' && <PositionSizeCalc />}

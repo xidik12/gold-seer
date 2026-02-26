@@ -74,6 +74,7 @@ function SectionCard({ title, children }) {
 }
 
 function GoldSection() {
+  const { t } = useTranslation('common')
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -93,7 +94,7 @@ function GoldSection() {
 
   return (
     <div className="space-y-3">
-      <SectionCard title="Precious Metals">
+      <SectionCard title={t('markets.preciousMetals', 'Precious Metals')}>
         {metals.map((item) => {
           const val = data?.[item.key]
           const price = val?.price ?? (typeof val === 'number' ? val : null)
@@ -108,6 +109,7 @@ function GoldSection() {
 }
 
 function IndicesSection() {
+  const { t } = useTranslation('common')
   const [macro, setMacro] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -141,15 +143,15 @@ function IndicesSection() {
       <div className="flex gap-2">
         <div className="flex-1 bg-accent-green/5 rounded-xl px-3 py-2 border border-accent-green/10">
           <p className="text-accent-green text-lg font-bold">{gainers}</p>
-          <p className="text-accent-green/60 text-[10px]">Gainers</p>
+          <p className="text-accent-green/60 text-[10px]">{t('markets.gainers', 'Gainers')}</p>
         </div>
         <div className="flex-1 bg-accent-red/5 rounded-xl px-3 py-2 border border-accent-red/10">
           <p className="text-accent-red text-lg font-bold">{losers}</p>
-          <p className="text-accent-red/60 text-[10px]">Losers</p>
+          <p className="text-accent-red/60 text-[10px]">{t('markets.losers', 'Losers')}</p>
         </div>
       </div>
 
-      <SectionCard title="Global Indices">
+      <SectionCard title={t('markets.globalIndices', 'Global Indices')}>
         {indices.map((idx) => {
           const val = macro?.[idx.key]
           const price = val?.price ?? (typeof val === 'number' ? val : null)
@@ -164,6 +166,7 @@ function IndicesSection() {
 }
 
 function CommoditiesSection() {
+  const { t } = useTranslation('common')
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -182,7 +185,7 @@ function CommoditiesSection() {
   ]
 
   return (
-    <SectionCard title="Commodities">
+    <SectionCard title={t('markets.commoditiesTitle', 'Commodities')}>
       {items.map((item) => {
         const val = data?.[item.key]
         const price = val?.price ?? (typeof val === 'number' ? val : null)
@@ -204,8 +207,8 @@ export default function MarketOverview() {
       {/* Header */}
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-text-primary">Markets</h1>
-          <p className="text-text-muted text-[10px] mt-0.5">Real-time global market data</p>
+          <h1 className="text-lg font-bold text-text-primary">{t('link.markets')}</h1>
+          <p className="text-text-muted text-[10px] mt-0.5">{t('markets.subtitle', 'Real-time global market data')}</p>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent-green pulse-glow" />

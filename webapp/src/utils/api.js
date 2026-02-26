@@ -332,4 +332,10 @@ export const api = {
 
   // Gold Supply
   getGoldSupply: () => cachedFetch('/market/supply', T300),
+
+  // COT (Commitment of Traders)
+  getCOTLatest: () => cachedFetch('/cot/latest', T300),
+
+  // Upcoming Events
+  getUpcomingEvents: () => cachedFetch('/events/recent', T60),
 }

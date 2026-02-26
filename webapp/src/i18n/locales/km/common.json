@@ -88,7 +88,18 @@
     "cotData": "ការវិភាគ COT",
     "sessions": "វេនជួញដូរ",
     "calculators": "ម៉ាស៊ីនគណនាមាស",
-    "correlation": "ទំនាក់ទំនង"
+    "correlation": "ទំនាក់ទំនង",
+    "tradingBot": "រ៉ូបូជួញដូរ",
+    "goldETF": "មាស ETF",
+    "calendar": "ប្រតិទិន",
+    "journal": "កំណត់ត្រាជួញដូរ",
+    "quantAnalysis": "វិភាគបរិមាណ"
+  },
+  "markets": {
+    "gold": "មាស",
+    "indices": "សន្ទស្សន៍",
+    "forex": "Forex",
+    "commodities": "ទំនិញ"
   },
   "btn": {
     "cancel": "បោះបង់",
