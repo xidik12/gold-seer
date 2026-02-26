@@ -64,10 +64,13 @@ async def backfill_historical_prices():
             logger.warning("Backfill: No historical prices fetched")
             return
 
-        # Parse ISO string timestamps to datetime objects
+        # Parse ISO string timestamps to naive UTC datetime objects
         for p in all_prices:
             if isinstance(p["timestamp"], str):
                 p["timestamp"] = datetime.fromisoformat(p["timestamp"])
+            # Strip timezone info — DB uses naive UTC timestamps
+            if hasattr(p["timestamp"], 'tzinfo') and p["timestamp"].tzinfo is not None:
+                p["timestamp"] = p["timestamp"].replace(tzinfo=None)
 
         # Insert into Price table, skipping existing dates
         async with async_session() as session:
