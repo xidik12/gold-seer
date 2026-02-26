@@ -535,24 +535,6 @@ async def get_macro_data(session: AsyncSession = Depends(get_session)):
     return result
 
 
-@router.get("/onchain")
-async def get_onchain_data():
-    """Deprecated: On-chain metrics not applicable for gold. Returns macro metrics instead."""
-    return {"message": "On-chain metrics not applicable for gold trading. Use /api/market/macro instead."}
-
-
-@router.get("/funding")
-async def get_funding_data():
-    """Deprecated: Crypto funding rates not applicable for gold."""
-    return {"message": "Funding rates not applicable for gold trading. Use /api/cot for positioning data."}
-
-
-@router.get("/dominance")
-async def get_dominance_data():
-    """Deprecated: Crypto dominance not applicable for gold."""
-    return {"message": "Dominance metrics not applicable for gold trading."}
-
-
 @router.get("/fear-greed")
 async def get_fear_greed(
     session: AsyncSession = Depends(get_session),

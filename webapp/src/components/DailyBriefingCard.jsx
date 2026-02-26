@@ -21,7 +21,7 @@ export default function DailyBriefingCard() {
   if (!briefing) return null
 
   const badge = SENTIMENT_BADGES[briefing.overall_sentiment] || SENTIMENT_BADGES.neutral
-  const change = briefing.btc_24h_change
+  const change = briefing.gold_24h_change
   const changeColor = change > 0 ? 'text-accent-green' : change < 0 ? 'text-accent-red' : 'text-text-muted'
 
   // Truncate summary for card display
@@ -41,7 +41,7 @@ export default function DailyBriefingCard() {
 
       <div className="flex items-baseline gap-2 mb-2">
         <span className="text-text-primary font-bold text-lg">
-          ${briefing.btc_price?.toLocaleString() || '—'}
+          ${briefing.gold_price?.toLocaleString() || '—'}
         </span>
         <span className={`text-xs font-medium ${changeColor}`}>
           {change > 0 ? '+' : ''}{change?.toFixed(2)}%

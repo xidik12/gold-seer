@@ -5,8 +5,7 @@ import { formatTimeAgo, formatPercent } from '../utils/format'
 import SubTabBar from '../components/SubTabBar'
 
 const MARKET_TABS = [
-  { path: '/liquidations', labelKey: 'common:link.liquidations' },
-  { path: '/powerlaw', labelKey: 'common:link.powerLaw' },
+  { path: '/cot', labelKey: 'common:link.cotData' },
   { path: '/elliott-wave', labelKey: 'common:link.elliottWave' },
   { path: '/events', labelKey: 'common:link.events' },
   { path: '/tools', labelKey: 'common:link.tools' },

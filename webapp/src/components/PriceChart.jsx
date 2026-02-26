@@ -273,7 +273,7 @@ export default function PriceChart() {
       <div className="px-4 pt-3 pb-2">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <h3 className="text-text-primary font-semibold text-sm">{t('common:chart.btcChart')}</h3>
+            <h3 className="text-text-primary font-semibold text-sm">{t('common:chart.goldChart')}</h3>
             {stats && (
               <span className={`text-xs font-medium px-1.5 py-0.5 rounded ${isPositive ? 'bg-accent-green/10 text-accent-green' : 'bg-accent-red/10 text-accent-red'}`}>
                 {isPositive ? '+' : ''}{Number(stats.changePct || 0).toFixed(2)}%
@@ -352,7 +352,7 @@ export default function PriceChart() {
           {/* Main price chart with overlays */}
           <div className="h-[250px] px-1 relative" {...bindGestures}>
             <div className="absolute top-2 left-14 z-10 text-[10px] text-[#3a3a55] font-semibold tracking-wider">
-              {t('common:trade.btcUsdt')} {t(timeframe.labelKey)}
+              {t('common:trade.xauusd')} {t(timeframe.labelKey)}
             </div>
 
             {/* MA Legend */}

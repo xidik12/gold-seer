@@ -53,13 +53,13 @@
       "macro_desc": " Interest rates, inflation, dollar strength (DXY), geopolitical events.",
       "sentiment_label": "Sentiment:",
       "sentiment_desc": " News, social media, fear & greed. Markets are driven by human emotion.",
-      "whales_label": "Whale activity:",
-      "whales_desc": " Large holders (large reserves) moving coins to/from exchanges can signal buying or selling."
+      "centralBanks_label": "Central Banks:",
+      "centralBanks_desc": " Central bank gold purchases and sales significantly impact global supply and demand dynamics."
     },
     "marketCap": {
       "title": "What is Market Cap?",
       "p1_label": "Market Cap",
-      "p1_desc": " = Price x Circulating Supply. It measures the total value of all coins in circulation.",
+      "p1_desc": " = Price x Total Supply. It measures the total value of all above-ground gold.",
       "p2": "Gold has a total market cap of approximately $13 trillion.",
       "p3": "Higher market cap = more established, lower volatility. Lower market cap = more speculative, higher risk/reward."
     },
@@ -523,9 +523,9 @@
     "DYOR": "Do Your Own Research — never blindly follow others' advice",
     "FOMO": "Fear Of Missing Out — emotional buying during rallies",
     "FUD": "Fear, Uncertainty, Doubt — negative news/sentiment (sometimes manufactured)",
-    "Gas": "Spread — the cost difference between buy and sell prices in trading",
-    "Halving": "Federal Reserve meeting every 6 weeks that sets interest rates",
-    "HODL": "Hold On for Dear Life — long-term holding strategy",
+    "Spread": "The cost difference between buy and sell prices in trading",
+    "FOMC": "Federal Open Market Committee — meets every 6 weeks to set interest rates",
+    "HODL": "Hold On for Dear Life — long-term holding strategy popular in gold investing",
     "Leverage": "Borrowing money to trade larger positions (amplifies gains AND losses)",
     "Liquidation": "Forced closing of a leveraged position when losses exceed margin",
     "Long": "A trade betting the price will go UP",
@@ -541,7 +541,7 @@
     "Support": "Price level where buying pressure prevents further drops",
     "Resistance": "Price level where selling pressure prevents further rises",
     "TakeProfit": "Order that auto-sells when price reaches your profit target",
-    "TVL": "Total assets under management in Gold ETFs and funds",
+    "AUM": "Assets Under Management — total value held in Gold ETFs and funds",
     "Whale": "Major institutional holder — central banks, ETFs, or funds holding large gold reserves"
   }
 }

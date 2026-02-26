@@ -525,9 +525,6 @@ async def suggest_trade(telegram_id: int, request: Request):
             for e in result.scalars().all()
         ]
 
-        # Whale transactions (removed — crypto-specific, not applicable for gold)
-        whale_activity = None
-
     if not pred_row or not signal_row:
         raise HTTPException(503, "No prediction data yet. Wait for first analysis cycle.")
 
@@ -596,9 +593,6 @@ async def suggest_trade(telegram_id: int, request: Request):
     except Exception:
         pass
 
-    # Power Law not applicable for gold — skip
-    power_law = None
-
     # Get user's open trades
     async with async_session() as session:
         result = await session.execute(
@@ -644,16 +638,13 @@ async def suggest_trade(telegram_id: int, request: Request):
             "fib_targets": elliott_wave.get("fibonacci_targets") if elliott_wave else None,
             "divergences": elliott_wave.get("divergences", []) if elliott_wave else [],
         },
-        "power_law": power_law,
         "indicators": {
             "rsi": (indicators or {}).get("rsi"),
             "macd_hist": (indicators or {}).get("macd_hist"),
             "atr": atr_value,
-            "funding_rate": (indicators or {}).get("funding_rate"),
             "fear_greed": (indicators or {}).get("fear_greed_value"),
         },
         "events": events,
-        "whale_activity": whale_activity,
         "current_price": current_price,
     }
 
@@ -673,16 +664,12 @@ async def suggest_trade(telegram_id: int, request: Request):
         atr=atr_value,
     )
 
-    # Enrich reasoning with Elliott Wave and Power Law
+    # Enrich reasoning with Elliott Wave context
     reasoning_parts = [plan["reasoning"]]
     if elliott_wave:
         ew_summary = elliott_wave.get("summary", "")
         if ew_summary:
             reasoning_parts.append(f"Elliott: {ew_summary}")
-    if power_law:
-        reasoning_parts.append(
-            f"Power Law: {power_law['zone']} ({power_law['deviation_pct']:+.1f}% from fair value ${power_law['fair_value']:,.0f})"
-        )
     plan["reasoning"] = " | ".join(reasoning_parts)
 
     # Save trade advice

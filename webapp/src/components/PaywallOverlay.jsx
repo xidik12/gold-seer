@@ -5,10 +5,10 @@ import { useSubscription } from '../contexts/SubscriptionContext'
 const FEATURES = [
   'paywall.features.predictions',
   'paywall.features.signals',
-  'paywall.features.smartMoney',
+  'paywall.features.macro',
   'paywall.features.advisor',
   'paywall.features.alerts',
-  'paywall.features.whales',
+  'paywall.features.calculators',
 ]
 
 const TIERS_DISPLAY = [

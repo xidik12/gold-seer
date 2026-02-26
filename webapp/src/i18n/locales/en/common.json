@@ -54,7 +54,8 @@
     "closePosition": "Close Position",
     "openPosition": "Open {{direction}}",
     "opening": "Opening...",
-    "btcUsdt": "XAU/USD"
+    "btcUsdt": "XAU/USD",
+    "xauusd": "XAU/USD"
   },
   "category": {
     "trading": "Trading",
@@ -99,6 +100,7 @@
   },
   "price": {
     "btcPrice": "Gold Price",
+    "goldPrice": "Gold Price",
     "price": "Price",
     "high": "High",
     "low": "Low",
@@ -118,6 +120,7 @@
     "noData": "No chart data available",
     "loadingChart": "Loading chart...",
     "btcChart": "Gold Chart",
+    "goldChart": "Gold Chart",
     "failedToLoad": "Failed to load chart",
     "timeframe": {
       "24h": "24H",

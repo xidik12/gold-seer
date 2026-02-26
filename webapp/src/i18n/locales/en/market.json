@@ -7,6 +7,7 @@
     "neutralCount": "{{count}} Neutral",
     "ofTotal": "of {{total}}",
     "btcPrice": "Gold Price",
+    "goldPrice": "Gold Price",
     "updatesEveryMinute": "Technical indicators update every minute. These are mathematical tools, not crystal balls. They work best when multiple indicators agree. Always combine with your own research.",
     "overallBullish": "{{count}} out of {{total}} indicators suggest the price will go UP. More tools are pointing to buying than selling — this is a positive sign, but nothing is guaranteed.",
     "overallBearish": "{{count}} out of {{total}} indicators suggest the price will go DOWN. More tools are pointing to selling than buying — be cautious.",
@@ -335,6 +336,7 @@
     "dashboard": {
       "title": "Power Law Dashboard",
       "btcPrice": "Gold Price",
+    "goldPrice": "Gold Price",
       "modelPrice": "Model Price",
       "multiplier": "Multiplier",
       "change24h": "24h Change",
@@ -383,6 +385,7 @@
       "modelOz": "Model (oz)",
       "goldPrice": "Gold Price",
       "btcPrice": "Gold Price",
+    "goldPrice": "Gold Price",
       "projections": "Gold Ratio Projections",
       "milestoneOz": "{{oz}} oz"
     },
@@ -431,6 +434,7 @@
       "valueUsd": "Value (USD)",
       "timeline": "Timeline",
       "btcPrice": "Gold Price",
+    "goldPrice": "Gold Price",
       "portfolioValue": "Portfolio Value",
       "expenses": "Expenses",
       "borrowingCapacity": "Borrowing Capacity",

@@ -379,7 +379,7 @@ function TradeCard({ trade, onOpen, onClose, currentPrice, t }) {
           }`}>
             {isLong ? t('direction.long', { ns: 'common' }) : t('direction.short', { ns: 'common' })}
           </span>
-          <span className="text-text-primary text-sm font-semibold">{t('trade.btcUsdt', { ns: 'common' })}</span>
+          <span className="text-text-primary text-sm font-semibold">{t('trade.xauusd', { ns: 'common' })}</span>
           {trade.leverage && <span className="text-text-muted text-[9px]">{trade.leverage}x</span>}
         </div>
         <span className={`text-[10px] px-2 py-0.5 rounded-full ${

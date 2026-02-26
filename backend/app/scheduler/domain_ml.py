@@ -516,24 +516,6 @@ async def generate_quant_prediction(timeframes: list[str] | None = None):
         # Fear & Greed value
         fear_greed_value = float(macro_row.fear_greed_index) if macro_row and macro_row.fear_greed_index else None
 
-        # Funding rate (legacy — not applicable for gold, always None)
-        funding_rate = None
-        try:
-            fr_data = await market_collector.get_funding_rate()
-            if fr_data:
-                funding_rate = fr_data.get("funding_rate")
-        except Exception as e:
-            logger.debug(f"Funding rate fetch for quant: {e}")
-
-        # On-chain data
-        onchain_data = None
-        if onchain_row:
-            onchain_data = {
-                "tx_volume": onchain_row.tx_volume,
-                "hash_rate": onchain_row.hash_rate,
-                "active_addresses": onchain_row.active_addresses,
-            }
-
         # Build market_data dict for GoldQuantPredictor
         closes = price_df["close"].tolist()
         highs = price_df["high"].tolist()

@@ -1,20 +1,19 @@
 {
   "title": "Resources & Tools",
-  "subtitle": "Expert-curated platforms and tools used by professional traders. Based on community recommendations, expert reviews, and real-world performance.",
+  "subtitle": "Expert-curated platforms and data sources used by professional gold and forex traders. Based on industry standards, expert reviews, and real-world performance.",
   "categories": {
-    "exchanges": "Exchanges",
-    "analysis": "Analysis Tools",
-    "onChain": "Macro Data",
-    "portfolio": "Portfolio Trackers",
-    "bots": "Trading Bots",
-    "learning": "Learning Platforms",
-    "learn": "Learn"
+    "marketData": "Market Data",
+    "economicData": "Economic Data",
+    "analysis": "Analysis & News",
+    "etf": "ETF & Holdings",
+    "platforms": "Trading Platforms",
+    "learn": "Education"
   },
   "tierGuide": "Tier Guide",
   "tiers": {
     "essential": {
       "name": "Essential",
-      "desc": "Must-have tools every trader needs"
+      "desc": "Must-have tools every gold trader needs"
     },
     "beginner": {
       "name": "Beginner",
@@ -32,358 +31,78 @@
   "gettingStarted": {
     "title": "Getting Started",
     "beginner_label": "Beginner:",
-    "beginner_desc": " Start with TradingView (charts) + Kitco (gold prices) + FRED (economic data). Learn the basics.",
+    "beginner_desc": " Start with TradingView (XAUUSD charts) + Kitco (live gold prices) + FRED (real yields & macro). Learn the basics of what moves gold.",
     "intermediate_label": "Intermediate:",
-    "intermediate_desc": " Add CME Group (futures data) + World Gold Council (fundamental) + a portfolio tracker. Start using indicators.",
+    "intermediate_desc": " Add CME Group (futures open interest) + World Gold Council (ETF flows & demand) + CFTC COT reports (positioning). Start reading macro drivers.",
     "advanced_label": "Advanced:",
-    "advanced_desc": " Layer in CFTC COT reports (positioning) + Bloomberg Terminal (custom analytics) + trading bots. Build systematic strategies."
+    "advanced_desc": " Layer in LBMA benchmark data + Bloomberg Terminal (professional analytics) + MetaTrader EA automation. Build systematic gold trading strategies."
   },
   "keyMetrics": {
-    "title": "KEY METRICS EVERY TRADER SHOULD TRACK",
-    "fearGreed": {
-      "name": "Fear & Greed Index",
-      "source": "CNN Business / Griffin Gold",
-      "why": "Market sentiment at a glance. Extreme fear = potential buy, extreme greed = potential sell."
+    "title": "KEY METRICS EVERY GOLD TRADER SHOULD TRACK",
+    "goldSilverRatio": {
+      "name": "Gold/Silver Ratio",
+      "source": "Kitco / TradingView",
+      "why": "Measures relative value between gold and silver. Historically high ratio (>80) = silver undervalued; low ratio (<50) = gold relatively expensive."
     },
-    "mvrv": {
-      "name": "MVRV Z-Score",
-      "source": "World Gold Council / Kitco Gold",
-      "why": "Identifies market tops (>7) and bottoms (<0.1) based on fundamental valuation."
-    },
-    "fundingRates": {
-      "name": "Funding Rates",
-      "source": "CME Group / CFTC",
-      "why": "Shows derivatives market positioning. Extreme funding = potential reversal signal."
-    },
-    "exchangeNetflows": {
-      "name": "Exchange Netflows",
-      "source": "World Gold Council / CFTC",
-      "why": "Gold flowing into exchanges = potential selling. Flowing out = accumulation."
-    },
-    "openInterest": {
-      "name": "Open Interest",
-      "source": "CME Group / COMEX",
-      "why": "Rising OI + rising price = strong trend. Rising OI + falling price = bearish pressure."
-    },
-    "rsiMacd": {
-      "name": "RSI + MACD Combo",
-      "source": "TradingView / Griffin Gold",
-      "why": "Most reliable indicator combination. RSI for overbought/oversold, MACD for trend confirmation."
-    },
-    "btcDominance": {
-      "name": "Gold Dominance",
-      "source": "World Gold Council / Griffin Gold",
-      "why": "Rising dominance = money flowing to Gold safety. Falling = alt season potential."
+    "realYields": {
+      "name": "Real Yields (TIPS)",
+      "source": "FRED / TradingView",
+      "why": "The single most important gold driver. Falling real yields = gold bullish. Rising real yields = gold bearish. Watch 10Y TIPS daily."
     },
     "dxy": {
       "name": "DXY (Dollar Index)",
       "source": "TradingView / Griffin Gold",
-      "why": "Gold often inversely correlates with dollar strength. Weak dollar = bullish Gold."
+      "why": "Gold is priced in USD and inversely correlated with the dollar. A falling DXY is the most consistent bullish signal for gold."
+    },
+    "vix": {
+      "name": "VIX (Fear Index)",
+      "source": "CBOE / TradingView",
+      "why": "Gold is a safe-haven asset. Rising VIX signals risk-off sentiment — money flows into gold. Watch spikes above 20 for buy signals."
+    },
+    "cotNetPositioning": {
+      "name": "COT Net Positioning",
+      "source": "CFTC / Barchart",
+      "why": "Weekly report on how large speculators are positioned in gold futures. Extreme net long = crowded trade warning. Extreme net short = contrarian buy signal."
+    },
+    "etfHoldings": {
+      "name": "ETF Holdings (tonnes)",
+      "source": "World Gold Council / GLD",
+      "why": "Total gold held in ETFs is a proxy for institutional demand. Rising holdings = institutional accumulation. Declining holdings = risk-on rotation out of gold."
+    },
+    "centralBankBuying": {
+      "name": "Central Bank Buying",
+      "source": "World Gold Council",
+      "why": "Central banks are the largest gold buyers. Record buying years (2022-2024) provide structural price support. Monitor quarterly WGC demand reports."
+    },
+    "rsiMacd": {
+      "name": "RSI + MACD Combo",
+      "source": "TradingView / Griffin Gold",
+      "why": "Most reliable indicator combination for XAUUSD. RSI for overbought/oversold levels, MACD for trend direction and momentum confirmation."
     }
   },
-  "exchanges": {
-    "title": "EXCHANGES & TRADING PLATFORMS",
-    "description": "Where to trade. Ranked by experts for reliability, fees, and features.",
-    "binance": {
-      "desc": "#1 by volume worldwide. Full trading suite with leverage, automation, and 600+ pairs. Best for active traders.",
-      "tags": [
-        "Low fees",
-        "Deep liquidity",
-        "Futures"
-      ]
-    },
-    "coinbase": {
-      "desc": "Best for beginners. US-regulated gold broker with simple buy/sell interface. Advanced charting for experienced traders.",
-      "tags": [
-        "Regulated",
-        "Easy UI",
-        "Gold trading"
-      ]
-    },
-    "kraken": {
-      "desc": "Rock-solid reliability since 2011. Kraken Pro offers institutional-grade features. Great for day traders.",
-      "tags": [
-        "Reliable",
-        "Low fees",
-        "Futures"
-      ]
-    },
-    "bybit": {
-      "desc": "Top derivatives exchange. Copy trading, advanced order types, and deep liquidity for non-US users.",
-      "tags": [
-        "Derivatives",
-        "Copy trading",
-        "High leverage"
-      ]
-    },
-    "okx": {
-      "desc": "Full-featured gold trading platform. Built-in trading tools, ETF access, and comprehensive market analysis. Complete ecosystem.",
-      "tags": [
-        "ETFs",
-        "Trading tools",
-        "Market analysis"
-      ]
-    },
-    "bydfi": {
-      "desc": "Most feature-rich for 2026. Spot + futures, copy trading, grid bots, broad precious metals support. Active trader favorite.",
-      "tags": [
-        "Spot + Futures",
-        "Copy trading",
-        "Grid bots"
-      ]
-    }
+  "marketData": {
+    "title": "GOLD MARKET DATA",
+    "description": "Live prices, benchmarks, and authoritative data sources for the gold market."
+  },
+  "economicData": {
+    "title": "ECONOMIC & MACRO DATA",
+    "description": "Macro indicators, futures positioning, and economic data that drive gold prices."
   },
   "analysis": {
-    "title": "CHARTING & ANALYSIS TOOLS",
-    "description": "Technical analysis, charting, and market research platforms.",
-    "tradingview": {
-      "desc": "The #1 charting platform. 100+ indicators, community-shared strategies, real-time data. Used by 90% of traders.",
-      "tags": [
-        "Charts",
-        "100+ indicators",
-        "Community"
-      ]
-    },
-    "coinglass": {
-      "desc": "Best for derivatives data. Liquidation heatmaps, open interest, funding rates, order flow, and whale tracking.",
-      "tags": [
-        "Liquidations",
-        "OI",
-        "Funding rates"
-      ]
-    },
-    "coinmarketcap": {
-      "desc": "Go-to for market overview. Price tracking, market rankings, Fear & Greed index, gold market calendar.",
-      "tags": [
-        "Prices",
-        "Rankings",
-        "Fear & Greed"
-      ]
-    },
-    "trendspider": {
-      "desc": "AI-powered technical analysis. Automated trendline detection, multi-timeframe analysis, strategy backtesting.",
-      "tags": [
-        "Auto trendlines",
-        "Backtesting",
-        "Alerts"
-      ]
-    },
-    "coinalyze": {
-      "desc": "Aggregated futures data across all major exchanges. Open interest, funding, volume, and basis analytics.",
-      "tags": [
-        "Futures data",
-        "OI",
-        "Aggregated"
-      ]
-    },
-    "bitcoinmagazinepro": {
-      "desc": "Gold-specific charts: MVRV Z-Score, Pi Cycle, Puell Multiple, Stock-to-Flow. Best Gold cycle tools.",
-      "tags": [
-        "Gold charts",
-        "Cycle analysis",
-        "MVRV"
-      ]
-    }
+    "title": "ANALYSIS & NEWS",
+    "description": "Technical analysis, fundamental research, and real-time news for XAUUSD traders."
   },
-  "onchain": {
-    "title": "MACRO ANALYTICS",
-    "description": "Macro data, institutional tracking, and smart money analysis.",
-    "glassnode": {
-      "desc": "Industry standard for fundamental. MVRV Z-Score, SOPR, NVT, holder behavior, exchange flows. Free tier available.",
-      "tags": [
-        "MVRV",
-        "SOPR",
-        "Supply metrics"
-      ]
-    },
-    "cryptoquant": {
-      "desc": "Best for exchange flow analysis. Tracks whale deposits/withdrawals, miner behavior, and market stress signals.",
-      "tags": [
-        "Exchange flows",
-        "Miner data",
-        "Alerts"
-      ]
-    },
-    "nansen": {
-      "desc": "Market intelligence platform. Track smart money, fund movements, whale portfolios. Labels 250M+ portfolios.",
-      "tags": [
-        "Smart money",
-        "Entity labels",
-        "ETFs"
-      ]
-    },
-    "santiment": {
-      "desc": "Combines fundamental + social sentiment. Developer activity tracking, social volume, holder distribution.",
-      "tags": [
-        "Social data",
-        "Dev activity",
-        "Fundamental"
-      ]
-    },
-    "defillama": {
-      "desc": "Best free ETFs analytics. TVL across all protocols, yield tracking, fee revenue. 100% free, no account needed.",
-      "tags": [
-        "TVL",
-        "ETFs",
-        "Yields"
-      ]
-    },
-    "whalealert": {
-      "desc": "Real-time large transaction tracker. Monitors Gold, ETH, and major market datas for whale movements.",
-      "tags": [
-        "Large txs",
-        "Real-time",
-        "Multi-chain"
-      ]
-    },
-    "dune": {
-      "desc": "Build custom fundamental dashboards with SQL. Community-shared dashboards for every protocol. Free tier available.",
-      "tags": [
-        "Custom queries",
-        "Dashboards",
-        "SQL"
-      ]
-    }
+  "etf": {
+    "title": "ETF & HOLDINGS DATA",
+    "description": "Track gold ETF inflows, outflows, and total holdings as institutional demand signals."
   },
-  "portfolio": {
-    "title": "PORTFOLIO & TAX TOOLS",
-    "description": "Track your holdings, calculate taxes, and manage your portfolio.",
-    "cointracker": {
-      "desc": "Leading integrated portfolio + tax solution. 300+ exchange integrations, auto ETFs tracking, TurboTax compatible.",
-      "tags": [
-        "Tax",
-        "Portfolio",
-        "ETFs"
-      ]
-    },
-    "koinly": {
-      "desc": "Best for international users. Supports 100+ countries, ETFs, NFT, and margin trades. Simple tax reporting.",
-      "tags": [
-        "Tax",
-        "100+ countries",
-        "ETFs/NFT"
-      ]
-    },
-    "cointracking": {
-      "desc": "Power user favorite. Deep historical data imports, comprehensive analytics, and detailed tax reports.",
-      "tags": [
-        "Tax",
-        "Analytics",
-        "300+ exchanges"
-      ]
-    },
-    "coinledger": {
-      "desc": "Best for US-based users. Direct TurboTax and TaxAct integration. Simple, straightforward tax reporting.",
-      "tags": [
-        "Tax",
-        "US-focused",
-        "TurboTax"
-      ]
-    },
-    "debank": {
-      "desc": "Best free ETFs portfolio tracker. Tracks all portfolio positions across all chains. No signup required.",
-      "tags": [
-        "ETFs portfolio",
-        "Multi-chain",
-        "Free"
-      ]
-    },
-    "zenledger": {
-      "desc": "Best for heavy ETFs users. Excels at staking rewards, liquidity pool tracking, and complex ETFs tax scenarios.",
-      "tags": [
-        "ETFs tax",
-        "Staking",
-        "LP"
-      ]
-    }
-  },
-  "bots": {
-    "title": "TRADING BOTS & AUTOMATION",
-    "description": "Automated trading, grid bots, copy trading, and algorithmic strategies.",
-    "cryptohopper": {
-      "desc": "Most versatile bot platform. Cloud-based, works with major gold brokers. Strategy marketplace for beginners.",
-      "tags": [
-        "Cloud-based",
-        "Strategy marketplace",
-        "DCA bots"
-      ]
-    },
-    "threecommas": {
-      "desc": "Popular for smart trade terminals. Grid bots, DCA bots, and portfolio rebalancing across major exchanges.",
-      "tags": [
-        "Smart trades",
-        "Grid bots",
-        "DCA"
-      ]
-    },
-    "pionex": {
-      "desc": "Exchange with free built-in bots. 16+ bot types including grid, DCA, and rebalancing. No extra fees.",
-      "tags": [
-        "Free bots",
-        "Grid trading",
-        "Built-in"
-      ]
-    },
-    "haasonline": {
-      "desc": "For advanced algorithmic traders. Custom scripting language, extensive backtesting, and strategy optimization.",
-      "tags": [
-        "Custom scripts",
-        "Backtesting",
-        "Advanced"
-      ]
-    }
+  "platforms": {
+    "title": "TRADING PLATFORMS",
+    "description": "Where to trade XAUUSD. Ranked for reliability, spreads, and features."
   },
   "learn": {
-    "title": "LEARNING RESOURCES",
-    "description": "Education, courses, communities, and research for all levels.",
-    "investopedia": {
-      "desc": "Best free gold trading education. Comprehensive guides on trading, technical analysis, and investing fundamentals.",
-      "tags": [
-        "Education",
-        "Guides",
-        "Free"
-      ]
-    },
-    "binanceacademy": {
-      "desc": "Free structured gold trading education. Beginner to advanced courses on market data, trading, ETFs, and security.",
-      "tags": [
-        "Free courses",
-        "Videos",
-        "Quizzes"
-      ]
-    },
-    "coinbureau": {
-      "desc": "Trusted gold market research and reviews. In-depth analysis, project reviews, and educational YouTube content.",
-      "tags": [
-        "Reviews",
-        "Research",
-        "YouTube"
-      ]
-    },
-    "messari": {
-      "desc": "Institutional-grade gold market research. Sector reports, token profiles, governance data, and fundraising intel.",
-      "tags": [
-        "Research",
-        "Data",
-        "Reports"
-      ]
-    },
-    "theblock": {
-      "desc": "Premium gold market news and data dashboards. Industry-leading reporting on institutional adoption and market structure.",
-      "tags": [
-        "News",
-        "Data",
-        "Research"
-      ]
-    },
-    "reddit": {
-      "desc": "Largest gold market communities on Reddit. Real-time discussion, sentiment gauge, and community-vetted information.",
-      "tags": [
-        "Community",
-        "Discussion",
-        "News"
-      ]
-    }
+    "title": "EDUCATION & LEARNING",
+    "description": "Free and paid education for gold and forex trading at all skill levels."
   },
   "visitSite": "Visit Site"
 }

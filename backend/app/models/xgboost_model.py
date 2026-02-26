@@ -198,18 +198,6 @@ class XGBoostPredictor:
             sig = np.clip(ev_impact, -1, 1)
             signals.append((0.5 + sig * 0.25, 2.0))
 
-        # ── Funding rate (weight 2) — derivatives signal ──
-        fr = _get("funding_rate")
-        if fr is not None:
-            if fr > 0.001:
-                signals.append((0.35, 2.0))
-            elif fr > 0.0005:
-                signals.append((0.42, 1.5))
-            elif fr < -0.001:
-                signals.append((0.65, 2.0))
-            elif fr < -0.0005:
-                signals.append((0.58, 1.5))
-
         # ── Mark-index spread (weight 1.5) — premium/discount ──
         spread = _get("mark_index_spread")
         if spread is not None:
@@ -311,19 +299,6 @@ class XGBoostPredictor:
             elif dvol < 40:
                 signals.append((0.55, 1.0))  # Calm — slight bullish
 
-        # ── NEW: Liquidation imbalance (weight 2) ──
-        long_liq = _get("long_liquidation_24h")
-        short_liq = _get("short_liquidation_24h")
-        if long_liq is not None and short_liq is not None:
-            total_liq = long_liq + short_liq
-            if total_liq > 0:
-                # If mostly longs liquidated → contrarian bullish (cascade exhausted)
-                long_pct = long_liq / total_liq
-                if long_pct > 0.7:
-                    signals.append((0.60, 2.0))  # Long squeeze exhaustion
-                elif long_pct < 0.3:
-                    signals.append((0.40, 2.0))  # Short squeeze exhaustion
-
         # ── NEW: ETF Net Flow (weight 2.5) — institutional demand ──
         etf_flow = _get("etf_net_flow_usd")
         if etf_flow is not None:
@@ -335,19 +310,6 @@ class XGBoostPredictor:
                 signals.append((0.25, 2.5))  # Massive outflow
             elif etf_flow < -100e6:
                 signals.append((0.37, 2.0))
-
-        # ── NEW: Exchange Netflow (weight 2) — coins entering/leaving exchanges ──
-        exch_net = _get("exchange_netflow_btc")
-        if exch_net is not None:
-            # Positive netflow = coins to exchanges = sell pressure
-            if exch_net > 5000:
-                signals.append((0.30, 2.0))  # Heavy inflows — bearish
-            elif exch_net > 1000:
-                signals.append((0.40, 1.5))
-            elif exch_net < -5000:
-                signals.append((0.70, 2.0))  # Heavy outflows — bullish
-            elif exch_net < -1000:
-                signals.append((0.60, 1.5))
 
         # ── NEW: NVT Signal (weight 1.5) — on-chain valuation ──
         nvt = _get("nvt_signal")
@@ -435,19 +397,6 @@ class XGBoostPredictor:
         if tsi_val is not None:
             sig = np.clip(tsi_val / 30, -1, 1)
             signals.append((0.5 + sig * 0.2, 1.5))
-
-        # ── NEW: Stablecoin Supply Change 7d (weight 1.5) — liquidity ──
-        stable_chg = _get("stablecoin_supply_change_7d")
-        if stable_chg is not None:
-            # Growing stablecoin supply = more dry powder = bullish
-            if stable_chg > 2:
-                signals.append((0.65, 1.5))
-            elif stable_chg > 0.5:
-                signals.append((0.57, 1.0))
-            elif stable_chg < -2:
-                signals.append((0.35, 1.5))
-            elif stable_chg < -0.5:
-                signals.append((0.43, 1.0))
 
         # ── NEW: Hash Ribbon (weight 1.5) — miner capitulation ──
         hash_rib = _get("hash_ribbon")

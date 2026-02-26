@@ -14,20 +14,6 @@ from app.database import (
     get_session, Price, Prediction, QuantPrediction,
     MacroData, ApiKey, ApiUsageLog,
 )
-# Power law model removed (crypto-specific) — gold uses simple fair value placeholder
-def _gold_fair_value(dt):
-    """Placeholder fair value model for gold."""
-    return None
-
-def _get_valuation_label(dev_pct):
-    if dev_pct > 20: return "Overvalued"
-    if dev_pct > 10: return "Above Fair Value"
-    if dev_pct > -10: return "Fair Value"
-    if dev_pct > -20: return "Below Fair Value"
-    return "Undervalued"
-
-# GLD ETF launch date (Nov 18, 2004) — used as the reference epoch for gold model
-GLD_LAUNCH = datetime(2004, 11, 18)
 
 logger = logging.getLogger(__name__)
 
@@ -166,35 +152,6 @@ async def get_macro(session: AsyncSession = Depends(get_session)):
         "fear_greed_index": row.fear_greed_index,
         "fear_greed_label": row.fear_greed_label,
         "timestamp": row.timestamp.isoformat(),
-    }
-
-
-@router.get("/market/onchain")
-async def get_onchain(session: AsyncSession = Depends(get_session)):
-    """Get latest on-chain data — not available for gold trading."""
-    return {"error": "On-chain data is not available for gold trading"}
-
-
-# ── Power Law ──────────────────────────────────────────────────
-
-@router.get("/powerlaw")
-async def get_power_law(session: AsyncSession = Depends(get_session)):
-    """Gold fair value model — placeholder (power law is BTC-specific)."""
-    result = await session.execute(
-        select(Price).order_by(desc(Price.timestamp)).limit(1)
-    )
-    price_row = result.scalar_one_or_none()
-    current_price = price_row.close if price_row else None
-
-    return {
-        "current_price": current_price,
-        "fair_value": None,
-        "deviation_pct": 0,
-        "valuation": "N/A",
-        "corridor": {},
-        "days_since_gld_launch": (datetime.utcnow() - GLD_LAUNCH).days,
-        "timestamp": datetime.utcnow().isoformat(),
-        "note": "Power law model is not applicable for gold. Use quant predictor instead.",
     }
 
 

@@ -470,7 +470,7 @@ const PriceBanner = memo(function PriceBanner({ t }) {
   return (
     <div className="bg-bg-card rounded-xl border border-white/5 p-3 flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <span className="text-text-muted text-xs">{t('trade.btcUsdt', { ns: 'common' })}</span>
+        <span className="text-text-muted text-xs">{t('trade.xauusd', { ns: 'common' })}</span>
         {change !== 0 && (
           <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
             change >= 0 ? 'bg-accent-green/15 text-accent-green' : 'bg-accent-red/15 text-accent-red'
@@ -508,7 +508,7 @@ const PositionCard = memo(function PositionCard({ trade, onClose, t }) {
           }`}>
             {trade.direction}
           </span>
-          <span className="text-text-primary text-sm font-semibold">{t('trade.btcUsdt', { ns: 'common' })}</span>
+          <span className="text-text-primary text-sm font-semibold">{t('trade.xauusd', { ns: 'common' })}</span>
           <span className="text-text-muted text-[9px]">{trade.leverage}x</span>
           <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent-goldBright/15 text-accent-goldBright">{t('app.paper', { ns: 'common' })}</span>
         </div>

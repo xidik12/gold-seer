@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next'
 import SubTabBar from '../components/SubTabBar'
 
 const MARKET_TABS = [
-  { path: '/liquidations', labelKey: 'common:link.liquidations' },
-  { path: '/powerlaw', labelKey: 'common:link.powerLaw' },
+  { path: '/cot', labelKey: 'common:link.cotData' },
   { path: '/elliott-wave', labelKey: 'common:link.elliottWave' },
   { path: '/events', labelKey: 'common:link.events' },
   { path: '/tools', labelKey: 'common:link.tools' },
@@ -54,7 +53,7 @@ function Basics() {
         <p><span className="text-text-secondary font-semibold">{t('learn:basics.whatMoves.halvings_label')}</span>{t('learn:basics.whatMoves.halvings_desc')}</p>
         <p><span className="text-text-secondary font-semibold">{t('learn:basics.whatMoves.macro_label')}</span>{t('learn:basics.whatMoves.macro_desc')}</p>
         <p><span className="text-text-secondary font-semibold">{t('learn:basics.whatMoves.sentiment_label')}</span>{t('learn:basics.whatMoves.sentiment_desc')}</p>
-        <p><span className="text-text-secondary font-semibold">{t('learn:basics.whatMoves.whales_label')}</span>{t('learn:basics.whatMoves.whales_desc')}</p>
+        <p><span className="text-text-secondary font-semibold">{t('learn:basics.whatMoves.centralBanks_label')}</span>{t('learn:basics.whatMoves.centralBanks_desc')}</p>
       </Accordion>
       <Accordion title={t('learn:basics.marketCap.title')}>
         <p><span className="text-text-secondary font-semibold">{t('learn:basics.marketCap.p1_label')}</span>{t('learn:basics.marketCap.p1_desc')}</p>

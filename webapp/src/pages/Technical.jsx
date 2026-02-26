@@ -400,7 +400,7 @@ export default function Technical() {
         <p className="text-text-muted text-[10px] leading-relaxed">{overallExplain}</p>
         {price && (
           <div className="mt-2 pt-2 border-t border-white/10">
-            <span className="text-text-muted text-xs">{t('technical.btcPrice')}: </span>
+            <span className="text-text-muted text-xs">{t('technical.goldPrice')}: </span>
             <span className="text-text-primary text-sm font-bold">{formatPricePrecise(price)}</span>
           </div>
         )}

@@ -47,7 +47,7 @@ export default function Briefing() {
   }
 
   const sentColor = SENTIMENT_COLORS[briefing?.overall_sentiment] || 'text-text-muted'
-  const change = briefing?.btc_24h_change
+  const change = briefing?.gold_24h_change
   const changeColor = change > 0 ? 'text-accent-green' : change < 0 ? 'text-accent-red' : 'text-text-muted'
 
   return (
@@ -85,7 +85,7 @@ export default function Briefing() {
             </div>
             <div className="flex items-baseline gap-2 mb-3">
               <span className="text-text-primary font-bold text-2xl">
-                ${briefing.btc_price?.toLocaleString() || '—'}
+                ${briefing.gold_price?.toLocaleString() || '—'}
               </span>
               <span className={`text-sm font-medium ${changeColor}`}>
                 {change > 0 ? '+' : ''}{change?.toFixed(2)}%
@@ -114,10 +114,10 @@ export default function Briefing() {
                   <p className="text-text-primary font-bold text-lg">{briefing.data_snapshot.fear_greed}</p>
                 </div>
               )}
-              {briefing.data_snapshot.whale_count != null && (
+              {briefing.data_snapshot.dxy != null && (
                 <div className="bg-bg-card rounded-xl p-3 border border-white/5">
-                  <p className="text-text-muted text-[10px]">{t('briefing.whaleTxs')}</p>
-                  <p className="text-text-primary font-bold text-lg">{briefing.data_snapshot.whale_count}</p>
+                  <p className="text-text-muted text-[10px]">DXY</p>
+                  <p className="text-text-primary font-bold text-lg">{briefing.data_snapshot.dxy?.toFixed(2)}</p>
                 </div>
               )}
               {briefing.data_snapshot.accuracy != null && (

@@ -69,7 +69,7 @@ function WaveStatusCard({ data, t }) {
     <div className="bg-bg-card rounded-2xl p-4 border border-white/5 slide-up">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <div className="text-text-muted text-[10px] font-medium">{t('common:price.btcPrice').toUpperCase()}</div>
+          <div className="text-text-muted text-[10px] font-medium">{t('common:price.goldPrice').toUpperCase()}</div>
           <div className="text-text-primary text-xl font-bold tabular-nums">
             {current_price ? formatPrice(current_price) : '--'}
           </div>
@@ -528,8 +528,7 @@ export default function ElliottWave() {
   const [timeframe, setTimeframe] = useState('4h')
 
   const MARKET_TABS = [
-    { path: '/liquidations', label: t('common:link.liquidations') },
-    { path: '/powerlaw', label: t('common:link.powerLaw') },
+    { path: '/cot', label: t('common:link.cotData') },
     { path: '/elliott-wave', label: t('common:link.elliottWave') },
     { path: '/events', label: t('common:link.events') },
     { path: '/tools', label: t('common:link.tools') },
