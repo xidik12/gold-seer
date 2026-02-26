@@ -209,13 +209,7 @@ async def generate_prediction(timeframes: list[str] | None = None):
             for p in prices
         ])
 
-        # Funding rate data (removed — crypto-specific)
-        funding_data = None
-
-        # Dominance data (removed — crypto-specific)
-        dominance_data = None
-
-        # Get latest macro data (M2 supply, gold, sp500 for ratio features)
+        # Get latest macro data (DXY, yields, gold, sp500 for ratio features)
         macro_raw = None
         try:
             async with async_session() as sess:
@@ -234,42 +228,9 @@ async def generate_prediction(timeframes: list[str] | None = None):
         except Exception as e:
             logger.debug(f"Macro data query error: {e}")
 
-        # On-chain data (removed — crypto-specific)
-        onchain_raw = None
-
-        # Gold supply data (estimated above-ground stock)
-        # Gold supply grows ~1.5% per year from mining (no hard cap like crypto)
-        supply_data = {
-            "total_mined": 212_582,  # Estimated tonnes above-ground (World Gold Council 2024)
-            "percent_mined": None,  # Gold has no hard cap
-            "annual_mine_supply_tonnes": 3_644,  # Annual mine production
-            "annual_growth_pct": 1.7,  # Supply growth rate
-        }
-
-        # Influencer social media data (removed — crypto-specific)
         influencer_data = None
 
-        # -- Collect new data sources (concurrently with 10s timeout) --
-        async def _safe_collect(collector, name):
-            try:
-                return await asyncio.wait_for(collector.collect(), timeout=10)
-            except asyncio.TimeoutError:
-                logger.debug(f"{name} collection timed out (10s)")
-                return None
-            except Exception as e:
-                logger.debug(f"{name} collection error: {e}")
-                return None
-
-        # Crypto-specific collectors removed — gold doesn't need derivatives_ext, exchange flows, stablecoins
-        derivatives_ext_data = None
-        etf_data = None
-        exchange_flow_data = None
-        stablecoin_data_raw = None
-
-        # Whale data aggregation (removed — crypto-specific)
-        whale_raw = None
-
-        # Build features (including social media, event memory, funding, dominance)
+        # Build features
         news_data = [{"title": n.title, "source": n.source, "timestamp": n.timestamp.isoformat() if n.timestamp else None} for n in news]
         features = feature_builder.build_features(
             price_df=price_df,
@@ -277,15 +238,6 @@ async def generate_prediction(timeframes: list[str] | None = None):
             influencer_data=influencer_data,
             macro_data=macro_raw,
             event_memory=event_memory_data if event_memory_data else None,
-            funding_data=funding_data,
-            dominance_data=dominance_data,
-            onchain_data=onchain_raw,
-            supply_data=supply_data,
-            derivatives_extended=derivatives_ext_data,
-            etf_data=etf_data,
-            exchange_flow_data=exchange_flow_data,
-            stablecoin_data=stablecoin_data_raw,
-            whale_data=whale_raw,
         )
 
         # Build REAL feature sequence from Feature table history
