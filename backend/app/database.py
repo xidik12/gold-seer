@@ -1239,7 +1239,7 @@ class SharedTrade(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    telegram_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    telegram_id: Mapped[int] = mapped_column(BigInteger)
     username: Mapped[str] = mapped_column(String(100), nullable=True)
     direction: Mapped[str] = mapped_column(String(10))  # long/short
     entry_price: Mapped[float] = mapped_column(Float)
@@ -1287,9 +1287,28 @@ def _add_missing_columns(connection):
                     _db_logger.warning(f"Column add skipped {table.name}.{col.name}: {e}")
 
 
+def _drop_conflicting_indexes(connection):
+    """Drop indexes that will conflict with create_all due to prior partial migrations."""
+    inspector = inspect(connection)
+    for table in Base.metadata.sorted_tables:
+        if not inspector.has_table(table.name):
+            continue
+        existing_indexes = {idx["name"] for idx in inspector.get_indexes(table.name) if idx["name"]}
+        for idx in table.indexes:
+            if idx.name in existing_indexes:
+                try:
+                    connection.execute(text(f'DROP INDEX IF EXISTS "{idx.name}"'))
+                    _db_logger.info(f"Dropped pre-existing index for re-creation: {idx.name}")
+                except Exception:
+                    pass
+
+
 async def init_db():
     _db_logger.info(f"Connecting to database: {engine.url!s}")
     try:
+        # First drop any conflicting indexes from prior partial migrations
+        async with engine.begin() as conn:
+            await conn.run_sync(_drop_conflicting_indexes)
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         # Run column migration in a separate transaction so the inspector
