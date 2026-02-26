@@ -56,13 +56,18 @@ async def backfill_historical_prices():
 
         collector = HistoricalGoldCollector()
         try:
-            all_prices = await collector.fetch_all_historical()
+            all_prices = await collector.collect()
         finally:
             await collector.close()
 
         if not all_prices:
             logger.warning("Backfill: No historical prices fetched")
             return
+
+        # Parse ISO string timestamps to datetime objects
+        for p in all_prices:
+            if isinstance(p["timestamp"], str):
+                p["timestamp"] = datetime.fromisoformat(p["timestamp"])
 
         # Insert into Price table, skipping existing dates
         async with async_session() as session:
@@ -176,10 +181,16 @@ async def collect_price_data():
     Uses GoldMarketCollector to fetch the latest gold price candle.
     """
     try:
-        price_data = await market_collector.collect()
+        result = await market_collector.collect()
 
-        if not price_data:
+        if not result:
             logger.warning("No gold price data received")
+            return
+
+        # market_collector.collect() returns {price_data, klines, session_info, timestamp}
+        price_data = result.get("price_data", {})
+        if not price_data:
+            logger.warning("Gold price_data is empty")
             return
 
         async with async_session() as session:
