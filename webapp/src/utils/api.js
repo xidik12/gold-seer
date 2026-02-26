@@ -40,8 +40,13 @@ function cachedFetch(endpoint, ttl, options = {}) {
 async function fetchAPI(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`
   const { headers: extraHeaders, ...rest } = options
+  const initData = window.Telegram?.WebApp?.initData
   const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json', ...extraHeaders },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(initData ? { 'X-Telegram-Init-Data': initData } : {}),
+      ...extraHeaders,
+    },
     ...rest,
   })
   if (!res.ok) {

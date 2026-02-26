@@ -1287,34 +1287,40 @@ def _add_missing_columns(connection):
                     _db_logger.warning(f"Column add skipped {table.name}.{col.name}: {e}")
 
 
-def _drop_conflicting_indexes(connection):
-    """Drop indexes that will conflict with create_all due to prior partial migrations."""
-    inspector = inspect(connection)
+def _safe_create_all(connection):
+    """Create tables one-by-one, skipping 'already exists' errors from partial migrations."""
     for table in Base.metadata.sorted_tables:
-        if not inspector.has_table(table.name):
-            continue
-        existing_indexes = {idx["name"] for idx in inspector.get_indexes(table.name) if idx["name"]}
+        try:
+            table.create(connection, checkfirst=True)
+        except Exception as e:
+            if "already exists" in str(e).lower():
+                _db_logger.info(f"Table {table.name}: skipped (already exists)")
+            else:
+                raise
+
+
+def _ensure_indexes(connection):
+    """Recreate any missing indexes (idempotent — skips existing ones)."""
+    for table in Base.metadata.sorted_tables:
         for idx in table.indexes:
-            if idx.name in existing_indexes:
-                try:
-                    connection.execute(text(f'DROP INDEX IF EXISTS "{idx.name}"'))
-                    _db_logger.info(f"Dropped pre-existing index for re-creation: {idx.name}")
-                except Exception:
-                    pass
+            try:
+                idx.create(connection)
+            except Exception:
+                pass  # Index already exists — fine
 
 
 async def init_db():
     _db_logger.info(f"Connecting to database: {engine.url!s}")
     try:
-        # First drop any conflicting indexes from prior partial migrations
+        # Create tables one-by-one to handle partial prior migrations
         async with engine.begin() as conn:
-            await conn.run_sync(_drop_conflicting_indexes)
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-        # Run column migration in a separate transaction so the inspector
-        # sees the freshly-committed tables/columns from create_all above.
+            await conn.run_sync(_safe_create_all)
+        # Add missing columns in a separate transaction
         async with engine.begin() as conn:
             await conn.run_sync(_add_missing_columns)
+        # Recreate any missing indexes (fixes prior drop)
+        async with engine.begin() as conn:
+            await conn.run_sync(_ensure_indexes)
         _db_logger.info("Database tables ready")
     except Exception as e:
         _db_logger.error(f"Database init failed: {e}", exc_info=True)

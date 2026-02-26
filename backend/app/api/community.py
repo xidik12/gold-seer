@@ -3,21 +3,31 @@
 import logging
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy import select, desc, func as sa_func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_session, SharedTrade
+from app.api.admin import _verify_telegram_init_data
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/community", tags=["community"])
 
 
+def _get_user(request: Request) -> tuple[int, str | None]:
+    init_data = request.headers.get("X-Telegram-Init-Data", "")
+    if not init_data:
+        raise HTTPException(401, "Missing initData")
+    user_data = _verify_telegram_init_data(init_data, max_age=86400)
+    telegram_id = user_data.get("id")
+    if not telegram_id:
+        raise HTTPException(400, "Invalid user data")
+    return int(telegram_id), user_data.get("username")
+
+
 class ShareTradeRequest(BaseModel):
-    telegram_id: int
-    username: str | None = None
     direction: str  # long / short
     entry_price: float
     target_price: float | None = None
@@ -68,9 +78,12 @@ async def get_shared_trades(
 @router.post("/trades")
 async def share_trade(
     req: ShareTradeRequest,
+    request: Request,
     session: AsyncSession = Depends(get_session),
 ):
-    """Share a trade (needs telegram_id in body)."""
+    """Share a trade (auth via X-Telegram-Init-Data header)."""
+    telegram_id, username = _get_user(request)
+
     if req.direction not in ("long", "short"):
         raise HTTPException(status_code=400, detail="Direction must be 'long' or 'short'")
 
@@ -78,8 +91,8 @@ async def share_trade(
         raise HTTPException(status_code=400, detail="Entry price must be positive")
 
     trade = SharedTrade(
-        telegram_id=req.telegram_id,
-        username=req.username,
+        telegram_id=telegram_id,
+        username=username,
         direction=req.direction,
         entry_price=req.entry_price,
         target_price=req.target_price,

@@ -3,15 +3,32 @@ import logging
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import select, delete
 
 from app.database import async_session, TradeJournalEntry
+from app.api.admin import _verify_telegram_init_data
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/trade-journal", tags=["trade_journal"])
+
+
+# ---------------------------------------------------------------------------
+# Auth helper
+# ---------------------------------------------------------------------------
+
+
+def _get_telegram_id(request: Request) -> int:
+    init_data = request.headers.get("X-Telegram-Init-Data", "")
+    if not init_data:
+        raise HTTPException(401, "Missing initData")
+    user_data = _verify_telegram_init_data(init_data, max_age=86400)
+    telegram_id = user_data.get("id")
+    if not telegram_id:
+        raise HTTPException(400, "Invalid user data")
+    return int(telegram_id)
 
 
 # ---------------------------------------------------------------------------
@@ -20,7 +37,6 @@ router = APIRouter(prefix="/api/trade-journal", tags=["trade_journal"])
 
 
 class JournalEntryCreate(BaseModel):
-    telegram_id: int
     broker_trade_id: Optional[int] = None
     trade_advice_id: Optional[int] = None
     notes: Optional[str] = None
@@ -98,11 +114,12 @@ async def get_journal_entries(
 
 
 @router.post("/entries", status_code=201)
-async def create_journal_entry(body: JournalEntryCreate):
+async def create_journal_entry(body: JournalEntryCreate, request: Request):
     """Create a new trade journal entry."""
+    telegram_id = _get_telegram_id(request)
     async with async_session() as session:
         entry = TradeJournalEntry(
-            telegram_id=body.telegram_id,
+            telegram_id=telegram_id,
             broker_trade_id=body.broker_trade_id,
             trade_advice_id=body.trade_advice_id,
             notes=body.notes,
