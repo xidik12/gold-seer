@@ -18,9 +18,13 @@ from app.bot.subscription import require_premium, is_premium, get_status_text, g
 from app.bot.referral import parse_referral_code, process_referral, get_or_create_referral_code
 from app.bot.partner_referral import parse_partner_code, process_partner_referral, try_link_partner_telegram
 from app.signals.generator import DISCLAIMER
+from app.broker.connection import BrokerConnection, create_broker
 
 logger = logging.getLogger(__name__)
 router = Router()
+
+# Active broker connections keyed by telegram_id
+_user_brokers: dict[int, BrokerConnection] = {}
 
 
 @router.message(CommandStart())
@@ -1291,3 +1295,327 @@ async def cmd_sessions(message: Message):
     except Exception as e:
         logger.error(f"cmd_sessions error: {e}", exc_info=True)
         await message.answer("Failed to fetch session data. Try again later.")
+
+
+# ────────────────────────────────────────────────────────────────
+#  BROKER COMMANDS
+# ────────────────────────────────────────────────────────────────
+
+@router.message(Command("connect"))
+@require_premium
+async def cmd_connect(message: Message):
+    """Connect to a broker: /connect [demo|metaapi]"""
+    telegram_id = message.from_user.id
+
+    # Check if already connected
+    if telegram_id in _user_brokers:
+        await message.answer(
+            "You are already connected to a broker.\n"
+            "Use /disconnect first, then reconnect.",
+            parse_mode="HTML",
+            reply_markup=back_keyboard(),
+        )
+        return
+
+    # Parse broker type from arguments
+    parts = (message.text or "").split()
+    broker_type = parts[1].lower() if len(parts) > 1 else settings.default_broker
+
+    if broker_type not in ("demo", "metaapi", "fix"):
+        await message.answer(
+            "Unknown broker type. Supported: <code>demo</code>, <code>metaapi</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    try:
+        broker = create_broker(broker_type)
+
+        # Build config based on broker type
+        config: dict = {}
+        if broker_type == "demo":
+            config = {"initial_balance": 10_000.00, "leverage": 100}
+        elif broker_type == "metaapi":
+            if not settings.metaapi_token or not settings.metaapi_account_id:
+                await message.answer(
+                    "MetaApi credentials not configured. Use <code>/connect demo</code> for paper trading.",
+                    parse_mode="HTML",
+                )
+                return
+            config = {"token": settings.metaapi_token, "account_id": settings.metaapi_account_id}
+
+        connected = await broker.connect(config)
+        if not connected:
+            await message.answer("Failed to connect to broker. Try again later.")
+            return
+
+        _user_brokers[telegram_id] = broker
+
+        # Fetch account info
+        account = await broker.get_account_info()
+
+        text = (
+            f"<b>Broker Connected</b>\n\n"
+            f"Type: <code>{broker_type}</code>\n"
+            f"Balance: <code>${account.get('balance', 0):,.2f}</code>\n"
+            f"Equity: <code>${account.get('equity', 0):,.2f}</code>\n"
+            f"Leverage: <code>1:{account.get('leverage', 0)}</code>\n"
+            f"Free Margin: <code>${account.get('free_margin', 0):,.2f}</code>\n\n"
+            f"Use /positions to view open trades\n"
+            f"Use /trade buy 0.01 to place an order"
+        )
+
+        await message.answer(text, parse_mode="HTML", reply_markup=back_keyboard())
+
+    except ValueError as e:
+        await message.answer(f"Error: {e}")
+    except Exception as e:
+        logger.error(f"cmd_connect error: {e}", exc_info=True)
+        await message.answer("Failed to connect to broker. Try again later.")
+
+
+@router.message(Command("disconnect"))
+@require_premium
+async def cmd_disconnect(message: Message):
+    """Disconnect from the broker."""
+    telegram_id = message.from_user.id
+
+    broker = _user_brokers.get(telegram_id)
+    if not broker:
+        await message.answer("No broker connected.", reply_markup=back_keyboard())
+        return
+
+    try:
+        await broker.disconnect()
+    except Exception as e:
+        logger.warning(f"Broker disconnect error for {telegram_id}: {e}")
+
+    del _user_brokers[telegram_id]
+
+    await message.answer(
+        "Broker disconnected.",
+        parse_mode="HTML",
+        reply_markup=back_keyboard(),
+    )
+
+
+@router.message(Command("positions"))
+@require_premium
+async def cmd_positions(message: Message):
+    """Show all open broker positions."""
+    telegram_id = message.from_user.id
+
+    broker = _user_brokers.get(telegram_id)
+    if not broker:
+        await message.answer(
+            "No broker connected. Use /connect to connect first.",
+            reply_markup=back_keyboard(),
+        )
+        return
+
+    try:
+        positions = await broker.get_positions()
+    except Exception as e:
+        logger.error(f"cmd_positions error: {e}", exc_info=True)
+        await message.answer("Failed to fetch positions. Try again later.")
+        return
+
+    if not positions:
+        await message.answer(
+            "<b>Open Positions</b>\n\nNo open positions.",
+            parse_mode="HTML",
+            reply_markup=back_keyboard(),
+        )
+        return
+
+    lines = ["<b>Open Positions</b>\n"]
+
+    total_pnl = 0.0
+    for pos in positions:
+        direction = pos.get("direction", "?").upper()
+        dir_emoji = "🟢" if direction == "BUY" else "🔴"
+        lot_size = pos.get("lot_size", 0)
+        entry = pos.get("entry_price", 0)
+        pnl = pos.get("pnl", 0)
+        total_pnl += pnl
+        pnl_emoji = "+" if pnl >= 0 else ""
+        sl = pos.get("sl")
+        tp = pos.get("tp")
+        pos_id = pos.get("position_id", "?")
+
+        line = (
+            f"{dir_emoji} <b>{direction}</b> {lot_size} lots\n"
+            f"   ID: <code>{pos_id}</code>\n"
+            f"   Entry: <code>${entry:,.2f}</code>\n"
+            f"   PnL: <code>{pnl_emoji}${pnl:,.2f}</code>\n"
+            f"   SL: <code>${sl:,.2f}</code> | TP: <code>${tp:,.2f}</code>"
+            if sl and tp else
+            f"{dir_emoji} <b>{direction}</b> {lot_size} lots\n"
+            f"   ID: <code>{pos_id}</code>\n"
+            f"   Entry: <code>${entry:,.2f}</code>\n"
+            f"   PnL: <code>{pnl_emoji}${pnl:,.2f}</code>\n"
+            f"   SL: {'$' + f'{sl:,.2f}' if sl else 'N/A'} | "
+            f"TP: {'$' + f'{tp:,.2f}' if tp else 'N/A'}"
+        )
+        lines.append(line)
+        lines.append("")
+
+    total_emoji = "+" if total_pnl >= 0 else ""
+    lines.append(f"<b>Total PnL:</b> <code>{total_emoji}${total_pnl:,.2f}</code>")
+
+    await message.answer("\n".join(lines), parse_mode="HTML", reply_markup=back_keyboard())
+
+
+@router.message(Command("trade"))
+@require_premium
+async def cmd_trade(message: Message):
+    """Place a trade: /trade buy 0.01 or /trade sell 0.1"""
+    from app.broker.risk_manager import RiskManager
+
+    telegram_id = message.from_user.id
+
+    broker = _user_brokers.get(telegram_id)
+    if not broker:
+        await message.answer(
+            "No broker connected. Use /connect first.",
+            reply_markup=back_keyboard(),
+        )
+        return
+
+    # Parse arguments
+    parts = (message.text or "").split()
+    if len(parts) < 3:
+        await message.answer(
+            "Usage: <code>/trade buy 0.01</code> or <code>/trade sell 0.1</code>",
+            parse_mode="HTML",
+        )
+        return
+
+    direction = parts[1].lower()
+    if direction not in ("buy", "sell"):
+        await message.answer("Direction must be <code>buy</code> or <code>sell</code>.", parse_mode="HTML")
+        return
+
+    try:
+        lot_size = float(parts[2])
+    except ValueError:
+        await message.answer("Invalid lot size. Example: <code>/trade buy 0.01</code>", parse_mode="HTML")
+        return
+
+    if lot_size <= 0:
+        await message.answer("Lot size must be positive.")
+        return
+
+    try:
+        # Get current AI signal for direction validation
+        async with async_session() as session:
+            result = await session.execute(
+                select(Signal)
+                .order_by(desc(Signal.timestamp))
+                .limit(1)
+            )
+            signal = result.scalar_one_or_none()
+
+        ai_note = ""
+        if signal:
+            ai_action = signal.action.lower().replace("_", " ")
+            ai_direction = "buy" if "buy" in ai_action else "sell" if "sell" in ai_action else "hold"
+            if ai_direction == "hold":
+                ai_note = "\n\n<i>AI Signal: HOLD — proceed with caution.</i>"
+            elif ai_direction != direction:
+                ai_note = f"\n\n<i>Warning: AI signal is {ai_action.upper()}, but you are going {direction.upper()}.</i>"
+            else:
+                ai_note = f"\n\n<i>AI Signal confirms: {ai_action.upper()}</i>"
+
+        # Get price for SL/TP from latest signal
+        price_data = await broker.get_price("XAUUSD")
+        if "error" in price_data:
+            await message.answer("Failed to get current price. Try again.")
+            return
+
+        entry_price = price_data["ask"] if direction == "buy" else price_data["bid"]
+
+        # Calculate SL/TP from signal or defaults ($10 SL, $20 TP for gold)
+        sl_distance = 10.0  # $10 default
+        tp_distance = 20.0  # $20 default
+        if signal and signal.stop_loss and signal.entry_price:
+            sl_distance = abs(signal.entry_price - signal.stop_loss)
+        if signal and signal.target_price and signal.entry_price:
+            tp_distance = abs(signal.target_price - signal.entry_price)
+
+        if direction == "buy":
+            sl = round(entry_price - sl_distance, 2)
+            tp = round(entry_price + tp_distance, 2)
+        else:
+            sl = round(entry_price + sl_distance, 2)
+            tp = round(entry_price - tp_distance, 2)
+
+        # Run risk checks
+        risk_manager = RiskManager()
+        account_info = await broker.get_account_info()
+        positions = await broker.get_positions()
+
+        risk_result = await risk_manager.check_trade(
+            account_info=account_info,
+            trade_plan={
+                "direction": direction,
+                "lot_size": lot_size,
+                "entry_price": entry_price,
+                "sl": sl,
+                "tp": tp,
+            },
+            positions=positions,
+            config={
+                "max_daily_loss_pct": settings.max_daily_loss_pct,
+                "max_open_positions": settings.max_open_positions,
+            },
+        )
+
+        if not risk_result["approved"]:
+            await message.answer(
+                f"<b>Trade Rejected</b>\n\n"
+                f"Reason: {risk_result['reason']}",
+                parse_mode="HTML",
+                reply_markup=back_keyboard(),
+            )
+            return
+
+        # Use risk-adjusted lot size
+        adjusted_lot = risk_result.get("adjusted_lot_size", lot_size)
+
+        # Place the order
+        order_result = await broker.place_order(
+            symbol="XAUUSD",
+            direction=direction,
+            lot_size=adjusted_lot,
+            sl=sl,
+            tp=tp,
+        )
+
+        if order_result.get("status") != "filled":
+            error = order_result.get("error", "Unknown error")
+            await message.answer(
+                f"<b>Order Failed</b>\n\nError: {error}",
+                parse_mode="HTML",
+                reply_markup=back_keyboard(),
+            )
+            return
+
+        dir_emoji = "🟢" if direction == "buy" else "🔴"
+        text = (
+            f"{dir_emoji} <b>Order Filled</b>\n\n"
+            f"Direction: <b>{direction.upper()}</b>\n"
+            f"Lot Size: <code>{adjusted_lot}</code>\n"
+            f"Entry: <code>${order_result.get('entry_price', 0):,.2f}</code>\n"
+            f"Stop-Loss: <code>${sl:,.2f}</code>\n"
+            f"Take-Profit: <code>${tp:,.2f}</code>\n"
+            f"Order ID: <code>{order_result.get('order_id', 'N/A')}</code>"
+            f"{ai_note}\n\n"
+            f"<i>{DISCLAIMER}</i>"
+        )
+
+        await message.answer(text, parse_mode="HTML", reply_markup=back_keyboard())
+
+    except Exception as e:
+        logger.error(f"cmd_trade error: {e}", exc_info=True)
+        await message.answer("Failed to place trade. Try again later.")

@@ -79,6 +79,7 @@ from app.models.continuous_learner import run_continuous_learning
 from app.models.ab_tester import evaluate_candidates
 from app.models.pattern_learner import run_pattern_discovery
 from app.scheduler.backup import run_database_backup
+from app.broker.position_manager import PositionManager
 
 logging.basicConfig(
     level=logging.INFO,
@@ -238,6 +239,44 @@ async def lifespan(app: FastAPI):
         # Game leaderboard period reset (daily at 00:00)
         scheduler.add_job(reset_game_periods, "cron", hour=0, minute=0, id="reset_game_periods", **_job_defaults)
 
+        # Broker position management (every 30 seconds, only if broker_enabled)
+        if settings.broker_enabled:
+            _position_manager = PositionManager()
+
+            async def manage_broker_positions():
+                """Run position management for all connected user brokers."""
+                from app.bot.commands import _user_brokers
+
+                if not _user_brokers:
+                    return
+
+                for telegram_id, broker in list(_user_brokers.items()):
+                    try:
+                        positions = await broker.get_positions()
+                        if positions:
+                            actions = await _position_manager.manage_positions(broker, positions)
+                            if actions:
+                                logger.info(
+                                    "Position manager: %d actions for user %d",
+                                    len(actions),
+                                    telegram_id,
+                                )
+                    except Exception as e:
+                        logger.error(
+                            "Position management error for user %d: %s",
+                            telegram_id,
+                            e,
+                        )
+
+            scheduler.add_job(
+                manage_broker_positions,
+                "interval",
+                seconds=30,
+                id="manage_broker_positions",
+                **_job_defaults,
+            )
+            logger.info("Broker position management job enabled (30s interval)")
+
         scheduler.start()
         logger.info("Scheduler started")
 
@@ -301,6 +340,9 @@ async def lifespan(app: FastAPI):
                     BotCommand(command="cot", description="COT positioning — hedge funds & commercials"),
                     BotCommand(command="calendar", description="Upcoming economic events & impact"),
                     BotCommand(command="sessions", description="Active trading sessions & volatility"),
+                    BotCommand(command="connect", description="Connect to a broker (demo/live)"),
+                    BotCommand(command="positions", description="View open broker positions"),
+                    BotCommand(command="trade", description="Place a trade — /trade buy 0.01"),
                     BotCommand(command="accuracy", description="Prediction track record"),
                     BotCommand(command="faq", description="Frequently asked questions"),
                     BotCommand(command="report", description="Report a bug or issue"),

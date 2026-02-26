@@ -99,6 +99,7 @@ class Settings(BaseSettings):
     # Broker integration
     broker_enabled: bool = False
     metaapi_token: str = ""
+    metaapi_account_id: str = ""
     default_broker: str = "demo"
     max_daily_loss_pct: float = 5.0
     max_open_positions: int = 3
