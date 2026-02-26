@@ -108,11 +108,8 @@ FEED_LANGUAGE_HINTS = {
     "google_news_gold_in": "hi",
 }
 
-CRYPTOPANIC_URL = "https://cryptopanic.com/api/v1/posts/"
-
-
 class NewsCollector(BaseCollector):
-    """Collects gold, commodity & macro news from RSS feeds and optional CryptoPanic API."""
+    """Collects gold, commodity & macro news from RSS feeds."""
 
     @retry(
         retry=retry_if_exception_type(Exception),
@@ -122,58 +119,13 @@ class NewsCollector(BaseCollector):
     )
     async def collect(self) -> dict:
         """Collect news from all sources."""
-        cryptopanic_news = await self._get_cryptopanic()
         rss_news = await self._get_rss_feeds()
 
-        all_news = []
-        if cryptopanic_news:
-            all_news.extend(cryptopanic_news)
-        if rss_news:
-            all_news.extend(rss_news)
-
         return {
-            "news": all_news,
-            "count": len(all_news),
+            "news": rss_news,
+            "count": len(rss_news),
             "timestamp": self.now().isoformat(),
         }
-
-    async def _get_cryptopanic(self) -> list[dict] | None:
-        """Get news from CryptoPanic API (deprecated — crypto-specific, kept for compat)."""
-        api_key = getattr(settings, "cryptopanic_api_key", "")
-        if not api_key:
-            return None
-
-        data = await self.fetch_json(
-            CRYPTOPANIC_URL,
-            params={
-                "auth_token": api_key,
-                "currencies": "GOLD",
-                "filter": "important",
-                "public": "true",
-            },
-        )
-
-        if not data or "results" not in data:
-            return None
-
-        news = []
-        for item in data["results"]:
-            votes = item.get("votes", {})
-            positive = votes.get("positive", 0)
-            negative = votes.get("negative", 0)
-            total = positive + negative
-            sentiment = (positive - negative) / total if total > 0 else 0
-
-            news.append({
-                "source": "cryptopanic",
-                "title": item.get("title", ""),
-                "url": item.get("url", ""),
-                "published": item.get("published_at", ""),
-                "sentiment_score": sentiment,
-                "raw_sentiment": item.get("metadata", {}).get("sentiment"),
-            })
-
-        return news
 
     async def _get_rss_feeds(self) -> list[dict]:
         """Parse RSS feeds for gold & macro news — all sources in parallel-ish loop."""

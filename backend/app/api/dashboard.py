@@ -125,10 +125,7 @@ async def get_dashboard_summary(session: AsyncSession = Depends(get_session)):
         for n in news_result.scalars().all()
     ]
 
-    # 5. On-chain data (removed — crypto-specific)
-    onchain_data = None
-
-    # 6. Macro data (1 query)
+    # 5. Macro data (1 query)
     macro_result = await session.execute(
         select(MacroData).order_by(desc(MacroData.timestamp)).limit(1)
     )
@@ -144,17 +141,12 @@ async def get_dashboard_summary(session: AsyncSession = Depends(get_session)):
             "timestamp": macro_row.timestamp.isoformat(),
         }
 
-    # 7. Gold market dominance (removed — crypto-specific)
-    dominance_data = None
-
     result = {
         "price": price_data,
         "predictions": predictions,
         "quant": quant_data,
         "news": news_list,
-        "onchain": onchain_data,
         "macro": macro_data,
-        "dominance": dominance_data,
         "generated_at": now.isoformat(),
     }
     _set_cache("dashboard_summary", result, 30)

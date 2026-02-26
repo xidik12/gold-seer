@@ -32,8 +32,8 @@ async def get_latest_briefing():
             "summary_html": briefing.summary_html,
             "summary_text": briefing.summary_text,
             "data_snapshot": briefing.data_snapshot,
-            "btc_price": briefing.btc_price,
-            "btc_24h_change": briefing.btc_24h_change,
+            "gold_price": briefing.gold_price,
+            "gold_24h_change": briefing.gold_24h_change,
             "overall_sentiment": briefing.overall_sentiment,
             "confidence": briefing.confidence,
             "generation_method": briefing.generation_method,
@@ -56,8 +56,8 @@ async def get_briefing_history(days: int = 7):
         "briefings": [
             {
                 "date": b.date,
-                "btc_price": b.btc_price,
-                "btc_24h_change": b.btc_24h_change,
+                "gold_price": b.gold_price,
+                "gold_24h_change": b.gold_24h_change,
                 "overall_sentiment": b.overall_sentiment,
                 "confidence": b.confidence,
             }
@@ -88,8 +88,8 @@ async def get_briefing_by_date(date: str):
             "summary_html": briefing.summary_html,
             "summary_text": briefing.summary_text,
             "data_snapshot": briefing.data_snapshot,
-            "btc_price": briefing.btc_price,
-            "btc_24h_change": briefing.btc_24h_change,
+            "gold_price": briefing.gold_price,
+            "gold_24h_change": briefing.gold_24h_change,
             "overall_sentiment": briefing.overall_sentiment,
             "confidence": briefing.confidence,
             "generation_method": briefing.generation_method,

@@ -96,7 +96,7 @@
     },
     "exchangeFlows": {
       "name": "交易所资金流 (9)",
-      "desc": "交易所储备、NVT 信号、MVRV Z 值、SOPR、Puell 倍数、币天销毁"
+      "desc": "COT持仓、ETF资金流、央行储备、金银比、矿产数据"
     },
     "macro": {
       "name": "宏观 (8)",
@@ -120,7 +120,7 @@
     },
     "dominance": {
       "name": "市占率 (4)",
-      "desc": "Gold 市占率、ETH 市占率、总市值、市值变化"
+      "desc": "Gold 市占率、ETF 管理规模、央行持仓、地上总供应量"
     },
     "supplyMining": {
       "name": "供应/开采 (4)",

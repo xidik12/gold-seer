@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { useTelegram } from '../hooks/useTelegram'
 import { api } from '../utils/api'
 
-const CACHE_KEY = 'btc_sub_state'
+const CACHE_KEY = 'gold_sub_state'
 
 function getCachedState() {
   try {

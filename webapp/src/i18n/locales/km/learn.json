@@ -153,7 +153,7 @@
     "volume": {
       "name": "Volume",
       "level": "Essential",
-      "desc": "Number of coins traded. High volume = strong conviction. Low volume = weak move. Volume precedes price — watch for volume spikes before big moves.",
+      "desc": "Number of contracts traded. High volume = strong conviction. Low volume = weak move. Volume precedes price — watch for volume spikes before big moves.",
       "tip": "Price up + volume up = strong trend. Price up + volume down = weakening, potential reversal."
     },
     "supportResistance": {

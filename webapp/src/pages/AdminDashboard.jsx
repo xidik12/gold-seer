@@ -446,7 +446,7 @@ function PartnersTab({ initData }) {
           <input type="text" placeholder="Partner Name" value={form.name}
             onChange={e => setForm({ ...form, name: e.target.value })}
             className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-1.5 text-xs text-text-primary" />
-          <input type="text" placeholder="Referral Code (e.g. CRYPTOEDU)" value={form.code}
+          <input type="text" placeholder="Referral Code (e.g. GOLDVIP)" value={form.code}
             onChange={e => setForm({ ...form, code: e.target.value.toUpperCase() })}
             className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-1.5 text-xs text-text-primary font-mono" />
           <input type="text" placeholder="Partner's Telegram ID (for dashboard access)" value={form.telegram_id}

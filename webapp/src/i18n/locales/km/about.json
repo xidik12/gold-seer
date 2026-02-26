@@ -96,7 +96,7 @@
     },
     "exchangeFlows": {
       "name": "ការហូរផ្សារ (9)",
-      "desc": "ទុនបម្រុងផ្សារ, NVT signal, MVRV Z-score, SOPR, Puell multiple, coin days destroyed"
+      "desc": "ទីតាំង COT, ការហូរ ETF, ទុនបម្រុងធនាគារកណ្តាល, អនុបាតមាស/ប្រាក់, ទិន្នន័យផលិតកម្មអណ្តូងរ៉ែ"
     },
     "macro": {
       "name": "ម៉ាក្រូ (8)",
@@ -385,7 +385,7 @@
     "liquidationsDesc": "ការមើលឃើញហានិភ័យទីផ្សារ derivatives",
     "quantTheory": "ទ្រឹស្តី Quant",
     "accuracyTracking": "ការតាមដានភាពត្រឹមត្រូវ",
-    "coinsTokens": "កាក់ និង Tokens",
+    "coinsTokens": "ទ្រព្យសម្បត្តិមាស",
     "etfFlows": "ការហូរ ETF",
     "learnEducate": "រៀន និងអប់រំ",
     "eventMemory": "ការចងចាំព្រឹត្តិការណ៍",

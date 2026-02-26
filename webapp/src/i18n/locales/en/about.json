@@ -96,7 +96,7 @@
     },
     "exchangeFlows": {
       "name": "Exchange Flows (9)",
-      "desc": "Exchange reserves, NVT signal, MVRV Z-score, SOPR, Puell multiple, coin days destroyed"
+      "desc": "COT positioning, ETF flows, central bank reserves, gold/silver ratio, mine production data"
     },
     "macro": {
       "name": "Macro (8)",
@@ -120,7 +120,7 @@
     },
     "dominance": {
       "name": "Dominance (4)",
-      "desc": "Gold dominance, ETH dominance, total market cap, market cap change"
+      "desc": "Gold market share, ETF AUM, central bank holdings, total above-ground supply"
     },
     "supplyMining": {
       "name": "Supply & Central Banks (4)",
@@ -385,7 +385,7 @@
     "liquidationsDesc": "Derivatives market risk visualization",
     "quantTheory": "Quant Theory",
     "accuracyTracking": "Accuracy Tracking",
-    "coinsTokens": "Coins & Tokens",
+    "coinsTokens": "Gold Assets",
     "etfFlows": "ETF Flows",
     "learnEducate": "Learn & Educate",
     "eventMemory": "Event Memory",
