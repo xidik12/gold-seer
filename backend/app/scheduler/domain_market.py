@@ -196,11 +196,11 @@ async def collect_price_data():
         async with async_session() as session:
             price = Price(
                 timestamp=datetime.utcnow(),
-                open=float(price_data.get("open", 0)),
-                high=float(price_data.get("high", 0)),
-                low=float(price_data.get("low", 0)),
-                close=float(price_data.get("close", 0)),
-                volume=float(price_data.get("volume", 0)),
+                open=float(price_data.get("open") or 0),
+                high=float(price_data.get("high") or 0),
+                low=float(price_data.get("low") or 0),
+                close=float(price_data.get("close") or 0),
+                volume=float(price_data.get("volume") or 0),
                 source="gold_market",
             )
             session.add(price)
