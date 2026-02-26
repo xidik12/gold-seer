@@ -44,6 +44,9 @@ class MacroCollector(BaseCollector):
         "silver": ["SI=F"],
         "copper": ["HG=F"],
         "natural_gas": ["NG=F"],
+        # Gold mining/ETF equities
+        "gdx": ["GDX"],
+        "gld": ["GLD"],
         # Indices
         "dow_jones": ["^DJI", "DIA"],
         "russell_2000": ["^RUT", "IWM"],

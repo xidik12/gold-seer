@@ -94,13 +94,13 @@
     "remaining": "Remaining",
     "totalSupply": "Total Supply",
     "dailyMining": "Daily Production",
-    "blockReward": "Block Reward",
-    "nextHalving": "Next FOMC Meeting",
+    "annualProduction": "Annual Production",
+    "nextFOMC": "Next FOMC Meeting",
     "milestones": "Supply Milestones",
     "percentMined": "{{pct}}% Mined",
-    "cap21M": "21M cap",
-    "perBlock": "per block",
-    "block": "block"
+    "totalAboveGround": "Total above-ground stock",
+    "tonnesPerYear": "tonnes/year",
+    "centralBankReserves": "Central Bank Reserves"
   },
   "dominance": {
     "title": "Gold Dominance",
@@ -144,19 +144,19 @@
     "showAll": "Show All 25 Assets",
     "showLess": "Show Less"
   },
-  "halving": {
-    "title": "Gold Market Countdown",
-    "nextHalving": "Next FOMC Meeting",
-    "block": "Block {{number}}",
+  "fomcCountdown": {
+    "title": "FOMC Countdown",
+    "nextMeeting": "Next FOMC Meeting",
+    "meetingDate": "Meeting {{date}}",
     "days": "days",
     "hours": "hours",
     "minutes": "minutes",
     "seconds": "seconds",
-    "cycleProgress": "Cycle Progress",
-    "rewardDrop": "Rate changes from {{from}} to {{to}}",
+    "cycleProgress": "Rate Cycle Progress",
+    "rateChange": "Rate changes from {{from}} to {{to}}",
     "last": "last",
     "next": "next",
-    "historicalNote": "Historically, rate decisions precede significant market moves within 12-18 months."
+    "historicalNote": "Historically, rate decisions precede significant gold market moves within 12-18 months."
   },
   "accuracy": {
     "title": "Prediction Accuracy",

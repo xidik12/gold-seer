@@ -45,14 +45,25 @@ const menuItems = [
     descKey: 'nav.forward',
   },
   {
-    path: '/smart-money',
+    path: '/cot',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-        <line x1="12" y1="1" x2="12" y2="23" />
-        <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+        <path d="M3 3v18h18" />
+        <path d="M7 16l4-8 4 4 4-6" />
       </svg>
     ),
-    labelKey: 'link.smartMoney',
+    labelKey: 'link.cotData',
+    descKey: 'nav.forward',
+  },
+  {
+    path: '/sessions',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+    ),
+    labelKey: 'link.sessions',
     descKey: 'nav.forward',
   },
   {
@@ -65,18 +76,6 @@ const menuItems = [
     ),
     labelKey: 'link.history',
     descKey: 'nav.back',
-  },
-  {
-    path: '/whales',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
-        <path d="M3 12c0-3.5 3-7 9-7s9 3.5 9 7-3 6-9 6-9-2.5-9-6z" />
-        <circle cx="8" cy="11" r="1" fill="currentColor" />
-        <path d="M21 12c1 1 2 2 2 3" />
-      </svg>
-    ),
-    labelKey: 'link.whales',
-    descKey: 'nav.forward',
   },
   {
     path: '/news',

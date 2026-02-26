@@ -184,6 +184,9 @@ class MacroData(Base):
     fed_funds_rate: Mapped[float] = mapped_column(Float, nullable=True)
     m2_yoy_change: Mapped[float] = mapped_column(Float, nullable=True)
     gold_silver_ratio: Mapped[float] = mapped_column(Float, nullable=True)
+    # Gold mining/ETF equities
+    gdx: Mapped[float] = mapped_column(Float, nullable=True)  # VanEck Gold Miners ETF
+    gld: Mapped[float] = mapped_column(Float, nullable=True)  # SPDR Gold Shares ETF
 
 
 class EventImpact(Base):

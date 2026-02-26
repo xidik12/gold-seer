@@ -332,7 +332,6 @@ export default function Technical() {
   const ichimoku = data?.ichimoku || {}
   const patterns = data?.candlestick_patterns || {}
   const trend = data?.trend || {}
-  const btcDom = data?.btc_dominance || {}
   const price = data?.current_price
 
   // Count signals
@@ -630,48 +629,6 @@ export default function Technical() {
         />
       </Section>
 
-      {/* ── Gold Market Share ── */}
-      {btcDom.btc_dominance != null && (
-        <Section
-          title={t('technical.btcDominance.title')}
-          color="text-accent-goldBright"
-          explain={t('technical.btcDominance.explain')}
-        >
-          <GaugeBar
-            value={btcDom.btc_dominance || 0}
-            min={30}
-            max={70}
-            label={t('technical.btcDominance.marketShare')}
-            zones={[
-              { color: 'bg-accent-red/40', width: '30%' },
-              { color: 'bg-accent-goldBright/30', width: '40%' },
-              { color: 'bg-accent-green/40', width: '30%' },
-            ]}
-            explanation={
-              btcDom.btc_dominance > 55 ? t('technical.btcDominance.gaugeHigh', { value: btcDom.btc_dominance.toFixed(1) })
-              : btcDom.btc_dominance > 45 ? t('technical.btcDominance.gaugeNormal', { value: btcDom.btc_dominance.toFixed(1) })
-              : t('technical.btcDominance.gaugeLow', { value: btcDom.btc_dominance.toFixed(1) })
-            }
-          />
-          <div className="flex justify-between text-[9px] text-text-muted -mt-1 mb-2">
-            <span>{t('technical.btcDominance.altcoinSeason')}</span>
-            <span>{t('technical.btcDominance.normal')}</span>
-            <span>{t('technical.btcDominance.btcSeason')}</span>
-          </div>
-          {btcDom.eth_dominance != null && (
-            <IndicatorRow label={t('technical.btcDominance.ethDominance')} value={btcDom.eth_dominance} unit="%" t={t}
-              description={t('technical.btcDominance.ethDominanceDesc')}
-            />
-          )}
-          {btcDom.market_cap_change_24h != null && (
-            <IndicatorRow label={t('technical.btcDominance.totalMarket24h')} value={btcDom.market_cap_change_24h} unit="%" t={t}
-              signal={btcDom.market_cap_change_24h > 0 ? 'bullish' : 'bearish'}
-              description={btcDom.market_cap_change_24h > 0 ? t('technical.btcDominance.totalMarketGrew') : t('technical.btcDominance.totalMarketShrank')}
-            />
-          )}
-        </Section>
-      )}
-
       {/* ── Stochastic RSI ── */}
       <Section
         title={t('technical.stochRsi.title')}
@@ -821,23 +778,9 @@ export default function Technical() {
         color="text-accent-gold"
         explain={t('technical.advanced.explain')}
       >
-        <IndicatorRow label={t('technical.advanced.mayer')} value={adv.mayer_multiple} t={t}
-          signal={adv.mayer_multiple > 2.4 ? 'bearish' : adv.mayer_multiple < 0.8 ? 'bullish' : 'neutral'}
-          description={
-            adv.mayer_multiple > 2.4 ? t('technical.advanced.mayerExtreme', { value: adv.mayer_multiple?.toFixed(2) })
-            : adv.mayer_multiple > 1.5 ? t('technical.advanced.mayerHigh', { value: adv.mayer_multiple?.toFixed(2) })
-            : adv.mayer_multiple > 1 ? t('technical.advanced.mayerAbove', { value: adv.mayer_multiple?.toFixed(2) })
-            : adv.mayer_multiple > 0.8 ? t('technical.advanced.mayerBelow', { value: adv.mayer_multiple?.toFixed(2) })
-            : t('technical.advanced.mayerDeep', { value: adv.mayer_multiple?.toFixed(2) })
-          }
-        />
-        <IndicatorRow label={t('technical.advanced.piCycle')} value={adv.pi_cycle_ratio} t={t}
-          signal={adv.pi_cycle_ratio > 0.95 ? 'bearish' : 'neutral'}
-          description={
-            adv.pi_cycle_ratio > 0.95 ? t('technical.advanced.piCycleDanger', { value: adv.pi_cycle_ratio?.toFixed(3) })
-            : adv.pi_cycle_ratio > 0.8 ? t('technical.advanced.piCycleWarming', { value: adv.pi_cycle_ratio?.toFixed(3) })
-            : t('technical.advanced.piCycleSafe', { value: adv.pi_cycle_ratio?.toFixed(3) })
-          }
+        <IndicatorRow label="Gold/Silver Ratio" value={data?.gold_silver_ratio || (price && data?.moving_averages?.sma_20 ? null : null)} t={t}
+          signal="neutral"
+          description="The gold/silver ratio indicates relative precious metal valuations. Historically averages ~65. Above 80 = silver undervalued, below 50 = silver overvalued."
         />
         <IndicatorRow label={t('technical.advanced.goldenDeath')} value={adv.ema_cross} t={t}
           signal={adv.ema_cross > 1 ? 'bullish' : 'bearish'}

@@ -229,6 +229,9 @@ async def collect_macro_data():
         silver = _price("silver")
         copper = _price("copper")
         natural_gas = _price("natural_gas")
+        # Gold mining/ETF equities
+        gdx = _price("gdx")
+        gld = _price("gld")
         # New indices
         dow_jones = _price("dow_jones")
         russell_2000 = _price("russell_2000")
@@ -240,6 +243,7 @@ async def collect_macro_data():
         all_prices = [dxy, gold, sp500, treasury_10y, nasdaq, vix, eurusd,
                       gbpusd, usdjpy, usdchf, audusd, usdcad, nzdusd,
                       wti_oil, silver, copper, natural_gas,
+                      gdx, gld,
                       dow_jones, russell_2000, dax, nikkei_225, ftse_100]
         if all(v is None for v in all_prices):
             logger.warning("Macro collection returned all None values, skipping DB save")
@@ -282,6 +286,9 @@ async def collect_macro_data():
                 silver=silver,
                 copper=copper,
                 natural_gas=natural_gas,
+                # Gold mining/ETF equities
+                gdx=gdx,
+                gld=gld,
                 # New indices
                 dow_jones=dow_jones,
                 russell_2000=russell_2000,
@@ -421,3 +428,198 @@ async def save_indicator_snapshot():
 
     except Exception as e:
         logger.error(f"Indicator snapshot error: {e}")
+
+
+async def collect_cot_data():
+    """Collect CFTC Commitments of Traders data for gold (runs every 6h)."""
+    try:
+        from app.collectors.cot import COTCollector
+        from app.database import async_session, COTData
+        from sqlalchemy import select
+
+        collector = COTCollector()
+        data = await collector.collect()
+        if not data:
+            logger.info("COT: No new data returned")
+            return
+
+        async with async_session() as session:
+            # Upsert by report_date
+            for record in (data if isinstance(data, list) else [data]):
+                report_date = record.get("report_date")
+                if not report_date:
+                    continue
+                existing = await session.execute(
+                    select(COTData).where(COTData.report_date == report_date)
+                )
+                if existing.scalar_one_or_none():
+                    continue  # Already have this week's data
+                cot = COTData(
+                    report_date=report_date,
+                    mm_long=record.get("mm_long"),
+                    mm_short=record.get("mm_short"),
+                    mm_net=record.get("mm_net"),
+                    mm_net_change=record.get("mm_net_change"),
+                    commercial_long=record.get("commercial_long"),
+                    commercial_short=record.get("commercial_short"),
+                    commercial_net=record.get("commercial_net"),
+                    noncommercial_long=record.get("noncommercial_long"),
+                    noncommercial_short=record.get("noncommercial_short"),
+                    noncommercial_net=record.get("noncommercial_net"),
+                    open_interest=record.get("open_interest"),
+                    oi_change=record.get("oi_change"),
+                    mm_net_percentile=record.get("mm_net_percentile"),
+                    oi_percentile=record.get("oi_percentile"),
+                )
+                session.add(cot)
+            await session.commit()
+
+        logger.info(f"COT data collected successfully")
+    except Exception as e:
+        logger.error(f"COT collection error: {e}")
+
+
+async def collect_fred_data():
+    """Collect FRED economic data series (runs every 6h)."""
+    try:
+        from app.collectors.fred import FREDCollector
+        from app.database import async_session, FREDSeries
+        from sqlalchemy import select
+
+        collector = FREDCollector()
+        data = await collector.collect()
+        if not data:
+            logger.info("FRED: No new data returned")
+            return
+
+        async with async_session() as session:
+            for record in (data if isinstance(data, list) else [data]):
+                series_id = record.get("series_id")
+                date = record.get("date")
+                if not series_id or not date:
+                    continue
+                # Upsert by series_id + date
+                existing = await session.execute(
+                    select(FREDSeries).where(
+                        FREDSeries.series_id == series_id,
+                        FREDSeries.date == date,
+                    )
+                )
+                if existing.scalar_one_or_none():
+                    continue
+                fred = FREDSeries(
+                    series_id=series_id,
+                    date=date,
+                    value=record.get("value", 0),
+                    previous_value=record.get("previous_value"),
+                    change=record.get("change"),
+                )
+                session.add(fred)
+            await session.commit()
+
+        logger.info(f"FRED data collected successfully")
+    except Exception as e:
+        logger.error(f"FRED collection error: {e}")
+
+
+async def collect_etf_flows():
+    """Collect gold ETF flow data (runs every hour)."""
+    try:
+        from app.collectors.gold_etf import GoldETFFlowCollector
+        from app.database import async_session, GoldETFFlow
+        from sqlalchemy import select
+
+        collector = GoldETFFlowCollector()
+        data = await collector.collect()
+        if not data:
+            logger.info("ETF: No new flow data returned")
+            return
+
+        async with async_session() as session:
+            for record in (data if isinstance(data, list) else [data]):
+                ticker = record.get("ticker")
+                date = record.get("date")
+                if not ticker or not date:
+                    continue
+                # Upsert by ticker + date
+                existing = await session.execute(
+                    select(GoldETFFlow).where(
+                        GoldETFFlow.ticker == ticker,
+                        GoldETFFlow.date == date,
+                    )
+                )
+                if existing.scalar_one_or_none():
+                    continue
+                etf = GoldETFFlow(
+                    date=date,
+                    ticker=ticker,
+                    holdings_tonnes=record.get("holdings_tonnes"),
+                    holdings_usd=record.get("holdings_usd"),
+                    daily_change_tonnes=record.get("daily_change_tonnes"),
+                    daily_change_usd=record.get("daily_change_usd"),
+                    volume=record.get("volume"),
+                    price=record.get("price"),
+                )
+                session.add(etf)
+            await session.commit()
+
+        count = len(data) if isinstance(data, list) else 1
+        logger.info(f"ETF flow data collected: {count} records")
+    except Exception as e:
+        logger.error(f"ETF flow collection error: {e}")
+
+
+async def collect_session_info():
+    """Collect gold trading session data (runs every 5 minutes)."""
+    try:
+        from app.collectors.session_tracker import SessionTracker
+
+        tracker = SessionTracker()
+        data = await tracker.collect()
+        if data:
+            logger.info(f"Session data collected: {data.get('session_name', 'unknown')}")
+    except Exception as e:
+        logger.error(f"Session collection error: {e}")
+
+
+async def collect_central_bank_gold():
+    """Collect central bank gold purchase data (runs every 24h)."""
+    try:
+        from app.collectors.central_bank import CentralBankGoldCollector
+        from app.database import async_session, CentralBankGold
+        from sqlalchemy import select
+
+        collector = CentralBankGoldCollector()
+        data = await collector.collect()
+        if not data:
+            logger.info("Central bank: No new data returned")
+            return
+
+        async with async_session() as session:
+            for record in (data if isinstance(data, list) else [data]):
+                report_date = record.get("report_date")
+                country = record.get("country")
+                if not report_date or not country:
+                    continue
+                existing = await session.execute(
+                    select(CentralBankGold).where(
+                        CentralBankGold.report_date == report_date,
+                        CentralBankGold.country == country,
+                    )
+                )
+                if existing.scalar_one_or_none():
+                    continue
+                cb = CentralBankGold(
+                    report_date=report_date,
+                    country=country,
+                    total_tonnes=record.get("total_tonnes"),
+                    monthly_change_tonnes=record.get("monthly_change_tonnes"),
+                    source=record.get("source", "wgc"),
+                )
+                session.add(cb)
+            await session.commit()
+
+        count = len(data) if isinstance(data, list) else 1
+        logger.info(f"Central bank gold data collected: {count} records")
+    except Exception as e:
+        logger.error(f"Central bank gold collection error: {e}")

@@ -19,6 +19,8 @@ import RealYieldWidget from '../components/RealYieldWidget'
 import ETFFlowWidget from '../components/ETFFlowWidget'
 import COTChart from '../components/COTChart'
 import CentralBankWidget from '../components/CentralBankWidget'
+import CorrelationWidget from '../components/CorrelationWidget'
+import SeasonalityWidget from '../components/SeasonalityWidget'
 
 class SafeWrap extends Component {
   constructor(props) {
@@ -442,6 +444,10 @@ export default function Dashboard() {
       {/* Premium content — only shown for premium users */}
       {(loading || isPremium) && (
         <>
+          <SafeWrap name="SessionClock" t={t}>
+            <SessionClock />
+          </SafeWrap>
+
           {/* Dual Predictions */}
           <div className="space-y-3">
             <SafeWrap name="AI Prediction" t={t}>
@@ -464,16 +470,12 @@ export default function Dashboard() {
             <GoldSentimentGauge />
           </SafeWrap>
 
-          <SafeWrap name="SessionClock" t={t}>
-            <SessionClock />
-          </SafeWrap>
-
-          <SafeWrap name="NewsCarousel" t={t}>
-            <NewsCarousel />
-          </SafeWrap>
-
           <SafeWrap name="MacroDashboard" t={t}>
             <MacroDashboard />
+          </SafeWrap>
+
+          <SafeWrap name="CorrelationWidget" t={t}>
+            <CorrelationWidget />
           </SafeWrap>
 
           <SafeWrap name="RealYieldWidget" t={t}>
@@ -486,6 +488,14 @@ export default function Dashboard() {
 
           <SafeWrap name="CentralBankWidget" t={t}>
             <CentralBankWidget />
+          </SafeWrap>
+
+          <SafeWrap name="SeasonalityWidget" t={t}>
+            <SeasonalityWidget />
+          </SafeWrap>
+
+          <SafeWrap name="NewsCarousel" t={t}>
+            <NewsCarousel />
           </SafeWrap>
 
           <DataSourceFooter sources={['goldapi', 'yahoo', 'fred', 'cftc', 'alphavantage', 'rss', 'reddit', 'kitco', 'ai']} />

@@ -38,12 +38,18 @@ from app.api import broker as broker_api
 from app.api import trade_journal as trade_journal_api
 from app.api import gold_etf as gold_etf_api
 from app.api import copy_trade as copy_trade_api
+from app.api import calculators as calculators_api
 from app.scheduler.jobs import (
     backfill_historical_prices,
     collect_price_data,
     collect_news_data,
     collect_macro_data,
     save_indicator_snapshot,
+    collect_cot_data,
+    collect_fred_data,
+    collect_etf_flows,
+    collect_session_info,
+    collect_central_bank_gold,
     generate_prediction,
     generate_prediction_1h,
     generate_prediction_4h,
@@ -155,12 +161,12 @@ async def lifespan(app: FastAPI):
         scheduler.add_job(collect_macro_data, "interval", hours=1, id="collect_macro", **_job_defaults)
         scheduler.add_job(save_indicator_snapshot, "interval", hours=1, id="save_indicators", **_job_defaults)
 
-        # TODO: Add gold-specific collector jobs once scheduler functions are implemented
-        # scheduler.add_job(collect_cot_data, "interval", hours=6, id="collect_cot", **_job_defaults)
-        # scheduler.add_job(collect_fred_data, "interval", hours=6, id="collect_fred", **_job_defaults)
-        # scheduler.add_job(collect_etf_flows, "interval", hours=1, id="collect_etf_flows", **_job_defaults)
-        # scheduler.add_job(collect_session_info, "interval", minutes=5, id="collect_sessions", **_job_defaults)
-        # scheduler.add_job(collect_central_bank_gold, "interval", hours=24, id="collect_cb_gold", **_job_defaults)
+        # Gold-specific collector jobs
+        scheduler.add_job(collect_cot_data, "interval", hours=6, id="collect_cot", **_job_defaults)
+        scheduler.add_job(collect_fred_data, "interval", hours=6, id="collect_fred", **_job_defaults)
+        scheduler.add_job(collect_etf_flows, "interval", hours=1, id="collect_etf_flows", **_job_defaults)
+        scheduler.add_job(collect_session_info, "interval", minutes=5, id="collect_sessions", **_job_defaults)
+        scheduler.add_job(collect_central_bank_gold, "interval", hours=24, id="collect_cb_gold", **_job_defaults)
 
         # Prediction jobs — time-aligned cron schedules (UTC)
         # 1h: every hour at :00
@@ -478,6 +484,7 @@ app.include_router(broker_api.router)
 app.include_router(trade_journal_api.router)
 app.include_router(gold_etf_api.router)
 app.include_router(copy_trade_api.router)
+app.include_router(calculators_api.router)
 
 
 @app.get("/health")

@@ -555,50 +555,131 @@ async def get_dominance_data():
 
 @router.get("/fear-greed")
 async def get_fear_greed(
-    days: int = Query(30, ge=1, le=365),
+    session: AsyncSession = Depends(get_session),
 ):
-    """Get Fear & Greed Index from alternative.me (free API)."""
-    cached = _get_cached(f"fear_greed:{days}")
+    """Gold composite sentiment index (0-100). Replaces crypto Fear & Greed.
+
+    Factors:
+    - VIX: High VIX = safe-haven demand = gold bullish (weight: 30%)
+    - Real Yield: Negative real yield = inflation fear = gold bullish (weight: 30%)
+    - DXY Strength: Weak dollar = gold bullish (weight: 20%)
+    - Gold Momentum: Recent price trend (weight: 20%)
+    """
+    cached = _get_cached("fear_greed_gold")
     if cached is not None:
         return cached
 
-    import aiohttp
-
-    url = f"https://api.alternative.me/fng/?limit={days}&format=json"
     try:
-        async with aiohttp.ClientSession() as sess:
-            async with sess.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                if resp.status != 200:
-                    return {"error": "Failed to fetch Fear & Greed data"}
-                raw = await resp.json(content_type=None)
+        macro, prev_macro, daily_macro = await _get_macro_trio(session)
+    except Exception:
+        macro = None
 
-        data_list = raw.get("data", [])
-        if not data_list:
-            return {"current": None, "history": []}
+    # Default neutral
+    score = 50
+    components = {}
 
-        current = data_list[0]
-        history = [
-            {
-                "value": int(d["value"]),
-                "label": d["value_classification"],
-                "timestamp": int(d["timestamp"]),
-            }
-            for d in data_list
-        ]
+    if macro:
+        total_weight = 0
+        weighted_score = 0
 
-        result = {
-            "current": {
-                "value": int(current["value"]),
-                "label": current["value_classification"],
-                "timestamp": int(current["timestamp"]),
-            },
-            "history": history,
-        }
-        _set_cache(f"fear_greed:{days}", result, 300)
-        return result
-    except Exception as e:
-        logger.warning(f"Fear & Greed fetch failed: {e}")
-        return {"current": None, "history": [], "error": str(e)}
+        # VIX component (30%): High VIX = fear in equities = gold bullish
+        if macro.vix is not None:
+            vix = macro.vix
+            if vix >= 35:
+                vix_score = 85  # Extreme fear in equities -> strong gold demand
+            elif vix >= 25:
+                vix_score = 70
+            elif vix >= 18:
+                vix_score = 50
+            elif vix >= 12:
+                vix_score = 30
+            else:
+                vix_score = 15  # Extreme complacency -> less gold demand
+            components["vix"] = {"value": vix, "score": vix_score, "weight": 30}
+            weighted_score += vix_score * 30
+            total_weight += 30
+
+        # Real Yield component (30%): Negative real yield = gold bullish
+        real_yield = getattr(macro, 'real_yield_10y', None)
+        if real_yield is None and macro.treasury_10y is not None:
+            # Approximate: 10Y nominal - assumed 2.5% inflation
+            real_yield = macro.treasury_10y - 2.5
+        if real_yield is not None:
+            if real_yield < -1.0:
+                ry_score = 90  # Deeply negative = very gold bullish
+            elif real_yield < 0:
+                ry_score = 70
+            elif real_yield < 1.0:
+                ry_score = 50
+            elif real_yield < 2.0:
+                ry_score = 30
+            else:
+                ry_score = 10  # High real yields = gold bearish
+            components["real_yield"] = {"value": round(real_yield, 2), "score": ry_score, "weight": 30}
+            weighted_score += ry_score * 30
+            total_weight += 30
+
+        # DXY component (20%): Weak dollar = gold bullish
+        if macro.dxy is not None and daily_macro and daily_macro.dxy:
+            dxy_change = ((macro.dxy - daily_macro.dxy) / daily_macro.dxy) * 100
+            if dxy_change < -0.5:
+                dxy_score = 80  # Dollar weakening -> gold bullish
+            elif dxy_change < -0.1:
+                dxy_score = 65
+            elif dxy_change < 0.1:
+                dxy_score = 50
+            elif dxy_change < 0.5:
+                dxy_score = 35
+            else:
+                dxy_score = 20  # Dollar strengthening -> gold bearish
+            components["dxy"] = {"value": round(macro.dxy, 2), "change_24h": round(dxy_change, 2), "score": dxy_score, "weight": 20}
+            weighted_score += dxy_score * 20
+            total_weight += 20
+
+        # Gold Momentum (20%): Recent price trend
+        if macro.gold is not None and daily_macro and daily_macro.gold:
+            gold_change = ((macro.gold - daily_macro.gold) / daily_macro.gold) * 100
+            if gold_change > 2.0:
+                mom_score = 90  # Strong rally
+            elif gold_change > 0.5:
+                mom_score = 70
+            elif gold_change > -0.5:
+                mom_score = 50
+            elif gold_change > -2.0:
+                mom_score = 30
+            else:
+                mom_score = 10  # Sharp selloff
+            components["momentum"] = {"value": round(macro.gold, 2), "change_24h": round(gold_change, 2), "score": mom_score, "weight": 20}
+            weighted_score += mom_score * 20
+            total_weight += 20
+
+        if total_weight > 0:
+            score = round(weighted_score / total_weight)
+
+    # Label
+    if score >= 80:
+        label = "Extreme Greed"
+    elif score >= 60:
+        label = "Greed"
+    elif score >= 40:
+        label = "Neutral"
+    elif score >= 20:
+        label = "Fear"
+    else:
+        label = "Extreme Fear"
+
+    result = {
+        "current": {
+            "value": score,
+            "label": label,
+            "timestamp": int(datetime.utcnow().timestamp()),
+        },
+        "components": components,
+        "source": "gold_composite",
+        "history": [],  # TODO: store historical values
+    }
+    _set_cache("fear_greed_gold", result, 300)
+    return result
 
 
 @router.get("/indicator-history")
@@ -813,3 +894,77 @@ async def get_ta_summary(session: AsyncSession = Depends(get_session)):
     result = TASummaryRating.compute(indicators)
     _set_cache("ta_summary", result, 60)
     return result
+
+
+@router.get("/correlations")
+async def get_correlations(session: AsyncSession = Depends(get_session)):
+    """Get rolling 30-day correlations between gold and key macro variables."""
+    cached = _get_cached("correlations")
+    if cached is not None:
+        return cached
+
+    import numpy as np
+
+    # Get 30 days of macro data
+    result = await session.execute(
+        select(MacroData)
+        .where(MacroData.timestamp >= datetime.utcnow() - timedelta(days=30))
+        .order_by(MacroData.timestamp)
+    )
+    rows = result.scalars().all()
+
+    if len(rows) < 10:
+        return {"error": "Not enough macro data for correlation analysis", "count": len(rows)}
+
+    def _corr(gold_vals, other_vals):
+        """Compute Pearson correlation between two series, ignoring None pairs."""
+        pairs = [(g, o) for g, o in zip(gold_vals, other_vals) if g is not None and o is not None]
+        if len(pairs) < 5:
+            return None
+        g = np.array([p[0] for p in pairs])
+        o = np.array([p[1] for p in pairs])
+        if np.std(g) == 0 or np.std(o) == 0:
+            return None
+        return float(np.corrcoef(g, o)[0, 1])
+
+    def _label(corr):
+        if corr is None:
+            return "insufficient_data"
+        if corr > 0.7:
+            return "strong_positive"
+        if corr > 0.3:
+            return "moderate_positive"
+        if corr > -0.3:
+            return "weak"
+        if corr > -0.7:
+            return "moderate_negative"
+        return "strong_negative"
+
+    gold_prices = [r.gold for r in rows]
+
+    pairs = {
+        "dxy": {"values": [r.dxy for r in rows], "expected": "inverse"},
+        "treasury_10y": {"values": [r.treasury_10y for r in rows], "expected": "inverse"},
+        "vix": {"values": [r.vix for r in rows], "expected": "positive"},
+        "silver": {"values": [r.silver for r in rows], "expected": "positive"},
+        "sp500": {"values": [r.sp500 for r in rows], "expected": "weak"},
+    }
+
+    correlations = {}
+    for key, info in pairs.items():
+        corr = _corr(gold_prices, info["values"])
+        correlations[key] = {
+            "correlation": round(corr, 3) if corr is not None else None,
+            "label": _label(corr),
+            "expected_direction": info["expected"],
+            "data_points": sum(1 for g, o in zip(gold_prices, info["values"]) if g is not None and o is not None),
+        }
+
+    data = {
+        "correlations": correlations,
+        "period_days": 30,
+        "total_data_points": len(rows),
+        "timestamp": rows[-1].timestamp.isoformat() if rows else None,
+    }
+    _set_cache("correlations", data, 300)
+    return data

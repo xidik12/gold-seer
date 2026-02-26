@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next'
 import SubTabBar from '../components/SubTabBar'
 
 const MARKET_TABS = [
-  { path: '/liquidations', labelKey: 'common:link.liquidations' },
-  { path: '/powerlaw', labelKey: 'common:link.powerLaw' },
   { path: '/elliott-wave', labelKey: 'common:link.elliottWave' },
   { path: '/events', labelKey: 'common:link.events' },
   { path: '/tools', labelKey: 'common:link.tools' },
@@ -48,12 +46,12 @@ function PositionSizeCalc() {
         <div>
           <label className="text-text-muted text-[10px]">{t('tools:positionSize.entryPrice')}</label>
           <input type="number" value={entry} onChange={e => setEntry(e.target.value)}
-            placeholder="97000" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+            placeholder="2900" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
         <div>
           <label className="text-text-muted text-[10px]">{t('tools:positionSize.stopLoss')}</label>
           <input type="number" value={stopLoss} onChange={e => setStopLoss(e.target.value)}
-            placeholder="95000" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+            placeholder="2850" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
       </div>
       {capitalNum > 0 && entryNum > 0 && slNum > 0 && (
@@ -112,12 +110,12 @@ function PnLCalc() {
         <div>
           <label className="text-text-muted text-[10px]">{t('tools:pnl.entryPrice')}</label>
           <input type="number" value={entry} onChange={e => setEntry(e.target.value)}
-            placeholder="97000" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+            placeholder="2900" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
         <div>
           <label className="text-text-muted text-[10px]">{t('tools:pnl.exitPrice')}</label>
           <input type="number" value={exit} onChange={e => setExit(e.target.value)}
-            placeholder="100000" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+            placeholder="3000" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
         <div>
           <label className="text-text-muted text-[10px]">{t('tools:pnl.positionSize')}</label>
@@ -171,17 +169,17 @@ function RiskRewardCalc() {
         <div>
           <label className="text-text-muted text-[10px]">{t('tools:riskReward.entryPrice')}</label>
           <input type="number" value={entry} onChange={e => setEntry(e.target.value)}
-            placeholder="97000" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+            placeholder="2900" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
         <div>
           <label className="text-text-muted text-[10px]">{t('tools:riskReward.takeProfit')}</label>
           <input type="number" value={target} onChange={e => setTarget(e.target.value)}
-            placeholder="103000" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+            placeholder="3050" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
         <div>
           <label className="text-text-muted text-[10px]">{t('tools:riskReward.stopLoss')}</label>
           <input type="number" value={stopLoss} onChange={e => setStopLoss(e.target.value)}
-            placeholder="95000" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+            placeholder="2850" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
       </div>
       {entryNum > 0 && targetNum > 0 && slNum > 0 && (
@@ -219,7 +217,7 @@ function DCACalc() {
   const [investment, setInvestment] = useState('100')
   const [frequency, setFrequency] = useState('weekly')
   const [months, setMonths] = useState('12')
-  const [currentPrice, setCurrentPrice] = useState('97000')
+  const [currentPrice, setCurrentPrice] = useState('2900')
 
   const invNum = parseFloat(investment) || 0
   const monthsNum = parseInt(months) || 0
@@ -229,7 +227,7 @@ function DCACalc() {
   const buysPerMonth = freqMultiplier[frequency] || 1
   const totalBuys = Math.round(buysPerMonth * monthsNum)
   const totalInvested = invNum * totalBuys
-  const btcAccumulated = priceNum > 0 ? totalInvested / priceNum : 0
+  const goldAccumulated = priceNum > 0 ? totalInvested / priceNum : 0
 
   // Simulate scenarios
   const scenarios = [
@@ -267,9 +265,9 @@ function DCACalc() {
             placeholder="12" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
         <div>
-          <label className="text-text-muted text-[10px]">{t('common:price.btcPrice')} ($)</label>
+          <label className="text-text-muted text-[10px]">Gold Price ($)</label>
           <input type="number" value={currentPrice} onChange={e => setCurrentPrice(e.target.value)}
-            placeholder="97000" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+            placeholder="2900" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
       </div>
       {invNum > 0 && monthsNum > 0 && (
@@ -277,13 +275,13 @@ function DCACalc() {
           <div className="grid grid-cols-3 gap-2 mb-3">
             <ResultBox label={t('tools:dca.totalInvested')} value={`$${totalInvested.toLocaleString()}`} />
             <ResultBox label={t('tools:dca.totalBuys')} value={totalBuys.toString()} />
-            <ResultBox label={t('tools:dca.totalBtc')} value={`${btcAccumulated.toFixed(6)}`} highlight />
+            <ResultBox label={t('tools:dca.totalGold')} value={`${goldAccumulated.toFixed(6)}`} highlight />
           </div>
           <div className="text-text-muted text-[9px] font-semibold mb-1.5">{t('tools:dca.priceScenarios')}</div>
           <div className="grid grid-cols-2 gap-2">
             {scenarios.map(s => {
               const futurePrice = priceNum * (1 + s.pct / 100)
-              const futureValue = btcAccumulated * futurePrice
+              const futureValue = goldAccumulated * futurePrice
               const pnl = futureValue - totalInvested
               return (
                 <div key={s.label} className="bg-white/[0.02] rounded-lg p-2">
@@ -299,6 +297,134 @@ function DCACalc() {
             })}
           </div>
         </>
+      )}
+    </div>
+  )
+}
+
+function WeightConverter() {
+  const [amount, setAmount] = useState('1')
+  const [fromUnit, setFromUnit] = useState('troy_oz')
+  const amountNum = parseFloat(amount) || 0
+
+  // Conversion factors to grams
+  const toGrams = {
+    troy_oz: 31.1035,
+    gram: 1,
+    kg: 1000,
+    tola: 11.6638,
+    tael: 37.429,
+    baht: 15.244,
+  }
+  const labels = {
+    troy_oz: 'Troy Oz',
+    gram: 'Grams',
+    kg: 'Kilograms',
+    tola: 'Tola',
+    tael: 'Tael (HK)',
+    baht: 'Baht (Thai)',
+  }
+
+  const baseGrams = amountNum * (toGrams[fromUnit] || 1)
+
+  return (
+    <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
+      <h3 className="text-text-secondary text-xs font-semibold mb-3">GOLD WEIGHT CONVERTER</h3>
+      <div className="grid grid-cols-2 gap-2 mb-3">
+        <div>
+          <label className="text-text-muted text-[10px]">Amount</label>
+          <input type="number" value={amount} onChange={e => setAmount(e.target.value)}
+            placeholder="1" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+        </div>
+        <div>
+          <label className="text-text-muted text-[10px]">From Unit</label>
+          <select value={fromUnit} onChange={e => setFromUnit(e.target.value)}
+            className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5">
+            {Object.entries(labels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+        </div>
+      </div>
+      {amountNum > 0 && (
+        <div className="grid grid-cols-3 gap-2">
+          {Object.entries(toGrams).filter(([k]) => k !== fromUnit).map(([unit, factor]) => (
+            <ResultBox key={unit} label={labels[unit]} value={(baseGrams / factor).toFixed(4)} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function MeltValueCalc() {
+  const [weight, setWeight] = useState('1')
+  const [purity, setPurity] = useState('24')
+  const [spotPrice, setSpotPrice] = useState('2900')
+
+  const weightNum = parseFloat(weight) || 0
+  const spotNum = parseFloat(spotPrice) || 0
+  const purityMap = { '24': 0.999, '22': 0.9167, '18': 0.75, '14': 0.5833, '10': 0.4167 }
+  const purityFactor = purityMap[purity] || 0.999
+  const meltValue = weightNum * spotNum * purityFactor
+
+  return (
+    <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
+      <h3 className="text-text-secondary text-xs font-semibold mb-3">GOLD MELT VALUE</h3>
+      <p className="text-text-muted text-[10px] mb-3">Calculate the intrinsic gold value based on weight and purity.</p>
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        <div>
+          <label className="text-text-muted text-[10px]">Weight (oz)</label>
+          <input type="number" value={weight} onChange={e => setWeight(e.target.value)}
+            placeholder="1" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+        </div>
+        <div>
+          <label className="text-text-muted text-[10px]">Karat</label>
+          <select value={purity} onChange={e => setPurity(e.target.value)}
+            className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5">
+            <option value="24">24K (99.9%)</option>
+            <option value="22">22K (91.7%)</option>
+            <option value="18">18K (75%)</option>
+            <option value="14">14K (58.3%)</option>
+            <option value="10">10K (41.7%)</option>
+          </select>
+        </div>
+        <div>
+          <label className="text-text-muted text-[10px]">Spot $/oz</label>
+          <input type="number" value={spotPrice} onChange={e => setSpotPrice(e.target.value)}
+            placeholder="2900" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+        </div>
+      </div>
+      {weightNum > 0 && spotNum > 0 && (
+        <div className="grid grid-cols-2 gap-2">
+          <ResultBox label="Melt Value" value={`$${meltValue.toFixed(2)}`} highlight />
+          <ResultBox label="Pure Gold" value={`${(weightNum * purityFactor).toFixed(4)} oz`} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PipValueCalc() {
+  const [lotSize, setLotSize] = useState('1.0')
+  const lotNum = parseFloat(lotSize) || 0
+  // XAUUSD: 1 pip = $0.01, 1 lot = 100 oz
+  const pipValue = lotNum * 100 * 0.01
+  const tickValue = lotNum * 100 * 0.10
+
+  return (
+    <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
+      <h3 className="text-text-secondary text-xs font-semibold mb-3">XAUUSD PIP VALUE</h3>
+      <p className="text-text-muted text-[10px] mb-3">1 pip = $0.01 move. 1 standard lot = 100 troy ounces.</p>
+      <div className="mb-3">
+        <label className="text-text-muted text-[10px]">Lot Size</label>
+        <input type="number" value={lotSize} onChange={e => setLotSize(e.target.value)} step="0.01"
+          placeholder="1.0" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
+      </div>
+      {lotNum > 0 && (
+        <div className="grid grid-cols-3 gap-2">
+          <ResultBox label="Pip Value" value={`$${pipValue.toFixed(2)}`} highlight />
+          <ResultBox label="10-pip Move" value={`$${(pipValue * 10).toFixed(2)}`} />
+          <ResultBox label="$1 Move" value={`$${tickValue.toFixed(2)}`} highlight />
+        </div>
       )}
     </div>
   )
@@ -322,6 +448,9 @@ export default function Tools() {
     { key: 'pnl', labelKey: 'tools:pnl.title' },
     { key: 'rr', labelKey: 'tools:riskReward.title' },
     { key: 'dca', labelKey: 'tools:dca.title' },
+    { key: 'weight', labelKey: 'Weight Convert' },
+    { key: 'melt', labelKey: 'Melt Value' },
+    { key: 'pip', labelKey: 'Pip Value' },
   ]
 
   return (
@@ -347,6 +476,9 @@ export default function Tools() {
       {activeCalc === 'pnl' && <PnLCalc />}
       {activeCalc === 'rr' && <RiskRewardCalc />}
       {activeCalc === 'dca' && <DCACalc />}
+      {activeCalc === 'weight' && <WeightConverter />}
+      {activeCalc === 'melt' && <MeltValueCalc />}
+      {activeCalc === 'pip' && <PipValueCalc />}
 
       {/* Pro tips */}
       <div className="bg-bg-card rounded-2xl p-4 border border-white/5">

@@ -23,6 +23,11 @@ from app.scheduler.domain_market import (  # noqa: F401
     collect_price_data,
     collect_macro_data,
     save_indicator_snapshot,
+    collect_cot_data,
+    collect_fred_data,
+    collect_etf_flows,
+    collect_session_info,
+    collect_central_bank_gold,
 )
 
 # ── ML predictions & evaluation ─────────────────────────────────

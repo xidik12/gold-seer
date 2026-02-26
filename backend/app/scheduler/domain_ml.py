@@ -534,16 +534,33 @@ async def generate_quant_prediction(timeframes: list[str] | None = None):
                 "active_addresses": onchain_row.active_addresses,
             }
 
+        # Build market_data dict for GoldQuantPredictor
+        closes = price_df["close"].tolist()
+        highs = price_df["high"].tolist()
+        lows = price_df["low"].tolist()
+
+        market_data_bundle = {
+            "current_price": current_price,
+            "closes": closes,
+            "highs": highs,
+            "lows": lows,
+            "timestamp": datetime.utcnow(),
+        }
+        # Add macro fields if available
+        if macro_data:
+            market_data_bundle.update(macro_data)
+        if macro_row:
+            market_data_bundle["dxy_prices"] = [macro_row.dxy] if macro_row.dxy else []
+            market_data_bundle["gold_prices"] = closes
+            market_data_bundle["silver_prices"] = [macro_row.silver] if macro_row and hasattr(macro_row, 'silver') and macro_row.silver else []
+            market_data_bundle["vix"] = macro_row.vix
+            market_data_bundle["fed_funds_rate"] = macro_row.fed_funds_rate if hasattr(macro_row, 'fed_funds_rate') else None
+        if fear_greed_value is not None:
+            market_data_bundle["fear_greed"] = fear_greed_value
+
         # Run quant predictor
         quant = QuantPredictor()
-        result = quant.predict(
-            price_df=price_df,
-            current_price=current_price,
-            macro_data=macro_data,
-            fear_greed_value=fear_greed_value,
-            funding_rate=funding_rate,
-            onchain_data=onchain_data,
-        )
+        result = await quant.predict(market_data=market_data_bundle)
 
         # Store in database
         preds = result.get("predictions", {})

@@ -8,7 +8,7 @@ import EconomicCalendar from '../components/EconomicCalendar'
 import DataSourceFooter from '../components/DataSourceFooter'
 
 const SECTION_TABS = [
-  { path: 'crypto', labelKey: 'markets.crypto', icon: '\u{1F4B0}' },
+  { path: 'gold', labelKey: 'markets.gold', icon: '\u{1F947}' },
   { path: 'indices', labelKey: 'markets.indices', icon: '\u{1F4CA}' },
   { path: 'forex', labelKey: 'markets.forex', icon: '\u{1F4B1}' },
   { path: 'commodities', labelKey: 'markets.commodities', icon: '\u{1F48E}' },
@@ -73,32 +73,35 @@ function SectionCard({ title, children }) {
   )
 }
 
-function CryptoSection() {
-  const [coins, setCoins] = useState([])
+function GoldSection() {
+  const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    api.getTrackedCoins()
-      .then((data) => setCoins(Array.isArray(data) ? data : data?.coins ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false))
+    api.getCommoditiesData().then(setData).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <LoadingSkeleton rows={6} />
+  if (loading) return <LoadingSkeleton rows={5} />
+
+  const metals = [
+    { key: 'gold', name: 'Gold (XAU/USD)', icon: 'XAU' },
+    { key: 'silver', name: 'Silver (XAG/USD)', icon: 'XAG' },
+    { key: 'platinum', name: 'Platinum', icon: 'XPT' },
+    { key: 'palladium', name: 'Palladium', icon: 'XPD' },
+    { key: 'copper', name: 'Copper', icon: 'HG' },
+  ]
 
   return (
     <div className="space-y-3">
-      <SectionCard title="Top Assets">
-        {coins.map((c, i) => (
-          <AssetRow
-            key={c.coin_id || c.symbol}
-            name={c.name || c.symbol}
-            icon={c.symbol?.toUpperCase()?.slice(0, 3) || '?'}
-            price={c.current_price}
-            change={c.price_change_24h}
-            rank={i + 1}
-          />
-        ))}
+      <SectionCard title="Precious Metals">
+        {metals.map((item) => {
+          const val = data?.[item.key]
+          const price = val?.price ?? (typeof val === 'number' ? val : null)
+          const change = val?.change_1h ?? val?.change_24h ?? null
+          return (
+            <AssetRow key={item.key} name={item.name} icon={item.icon} price={price} change={change} />
+          )
+        })}
       </SectionCard>
     </div>
   )
@@ -194,7 +197,7 @@ function CommoditiesSection() {
 
 export default function MarketOverview() {
   const { t } = useTranslation('common')
-  const [activeTab, setActiveTab] = useState('crypto')
+  const [activeTab, setActiveTab] = useState('gold')
 
   return (
     <div className="px-4 pt-4 space-y-4 pb-4">
@@ -228,7 +231,7 @@ export default function MarketOverview() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'crypto' && <CryptoSection />}
+      {activeTab === 'gold' && <GoldSection />}
       {activeTab === 'indices' && <IndicesSection />}
       {activeTab === 'forex' && <ForexTable />}
       {activeTab === 'commodities' && <CommoditiesSection />}

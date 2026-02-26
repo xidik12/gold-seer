@@ -60,8 +60,8 @@ async function fetchAPI(endpoint, options = {}) {
 // TTL constants (ms)
 const T15 = 15_000   // 15s — fast-changing (price)
 const T30 = 30_000   // 30s — predictions, signals, indicators
-const T60 = 60_000   // 60s — news, events, liquidations
-const T120 = 120_000 // 2min — macro, onchain, supply, dominance, power law
+const T60 = 60_000   // 60s — news, events
+const T120 = 120_000 // 2min — macro, supply
 const T300 = 300_000 // 5min — fear & greed, supply
 
 export const api = {
@@ -92,43 +92,9 @@ export const api = {
   getCandles: (hours = 168) => cachedFetch(`/market/candles?hours=${hours}`, T30),
   getIndicators: () => cachedFetch('/market/indicators', T30),
   getMacroData: () => cachedFetch('/market/macro', T120),
-  getOnchainData: () => cachedFetch('/market/onchain', T120),
-  getFundingHistory: (hours = 168) => cachedFetch(`/market/funding?hours=${hours}`, T60),
-  getDominanceData: (days = 30) => cachedFetch(`/market/dominance?days=${days}`, T120),
-  getBtcSupply: () => cachedFetch('/market/supply', T300),
-
-  // Influencers
-  getInfluencerTweets: (limit = 20, category = null) => {
-    let url = `/influencers/latest?limit=${limit}`
-    if (category) url += `&category=${category}`
-    return cachedFetch(url, T60)
-  },
-  getInfluencerSentiment: (hours = 24) => cachedFetch(`/influencers/sentiment?hours=${hours}`, T60),
-  getTopInfluencers: (hours = 24) => cachedFetch(`/influencers/top-influencers?hours=${hours}`, T60),
 
   // History
   getAccuracy: (days = 30) => cachedFetch(`/history/accuracy?days=${days}`, T120),
-
-  // Power Law
-  getPowerLawCurrent: () => cachedFetch('/powerlaw/current', T120),
-  getPowerLawHistorical: (days = 365) => cachedFetch(`/powerlaw/historical?days=${days}`, T120),
-  getPowerLawDashboard: () => cachedFetch('/powerlaw/dashboard', T120),
-  getPowerLawCurve: () => cachedFetch('/powerlaw/curve', T300),
-  getPowerLawGold: () => cachedFetch('/powerlaw/gold', T120),
-  getPowerLawM2: () => cachedFetch('/powerlaw/m2', T120),
-  getPowerLawSPX: () => cachedFetch('/powerlaw/spx', T120),
-  getPowerLawAssets: () => cachedFetch('/powerlaw/assets', T300),
-  getPowerLawMilestones: () => cachedFetch('/powerlaw/milestones', T300),
-  getPowerLawCalculator: (params = {}) => {
-    const qs = new URLSearchParams(params).toString()
-    return cachedFetch(`/powerlaw/calculator?${qs}`, T120)
-  },
-  getUpcomingEvents: () => cachedFetch('/powerlaw/upcoming', T300),
-
-  // Liquidations
-  getLiquidationMap: () => cachedFetch('/liquidations/map', T60),
-  getLiquidationLevels: () => cachedFetch('/liquidations/levels', T60),
-  getLiquidationStats: () => cachedFetch('/liquidations/stats', T60),
 
   // Events
   getRecentEvents: (hours = 24) => cachedFetch(`/events/recent?hours=${hours}`, T60),
@@ -258,33 +224,6 @@ export const api = {
   getElliottWaveCurrent: (timeframe = '4h') => cachedFetch(`/elliott-wave/current?timeframe=${timeframe}`, T120),
   getElliottWaveHistorical: (days = 90, timeframe = '4h') => cachedFetch(`/elliott-wave/historical?days=${days}&timeframe=${timeframe}`, T120),
 
-  // Coins
-  getTrackedCoins: () => cachedFetch('/coins/tracked', T60),
-  getCoinDetail: (coinId) => cachedFetch(`/coins/${coinId}/detail`, T30),
-  getCoinChart: (coinId, days = 7) => cachedFetch(`/coins/${coinId}/chart?days=${days}`, T60),
-  searchCoins: (query) => fetchAPI(`/coins/search?q=${encodeURIComponent(query)}`),
-  searchCoinByAddress: (address) => fetchAPI('/coins/search-address', {
-    method: 'POST',
-    body: JSON.stringify({ address }),
-  }),
-  getCoinReport: (address) => cachedFetch(`/coins/report/${address}`, T120),
-
-  // Whales
-  getRecentWhales: (hours = 24, limit = 50, direction, entityType) => {
-    let url = `/whales/recent?hours=${hours}&limit=${limit}`
-    if (direction) url += `&direction=${direction}`
-    if (entityType) url += `&entity_type=${entityType}`
-    return cachedFetch(url, T60)
-  },
-  getWhaleStats: () => cachedFetch('/whales/stats', T120),
-  getWhaleEntities: () => cachedFetch('/whales/entities', T300),
-  getWhaleFlowHistory: (days = 7) => cachedFetch(`/whales/flow-history?days=${days}`, T300),
-  getAddressTransactions: (address, limit = 50) => cachedFetch(`/whales/address/${address}?limit=${limit}`, T60),
-
-  // Institutional Holdings
-  getInstitutionalHoldings: () => cachedFetch('/whales/institutional', T300),
-  getInstitutionalHistory: (ticker, limit = 30) => cachedFetch(`/whales/institutional/${ticker}?limit=${limit}`, T300),
-
   // Partner Dashboard (Telegram auth — only the linked partner can access)
   getPartnerStats: (initData, code) => fetchAPI(`/partner/${code}/stats`, {
     headers: { 'X-Telegram-Init-Data': initData },
@@ -315,33 +254,6 @@ export const api = {
   // Referral
   getReferralInfo: (initData) => fetchAPI('/referral/info', { headers: { 'X-Telegram-Init-Data': initData } }),
   getReferralLeaderboard: () => cachedFetch('/referral/leaderboard', T120),
-
-  // Coin Predictions, Signals, Sentiment, Features
-  getCoinPrediction: (coinId) => cachedFetch(`/coins/${coinId}/prediction`, T30),
-  getCoinSignal: (coinId) => cachedFetch(`/coins/${coinId}/signal`, T30),
-  getCoinSentiment: (coinId, hours = 24) => cachedFetch(`/coins/${coinId}/sentiment?hours=${hours}`, T60),
-  getCoinFeatures: (coinId) => cachedFetch(`/coins/${coinId}/features`, T60),
-
-  // Arbitrage
-  getArbitrageOpportunities: () => cachedFetch('/arbitrage/current', T15),
-  getArbitrageHistory: (coinId, hours = 24) => {
-    let url = `/arbitrage/history?hours=${hours}`
-    if (coinId) url += `&coin_id=${coinId}`
-    return cachedFetch(url, T60)
-  },
-  getCoinArbitrage: (coinId) => cachedFetch(`/arbitrage/${coinId}`, T15),
-  calculateArbitrage: (coinId, amount) => cachedFetch(`/arbitrage/calculate?coin_id=${coinId}&amount_usd=${amount}`, T15),
-  getArbitrageAnalytics: (hours = 24) => cachedFetch(`/arbitrage/analytics?hours=${hours}`, T60),
-
-  // New Listings
-  getNewListings: (hours = 168) => cachedFetch(`/listings/recent?hours=${hours}`, T60),
-  getDexTrending: () => cachedFetch('/listings/dex-trending', T60),
-  getDexToCex: () => cachedFetch('/listings/dex-to-cex', T60),
-
-  // Memecoins
-  getTrendingMemecoins: () => cachedFetch('/memecoins/trending', T60),
-  getMemecoinRisk: (address) => cachedFetch(`/memecoins/${address}/risk`, T120),
-  getMemecoinLeaderboard: () => cachedFetch('/memecoins/leaderboard', T120),
 
   // Price Alerts (user-specific, no cache)
   getUserAlerts: (initData) => fetchAPI('/alerts/', { headers: { 'X-Telegram-Init-Data': initData } }),
@@ -382,19 +294,39 @@ export const api = {
     headers: { 'X-Telegram-Init-Data': initData },
   }),
 
-  // Smart Money
-  getSmartMoneyFeed: (initData, hours = 24, limit = 50, eventType = 'all', direction = 'all') => {
-    const params = `?hours=${hours}&limit=${limit}&event_type=${eventType}&direction=${direction}`
-    return fetchAPI(`/smart-money/feed${params}`, {
-      headers: initData ? { 'X-Telegram-Init-Data': initData } : {},
-    })
-  },
-  getSmartMoneyScore: () => cachedFetch('/smart-money/score', T60),
-
   // Market Overview (TradingView-style)
   getForexData: () => cachedFetch('/market/forex', T120),
   getCommoditiesData: () => cachedFetch('/market/commodities', T120),
   getYieldCurve: () => cachedFetch('/market/yields', T120),
   getTASummary: () => cachedFetch('/market/ta-summary', T60),
   getEconomicCalendar: (days = 14) => cachedFetch(`/market/calendar/upcoming?days=${days}`, T300),
+
+  // Gold Calculators
+  getCalculatorPipValue: (lotSize = 1.0) => cachedFetch(`/calculators/pip-value?lot_size=${lotSize}`, T120),
+  getCalculatorLotSize: (params) => {
+    const qs = new URLSearchParams(params).toString()
+    return cachedFetch(`/calculators/lot-size?${qs}`, T120)
+  },
+  getCalculatorMargin: (params) => {
+    const qs = new URLSearchParams(params).toString()
+    return cachedFetch(`/calculators/margin?${qs}`, T120)
+  },
+  getCalculatorPnl: (params) => {
+    const qs = new URLSearchParams(params).toString()
+    return cachedFetch(`/calculators/pnl?${qs}`, T120)
+  },
+  getCalculatorWeightConvert: (params) => {
+    const qs = new URLSearchParams(params).toString()
+    return cachedFetch(`/calculators/weight-convert?${qs}`, T120)
+  },
+  getCalculatorMeltValue: (params) => {
+    const qs = new URLSearchParams(params).toString()
+    return cachedFetch(`/calculators/melt-value?${qs}`, T120)
+  },
+
+  // Correlations
+  getCorrelations: () => cachedFetch('/market/correlations', T120),
+
+  // Gold Supply
+  getGoldSupply: () => cachedFetch('/market/supply', T300),
 }
