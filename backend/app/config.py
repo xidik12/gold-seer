@@ -93,7 +93,8 @@ class Settings(BaseSettings):
     jwt_expire_hours: int = 24
 
     # Gold-specific API keys
-    goldapi_key: str = ""  # GoldAPI.io for real-time XAUUSD
+    goldapi_key: str = ""  # GoldAPI.io for real-time XAUUSD (100/month — last resort)
+    finnhub_api_key: str = ""  # Finnhub.io for XAUUSD candles (60/min free)
     oanda_api_key: str = ""  # Oanda for forex/gold data (optional)
 
     # Broker integration

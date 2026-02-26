@@ -1,11 +1,13 @@
 """Primary XAUUSD price collector with multi-source fallback.
 
-Sources (in priority order):
-1. GoldAPI.io — real-time spot price with session metadata
-2. Alpha Vantage — CURRENCY_EXCHANGE_RATE (XAU/USD)
-3. Yahoo Finance — GC=F via v8 chart API
+Sources (ordered by free-tier generosity):
+1. Yahoo Finance — GC=F via v8 chart API (free, no key, OHLCV)
+2. Finnhub       — OANDA:XAU_USD forex candles (60 req/min free, OHLCV)
+3. Alpha Vantage — CURRENCY_EXCHANGE_RATE XAU/USD (25 req/day free)
+4. GoldAPI.io    — real-time spot price (100 req/month — last resort)
 """
 import logging
+import time
 from datetime import datetime, timezone
 
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
@@ -38,9 +40,10 @@ YAHOO_HEADERS = {
 class GoldPriceCollector(BaseCollector):
     """Collects real-time XAUUSD price from multiple sources with session awareness."""
 
-    GOLDAPI_URL = "https://www.goldapi.io/api/XAU/USD"
-    ALPHA_VANTAGE_URL = "https://www.alphavantage.co/query"
     YAHOO_CHART_URL = "https://query2.finance.yahoo.com/v8/finance/chart/GC=F"
+    FINNHUB_CANDLE_URL = "https://finnhub.io/api/v1/forex/candle"
+    ALPHA_VANTAGE_URL = "https://www.alphavantage.co/query"
+    GOLDAPI_URL = "https://www.goldapi.io/api/XAU/USD"
 
     @retry(
         retry=retry_if_exception_type(Exception),
@@ -49,7 +52,10 @@ class GoldPriceCollector(BaseCollector):
         reraise=True,
     )
     async def collect(self) -> dict:
-        """Collect current XAUUSD price with fallback across 3 sources."""
+        """Collect current XAUUSD price with fallback across 4 sources.
+
+        Priority: Yahoo (free) → Finnhub (60/min) → Alpha Vantage (25/day) → GoldAPI (100/month)
+        """
         result = {
             "price": None,
             "open": None,
@@ -63,25 +69,32 @@ class GoldPriceCollector(BaseCollector):
             "session_info": self.get_session_info(),
         }
 
-        # Source 1: GoldAPI.io
-        goldapi_data = await self._fetch_goldapi()
-        if goldapi_data:
-            result.update(goldapi_data)
-            result["source"] = "goldapi"
+        # Source 1: Yahoo Finance (free, no key required)
+        yf_data = await self._fetch_yahoo()
+        if yf_data:
+            result.update(yf_data)
+            result["source"] = "yahoo_finance"
             return result
 
-        # Source 2: Alpha Vantage
+        # Source 2: Finnhub (60 requests/min free tier)
+        finnhub_data = await self._fetch_finnhub()
+        if finnhub_data:
+            result.update(finnhub_data)
+            result["source"] = "finnhub"
+            return result
+
+        # Source 3: Alpha Vantage (25 requests/day — use sparingly)
         av_data = await self._fetch_alpha_vantage()
         if av_data:
             result.update(av_data)
             result["source"] = "alpha_vantage"
             return result
 
-        # Source 3: Yahoo Finance
-        yf_data = await self._fetch_yahoo()
-        if yf_data:
-            result.update(yf_data)
-            result["source"] = "yahoo_finance"
+        # Source 4: GoldAPI.io (100 requests/month — last resort)
+        goldapi_data = await self._fetch_goldapi()
+        if goldapi_data:
+            result.update(goldapi_data)
+            result["source"] = "goldapi"
             return result
 
         logger.warning("All XAUUSD price sources failed")
@@ -127,76 +140,6 @@ class GoldPriceCollector(BaseCollector):
     # ------------------------------------------------------------------
     # Private source methods
     # ------------------------------------------------------------------
-
-    async def _fetch_goldapi(self) -> dict | None:
-        """Fetch from GoldAPI.io (requires API key)."""
-        if not settings.goldapi_key:
-            logger.debug("GoldAPI key not set, skipping")
-            return None
-
-        try:
-            data = await self.fetch_json(
-                self.GOLDAPI_URL,
-                headers={"x-access-token": settings.goldapi_key, "Content-Type": "application/json"},
-            )
-            if not data or "price" not in data:
-                return None
-
-            return {
-                "price": float(data["price"]),
-                "open": float(data.get("open_price", 0) or 0),
-                "high": float(data.get("high_price", 0) or 0),
-                "low": float(data.get("low_price", 0) or 0),
-                "close": float(data["price"]),
-                "volume": None,  # GoldAPI does not provide volume
-                "change_24h": float(data.get("ch", 0) or 0),
-            }
-        except Exception as e:
-            logger.warning(f"GoldAPI fetch error: {e}")
-            return None
-
-    async def _fetch_alpha_vantage(self) -> dict | None:
-        """Fetch from Alpha Vantage CURRENCY_EXCHANGE_RATE."""
-        if not settings.alpha_vantage_api_key:
-            logger.debug("Alpha Vantage API key not set, skipping")
-            return None
-
-        try:
-            data = await self.fetch_json(
-                self.ALPHA_VANTAGE_URL,
-                params={
-                    "function": "CURRENCY_EXCHANGE_RATE",
-                    "from_currency": "XAU",
-                    "to_currency": "USD",
-                    "apikey": settings.alpha_vantage_api_key,
-                },
-            )
-            if not data:
-                return None
-
-            rate_data = data.get("Realtime Currency Exchange Rate")
-            if not rate_data:
-                return None
-
-            price = float(rate_data.get("5. Exchange Rate", 0))
-            bid = float(rate_data.get("8. Bid Price", 0) or 0)
-            ask = float(rate_data.get("9. Ask Price", 0) or 0)
-
-            if price <= 0:
-                return None
-
-            return {
-                "price": price,
-                "open": None,
-                "high": ask if ask > 0 else None,
-                "low": bid if bid > 0 else None,
-                "close": price,
-                "volume": None,
-                "change_24h": None,
-            }
-        except Exception as e:
-            logger.warning(f"Alpha Vantage XAU/USD error: {e}")
-            return None
 
     async def _fetch_yahoo(self) -> dict | None:
         """Fetch from Yahoo Finance v8 chart API for GC=F (gold futures)."""
@@ -246,4 +189,123 @@ class GoldPriceCollector(BaseCollector):
             }
         except Exception as e:
             logger.warning(f"Yahoo Finance GC=F error: {e}")
+            return None
+
+    async def _fetch_finnhub(self) -> dict | None:
+        """Fetch from Finnhub forex candle API for OANDA:XAU_USD."""
+        if not settings.finnhub_api_key:
+            logger.debug("Finnhub API key not set, skipping")
+            return None
+
+        try:
+            now = int(time.time())
+            # Fetch last 2 days of daily candles
+            data = await self.fetch_json(
+                self.FINNHUB_CANDLE_URL,
+                params={
+                    "symbol": "OANDA:XAU_USD",
+                    "resolution": "D",
+                    "from": now - 172800,  # 2 days ago
+                    "to": now,
+                    "token": settings.finnhub_api_key,
+                },
+            )
+            if not data or data.get("s") != "ok":
+                return None
+
+            o = data.get("o", [])
+            h = data.get("h", [])
+            l = data.get("l", [])
+            c = data.get("c", [])
+            v = data.get("v", [])
+
+            if not c:
+                return None
+
+            price = float(c[-1])
+            change_24h = None
+            if len(c) >= 2 and c[-2] and c[-2] > 0:
+                change_24h = round(((c[-1] - c[-2]) / c[-2]) * 100, 4)
+
+            return {
+                "price": price,
+                "open": float(o[-1]) if o else None,
+                "high": float(h[-1]) if h else None,
+                "low": float(l[-1]) if l else None,
+                "close": price,
+                "volume": int(v[-1]) if v and v[-1] else None,
+                "change_24h": change_24h,
+            }
+        except Exception as e:
+            logger.warning(f"Finnhub XAU_USD error: {e}")
+            return None
+
+    async def _fetch_alpha_vantage(self) -> dict | None:
+        """Fetch from Alpha Vantage CURRENCY_EXCHANGE_RATE."""
+        if not settings.alpha_vantage_api_key:
+            logger.debug("Alpha Vantage API key not set, skipping")
+            return None
+
+        try:
+            data = await self.fetch_json(
+                self.ALPHA_VANTAGE_URL,
+                params={
+                    "function": "CURRENCY_EXCHANGE_RATE",
+                    "from_currency": "XAU",
+                    "to_currency": "USD",
+                    "apikey": settings.alpha_vantage_api_key,
+                },
+            )
+            if not data:
+                return None
+
+            rate_data = data.get("Realtime Currency Exchange Rate")
+            if not rate_data:
+                return None
+
+            price = float(rate_data.get("5. Exchange Rate", 0))
+            bid = float(rate_data.get("8. Bid Price", 0) or 0)
+            ask = float(rate_data.get("9. Ask Price", 0) or 0)
+
+            if price <= 0:
+                return None
+
+            return {
+                "price": price,
+                "open": None,
+                "high": ask if ask > 0 else None,
+                "low": bid if bid > 0 else None,
+                "close": price,
+                "volume": None,
+                "change_24h": None,
+            }
+        except Exception as e:
+            logger.warning(f"Alpha Vantage XAU/USD error: {e}")
+            return None
+
+    async def _fetch_goldapi(self) -> dict | None:
+        """Fetch from GoldAPI.io (requires API key). 100 req/month — last resort."""
+        if not settings.goldapi_key:
+            logger.debug("GoldAPI key not set, skipping")
+            return None
+
+        try:
+            data = await self.fetch_json(
+                self.GOLDAPI_URL,
+                headers={"x-access-token": settings.goldapi_key, "Content-Type": "application/json"},
+            )
+            if not data or "price" not in data:
+                return None
+
+            return {
+                "price": float(data["price"]),
+                "open": float(data.get("open_price", 0) or 0),
+                "high": float(data.get("high_price", 0) or 0),
+                "low": float(data.get("low_price", 0) or 0),
+                "close": float(data["price"]),
+                "volume": None,  # GoldAPI does not provide volume
+                "change_24h": float(data.get("ch", 0) or 0),
+            }
+        except Exception as e:
+            logger.warning(f"GoldAPI fetch error: {e}")
             return None
