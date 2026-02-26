@@ -200,6 +200,10 @@ class EnsemblePredictor:
             tfm_bullish = tfm_tf.get("bullish_prob", 0.5)
             sent_score = sentiment.get("score", 0)
 
+            tft_conf = tft_tf.get("confidence", 0.0)
+            lstm_conf = lstm_tf.get("confidence", 0.0)
+            tfm_conf = tfm_tf.get("confidence", 0.0)
+
             # Weighted ensemble of all 4 models
             base_prob = (
                 w["tft"] * tft_bullish

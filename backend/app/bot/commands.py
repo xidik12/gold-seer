@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from aiogram import Router
 from aiogram.filters import CommandStart, Command
@@ -11,7 +11,7 @@ from app.config import settings
 from app.database import (
     async_session, BotUser, Prediction, Signal, News,
     PortfolioState, TradeAdvice, TradeResult, Price, ApiKey, ApiUsageLog,
-    SupportTicket,
+    SupportTicket, MacroData, COTData, EconomicEvent, GoldSessionData,
 )
 from app.bot.keyboards import main_keyboard, settings_keyboard, back_keyboard, advisor_keyboard, trade_close_keyboard, subscribe_keyboard
 from app.bot.subscription import require_premium, is_premium, get_status_text, grant_trial
@@ -851,29 +851,8 @@ async def cmd_report(message: Message):
 
 
 # ────────────────────────────────────────────────────────────────
-#  MULTI-COIN EXPANSION COMMANDS
+#  GOLD-SPECIFIC MARKET COMMANDS
 # ────────────────────────────────────────────────────────────────
-
-@router.message(Command("arb"))
-@require_premium
-async def cmd_arb(message: Message):
-    """Show top 3 current arbitrage opportunities."""
-    await message.answer(
-        "💱 <b>Arbitrage Scanner</b>\n\nThis feature is not available for gold trading.",
-        parse_mode="HTML",
-        reply_markup=back_keyboard(),
-    )
-
-
-@router.message(Command("listings"))
-@require_premium
-async def cmd_listings(message: Message):
-    """Show recent new exchange listings."""
-    await message.answer(
-        "🆕 <b>New Listings</b>\n\nThis feature is not available for gold trading.",
-        parse_mode="HTML",
-        reply_markup=back_keyboard(),
-    )
 
 
 @router.message(Command("alert"))
@@ -1017,23 +996,298 @@ async def cmd_game(message: Message):
     await message.answer(text, parse_mode="HTML", reply_markup=game_keyboard())
 
 
-@router.message(Command("smartmoney"))
+@router.message(Command("macro"))
 @require_premium
-async def cmd_smartmoney(message: Message):
-    """Show smart money score + last 3 events."""
-    await message.answer(
-        "💰 <b>Smart Money Score</b>\n\nThis feature is not available for gold trading.",
-        parse_mode="HTML",
-        reply_markup=back_keyboard(),
-    )
+async def cmd_macro(message: Message):
+    """Show current macro dashboard — gold, DXY, yields, VIX, silver."""
+    try:
+        async with async_session() as session:
+            result = await session.execute(
+                select(MacroData)
+                .order_by(desc(MacroData.timestamp))
+                .limit(1)
+            )
+            macro = result.scalar_one_or_none()
+
+        if not macro:
+            await message.answer(
+                "⏳ No macro data available yet. Data is being collected...",
+                reply_markup=back_keyboard(),
+            )
+            return
+
+        # Gold/silver ratio
+        gs_ratio = ""
+        if macro.gold and macro.silver and macro.silver > 0:
+            ratio = macro.gold / macro.silver
+            gs_ratio = f"\n⚖️ Gold/Silver Ratio: <b>{ratio:.1f}</b>"
+
+        # Format optional values
+        gold_line = f"💰 Gold: <b>${macro.gold:,.2f}</b>" if macro.gold else "💰 Gold: N/A"
+        dxy_line = f"💵 DXY: <b>{macro.dxy:.2f}</b>" if macro.dxy else "💵 DXY: N/A"
+        yield_line = f"📊 10Y Yield: <b>{macro.treasury_10y:.2f}%</b>" if macro.treasury_10y else "📊 10Y Yield: N/A"
+        vix_line = f"📈 VIX: <b>{macro.vix:.1f}</b>" if macro.vix else "📈 VIX: N/A"
+        silver_line = f"🥈 Silver: <b>${macro.silver:.2f}</b>" if macro.silver else "🥈 Silver: N/A"
+
+        # Extra context
+        extras = []
+        if macro.sp500:
+            extras.append(f"📉 S&P 500: {macro.sp500:,.0f}")
+        if macro.wti_oil:
+            extras.append(f"🛢️ WTI Oil: ${macro.wti_oil:.2f}")
+        if macro.eurusd:
+            extras.append(f"💱 EUR/USD: {macro.eurusd:.4f}")
+        extras_text = "\n".join(extras)
+        if extras_text:
+            extras_text = f"\n\n{extras_text}"
+
+        age = datetime.utcnow() - macro.timestamp
+        age_minutes = int(age.total_seconds() / 60)
+        if age_minutes < 60:
+            age_text = f"{age_minutes}m ago"
+        else:
+            age_text = f"{age_minutes // 60}h {age_minutes % 60}m ago"
+
+        text = (
+            f"🌍 <b>Macro Dashboard</b>\n\n"
+            f"{gold_line}\n"
+            f"{dxy_line}\n"
+            f"{yield_line}\n"
+            f"{vix_line}\n"
+            f"{silver_line}"
+            f"{gs_ratio}"
+            f"{extras_text}\n\n"
+            f"<i>Updated {age_text}</i>"
+        )
+
+        await message.answer(text, parse_mode="HTML", reply_markup=back_keyboard())
+
+    except Exception as e:
+        logger.error(f"cmd_macro error: {e}", exc_info=True)
+        await message.answer("Failed to fetch macro data. Try again later.")
 
 
-@router.message(Command("meme"))
+@router.message(Command("cot"))
 @require_premium
-async def cmd_meme(message: Message):
-    """Show trending memecoins with risk scores."""
-    await message.answer(
-        "🐸 <b>Memecoin Scanner</b>\n\nThis feature is not available for gold trading.",
-        parse_mode="HTML",
-        reply_markup=back_keyboard(),
-    )
+async def cmd_cot(message: Message):
+    """Show latest COT (Commitments of Traders) positioning data."""
+    try:
+        async with async_session() as session:
+            result = await session.execute(
+                select(COTData)
+                .order_by(desc(COTData.report_date))
+                .limit(1)
+            )
+            cot = result.scalar_one_or_none()
+
+        if not cot:
+            await message.answer(
+                "⏳ No COT data available yet. CFTC data is collected weekly.",
+                reply_markup=back_keyboard(),
+            )
+            return
+
+        # Signal interpretation
+        if cot.mm_net is not None:
+            if cot.mm_net > 0:
+                signal = "🟢 Managed Money NET LONG — bullish positioning"
+            elif cot.mm_net < 0:
+                signal = "🔴 Managed Money NET SHORT — bearish positioning"
+            else:
+                signal = "🟡 Managed Money FLAT — neutral positioning"
+        else:
+            signal = "⚪ Positioning data unavailable"
+
+        # Format values with fallbacks
+        mm_long = f"{cot.mm_long:,}" if cot.mm_long is not None else "N/A"
+        mm_short = f"{cot.mm_short:,}" if cot.mm_short is not None else "N/A"
+        mm_net_val = f"{cot.mm_net:+,}" if cot.mm_net is not None else "N/A"
+        mm_change = f" ({cot.mm_net_change:+,} chg)" if cot.mm_net_change is not None else ""
+
+        comm_long = f"{cot.commercial_long:,}" if cot.commercial_long is not None else "N/A"
+        comm_short = f"{cot.commercial_short:,}" if cot.commercial_short is not None else "N/A"
+        comm_net_val = f"{cot.commercial_net:+,}" if cot.commercial_net is not None else "N/A"
+
+        oi_val = f"{cot.open_interest:,}" if cot.open_interest is not None else "N/A"
+        oi_change = f" ({cot.oi_change:+,})" if cot.oi_change is not None else ""
+
+        # Percentile info
+        percentile_text = ""
+        if cot.mm_net_percentile is not None:
+            percentile_text += f"\n📏 MM Net Percentile (3yr): {cot.mm_net_percentile:.0f}%"
+        if cot.oi_percentile is not None:
+            percentile_text += f"\n📏 OI Percentile (3yr): {cot.oi_percentile:.0f}%"
+
+        report_date = cot.report_date.strftime("%b %d, %Y")
+
+        text = (
+            f"📋 <b>COT Report — Gold (COMEX)</b>\n"
+            f"<i>Report date: {report_date}</i>\n\n"
+            f"<b>Managed Money (Hedge Funds)</b>\n"
+            f"  Long: {mm_long} | Short: {mm_short}\n"
+            f"  Net: <b>{mm_net_val}</b>{mm_change}\n\n"
+            f"<b>Commercials (Producers)</b>\n"
+            f"  Long: {comm_long} | Short: {comm_short}\n"
+            f"  Net: <b>{comm_net_val}</b>\n\n"
+            f"<b>Open Interest:</b> {oi_val}{oi_change}"
+            f"{percentile_text}\n\n"
+            f"{signal}"
+        )
+
+        await message.answer(text, parse_mode="HTML", reply_markup=back_keyboard())
+
+    except Exception as e:
+        logger.error(f"cmd_cot error: {e}", exc_info=True)
+        await message.answer("Failed to fetch COT data. Try again later.")
+
+
+@router.message(Command("calendar"))
+@require_premium
+async def cmd_calendar(message: Message):
+    """Show upcoming high-impact economic events."""
+    try:
+        now = datetime.utcnow()
+
+        async with async_session() as session:
+            # Get upcoming events (today and future), prioritize high impact
+            result = await session.execute(
+                select(EconomicEvent)
+                .where(EconomicEvent.event_date >= now - timedelta(hours=6))
+                .order_by(EconomicEvent.event_date)
+                .limit(20)
+            )
+            events = result.scalars().all()
+
+        if not events:
+            await message.answer(
+                "📅 <b>Economic Calendar</b>\n\nNo upcoming events found.",
+                parse_mode="HTML",
+                reply_markup=back_keyboard(),
+            )
+            return
+
+        # Filter to show high/medium impact first, cap at 10
+        high = [e for e in events if e.importance == "high"]
+        medium = [e for e in events if e.importance == "medium"]
+        low = [e for e in events if e.importance == "low"]
+        sorted_events = (high + medium + low)[:10]
+
+        lines = ["📅 <b>Economic Calendar</b>\n"]
+
+        impact_emoji = {"high": "🔴", "medium": "🟡", "low": "🟢"}
+
+        for e in sorted_events:
+            emoji = impact_emoji.get(e.importance, "⚪")
+            date_str = e.event_date.strftime("%b %d %H:%M")
+            country = f"[{e.country}]" if e.country else ""
+
+            line = f"{emoji} <b>{date_str}</b> {country}\n   {e.event_name}"
+
+            # Show forecast/previous if available
+            details = []
+            if e.forecast:
+                details.append(f"Exp: {e.forecast}")
+            if e.previous:
+                details.append(f"Prev: {e.previous}")
+            if e.actual:
+                details.append(f"Act: {e.actual}")
+            if details:
+                line += f"\n   <i>{' | '.join(details)}</i>"
+
+            lines.append(line)
+            lines.append("")
+
+        lines.append("🔴 High  🟡 Medium  🟢 Low impact")
+
+        await message.answer("\n".join(lines), parse_mode="HTML", reply_markup=back_keyboard())
+
+    except Exception as e:
+        logger.error(f"cmd_calendar error: {e}", exc_info=True)
+        await message.answer("Failed to fetch calendar data. Try again later.")
+
+
+@router.message(Command("sessions"))
+@require_premium
+async def cmd_sessions(message: Message):
+    """Show current trading session info (Asian/London/NY)."""
+    try:
+        now = datetime.utcnow()
+        hour = now.hour
+
+        # Determine active sessions based on UTC time
+        # Asian:  00:00 - 08:00 UTC
+        # London: 08:00 - 16:00 UTC
+        # NY:     13:00 - 21:00 UTC
+        # Overlap (London/NY): 13:00 - 16:00 UTC
+
+        active_sessions = []
+        if 0 <= hour < 8:
+            active_sessions.append(("🌏 Asian", "asian", 8 - hour))
+        if 8 <= hour < 16:
+            active_sessions.append(("🇬🇧 London", "london", 16 - hour))
+        if 13 <= hour < 21:
+            active_sessions.append(("🇺🇸 New York", "new_york", 21 - hour))
+
+        # Check for overlap
+        is_overlap = 13 <= hour < 16
+
+        if not active_sessions:
+            # After 21:00 UTC — markets winding down, Asian opens at midnight
+            hours_to_asian = (24 - hour) % 24
+            active_sessions.append(("💤 Off-Hours", "off", hours_to_asian))
+
+        # Volatility expectations
+        volatility_map = {
+            "asian": "Low",
+            "london": "Medium-High",
+            "new_york": "High",
+            "off": "Very Low",
+        }
+
+        lines = [
+            f"🕐 <b>Trading Sessions</b>\n"
+            f"<i>UTC: {now.strftime('%H:%M')}</i>\n"
+        ]
+
+        if is_overlap:
+            lines.append("⚡ <b>London/NY Overlap — Peak Volatility</b>\n")
+
+        for label, key, hours_left in active_sessions:
+            vol = volatility_map.get(key, "Unknown")
+            minutes_left = hours_left * 60 - now.minute
+            h, m = divmod(minutes_left, 60)
+            time_str = f"{h}h {m}m" if h > 0 else f"{m}m"
+
+            lines.append(
+                f"{label}\n"
+                f"   ⏳ Closes in: {time_str}\n"
+                f"   📊 Typical volatility: <b>{vol}</b>"
+            )
+
+        # Try to get today's session data from DB
+        today = now.strftime("%Y-%m-%d")
+        async with async_session() as session:
+            result = await session.execute(
+                select(GoldSessionData)
+                .where(GoldSessionData.date == today)
+                .order_by(desc(GoldSessionData.session_start))
+            )
+            session_data = result.scalars().all()
+
+        if session_data:
+            lines.append("\n<b>Today's Session Stats</b>")
+            for sd in session_data:
+                dir_emoji = {"up": "🟢", "down": "🔴", "flat": "🟡"}.get(sd.direction, "⚪")
+                name = sd.session_name.replace("_", " ").title()
+                range_text = f" | Range: ${sd.range_usd:.0f}" if sd.range_usd else ""
+                lines.append(
+                    f"  {dir_emoji} {name}: ${sd.open_price:,.0f} → "
+                    f"${sd.close_price:,.0f}{range_text}" if sd.close_price else
+                    f"  {dir_emoji} {name}: ${sd.open_price:,.0f} (active)"
+                )
+
+        await message.answer("\n".join(lines), parse_mode="HTML", reply_markup=back_keyboard())
+
+    except Exception as e:
+        logger.error(f"cmd_sessions error: {e}", exc_info=True)
+        await message.answer("Failed to fetch session data. Try again later.")

@@ -198,18 +198,6 @@ class XGBoostPredictor:
             sig = np.clip(ev_impact, -1, 1)
             signals.append((0.5 + sig * 0.25, 2.0))
 
-        # ── Mark-index spread (weight 1.5) — premium/discount ──
-        spread = _get("mark_index_spread")
-        if spread is not None:
-            sig = np.clip(spread * 0.1, -1, 1)
-            signals.append((0.5 + sig * 0.15, 1.5))
-
-        # ── Gold market share change (weight 1) ──
-        mcap_chg = _get("market_cap_change")
-        if mcap_chg is not None:
-            sig = np.clip(mcap_chg * 2, -1, 1)
-            signals.append((0.5 + sig * 0.15, 1.0))
-
         # ── NEW: ADX (weight 2) — trend strength ──
         adx_val = _get("adx")
         if adx_val is not None:
@@ -265,42 +253,8 @@ class XGBoostPredictor:
             sig = np.clip(fisher, -3, 3) / 3  # Normalize to -1..+1
             signals.append((0.5 + sig * 0.2, 1.5))
 
-        # ── NEW: Long/Short Ratio (weight 2) — crowd positioning ──
-        ls_ratio = _get("long_short_ratio")
-        if ls_ratio is not None:
-            # Contrarian: extreme longs = bearish, extreme shorts = bullish
-            if ls_ratio > 3.0:
-                signals.append((0.30, 2.0))  # Too many longs
-            elif ls_ratio > 2.0:
-                signals.append((0.40, 1.5))
-            elif ls_ratio < 0.5:
-                signals.append((0.70, 2.0))  # Too many shorts
-            elif ls_ratio < 0.8:
-                signals.append((0.60, 1.5))
-
-        # ── NEW: Taker Buy/Sell Ratio (weight 2) — aggression ──
-        taker = _get("taker_buy_sell_ratio")
-        if taker is not None:
-            if taker > 1.1:
-                signals.append((0.65, 2.0))  # Aggressive buying
-            elif taker > 1.02:
-                signals.append((0.57, 1.5))
-            elif taker < 0.9:
-                signals.append((0.35, 2.0))  # Aggressive selling
-            elif taker < 0.98:
-                signals.append((0.43, 1.5))
-
-        # ── NEW: DVOL — gold implied volatility (weight 1.5) ──
-        dvol = _get("dvol")
-        if dvol is not None:
-            # High DVOL = uncertainty, low DVOL = complacency
-            if dvol > 80:
-                signals.append((0.45, 1.5))  # Fear/uncertainty
-            elif dvol < 40:
-                signals.append((0.55, 1.0))  # Calm — slight bullish
-
         # ── NEW: ETF Net Flow (weight 2.5) — institutional demand ──
-        etf_flow = _get("etf_net_flow_usd")
+        etf_flow = _get("etf_net_flow")
         if etf_flow is not None:
             if etf_flow > 500e6:
                 signals.append((0.75, 2.5))  # Massive inflow
@@ -310,42 +264,6 @@ class XGBoostPredictor:
                 signals.append((0.25, 2.5))  # Massive outflow
             elif etf_flow < -100e6:
                 signals.append((0.37, 2.0))
-
-        # ── NEW: NVT Signal (weight 1.5) — on-chain valuation ──
-        nvt = _get("nvt_signal")
-        if nvt is not None:
-            if nvt > 150:
-                signals.append((0.30, 1.5))  # Overvalued by transaction volume
-            elif nvt < 30:
-                signals.append((0.65, 1.5))  # Undervalued
-
-        # ── NEW: MVRV Z-Score (weight 2) — market vs realized value ──
-        mvrv = _get("mvrv_zscore")
-        if mvrv is not None:
-            if mvrv > 7:
-                signals.append((0.15, 2.0))  # Extreme overvaluation
-            elif mvrv > 3:
-                signals.append((0.35, 1.5))
-            elif mvrv < 0:
-                signals.append((0.75, 2.0))  # Below realized value — strong buy
-            elif mvrv < 1:
-                signals.append((0.60, 1.5))
-
-        # ── NEW: SOPR (weight 1.5) — Spent Output Profit Ratio ──
-        sopr = _get("sopr")
-        if sopr is not None:
-            if sopr < 0.95:
-                signals.append((0.70, 1.5))  # Sellers at a loss — capitulation
-            elif sopr > 1.05:
-                signals.append((0.40, 1.0))  # Profit taking
-
-        # ── NEW: Puell Multiple (weight 1.5) — miner revenue vs avg ──
-        puell = _get("puell_multiple")
-        if puell is not None:
-            if puell > 4:
-                signals.append((0.25, 1.5))  # Miners over-earning — top signal
-            elif puell < 0.5:
-                signals.append((0.70, 1.5))  # Miners under-earning — bottom signal
 
         # ── NEW: Hurst Exponent (weight 2) — regime detection ──
         hurst = _get("hurst_exponent")
@@ -397,22 +315,6 @@ class XGBoostPredictor:
         if tsi_val is not None:
             sig = np.clip(tsi_val / 30, -1, 1)
             signals.append((0.5 + sig * 0.2, 1.5))
-
-        # ── NEW: Hash Ribbon (weight 1.5) — miner capitulation ──
-        hash_rib = _get("hash_ribbon")
-        if hash_rib is not None:
-            if hash_rib < 0:
-                signals.append((0.65, 1.5))  # Miner capitulation — buy signal
-            elif hash_rib > 0:
-                signals.append((0.50, 0.5))  # Recovery/expansion
-
-        # ── NEW: Estimated Leverage Ratio (weight 1.5) ──
-        leverage = _get("estimated_leverage_ratio")
-        if leverage is not None:
-            if leverage > 0.3:
-                signals.append((0.40, 1.5))  # High leverage — risk of cascade
-            elif leverage < 0.1:
-                signals.append((0.55, 1.0))  # Low leverage — healthy
 
         # ── Compute weighted average ──
         if not signals:
