@@ -363,24 +363,35 @@ async def lifespan(app: FastAPI):
                 logger.warning(f"delete_webhook failed: {e}")
 
             # Brief delay to let previous Railway instance shut down
-            await asyncio.sleep(3)
+            await asyncio.sleep(5)
 
-            # Start polling in background with conflict detection and retry
+            # Start polling in background with retry on conflict (deployment overlap)
             async def _run_bot_polling():
-                retry_delay = 5
-                while True:
+                retry_delay = 10
+                max_retries = 12  # ~2 minutes of retrying
+                for attempt in range(max_retries):
                     try:
-                        logger.info("Bot polling starting...")
+                        logger.info("Bot polling starting... (attempt %d)", attempt + 1)
                         await dp.start_polling(bot)
-                        break
+                        break  # Clean exit
                     except Exception as e:
                         err_str = str(e).lower()
                         if "conflict" in err_str or "409" in err_str:
-                            logger.warning("Bot polling: 409 conflict, stopping")
-                            break
-                        logger.error(f"Bot polling crashed: {e}, retrying in {retry_delay}s")
+                            # Old instance still polling — wait and retry
+                            logger.warning(
+                                "Bot polling: 409 conflict (old instance still running), "
+                                "retrying in %ds (attempt %d/%d)",
+                                retry_delay, attempt + 1, max_retries,
+                            )
+                        else:
+                            logger.error(
+                                "Bot polling crashed: %s, retrying in %ds",
+                                e, retry_delay,
+                            )
                         await asyncio.sleep(retry_delay)
-                        retry_delay = min(retry_delay * 2, 60)
+                        retry_delay = min(retry_delay * 1.5, 30)
+                else:
+                    logger.error("Bot polling: gave up after %d attempts", max_retries)
 
             bot_task = asyncio.create_task(_run_bot_polling())
             logger.info("Telegram bot started")
