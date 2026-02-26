@@ -166,7 +166,7 @@ def alert_list_keyboard(alerts: list) -> InlineKeyboardMarkup:
     """Keyboard with delete buttons for each active alert."""
     buttons = []
     for a in alerts[:10]:
-        symbol = a.coin_id.upper()[:6] if hasattr(a, 'coin_id') else "XAUUSD"
+        symbol = a.asset_id.upper()[:6] if hasattr(a, 'asset_id') else "XAUUSD"
         direction = "↑" if a.direction == "above" else "↓"
         buttons.append([
             InlineKeyboardButton(

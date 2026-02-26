@@ -85,14 +85,7 @@ async def generate_daily_briefing():
             )
             macro = result.scalar_one_or_none()
 
-            # 6. On-chain data (removed — crypto-specific)
-            onchain = None
-
-            # 7. Whale activity (removed — crypto-specific)
-            whale_count = 0
-            whale_volume = 0
-
-            # 8. News sentiment (24h average)
+            # 6. News sentiment (24h average)
             result = await session.execute(
                 select(func.avg(News.sentiment_score))
                 .where(News.timestamp >= cutoff_24h)
@@ -100,16 +93,7 @@ async def generate_daily_briefing():
             )
             news_sentiment_avg = result.scalar() or 0
 
-            # 9. Funding rate (removed — crypto-specific)
-            funding = None
-
-            # 10. Dominance (removed — crypto-specific)
-            dominance = None
-
-            # 11. Arbitrage count (removed — crypto-specific)
-            arb_count = 0
-
-            # 12. Prediction accuracy (recent)
+            # 7. Prediction accuracy (recent)
             result = await session.execute(
                 select(Prediction)
                 .where(Prediction.was_correct.isnot(None))
@@ -174,36 +158,26 @@ async def generate_daily_briefing():
             if macro and macro.fear_greed_index is not None:
                 html_parts.append(f"Fear & Greed: {macro.fear_greed_index}/100 ({macro.fear_greed_label or ''})")
             html_parts.append(f"News Sentiment: {news_sentiment_avg:+.2f} ({_sentiment_label(news_sentiment_avg)})")
-            if funding and funding.funding_rate is not None:
-                fr = funding.funding_rate * 100
-                html_parts.append(f"Funding Rate: {fr:+.4f}%")
 
-            # Whale Activity
-            html_parts.append(f"\n<b>🐋 Whale Activity</b>")
-            html_parts.append(f"{whale_count} large transactions | ${whale_volume:,.0f} moved (24h)")
-
-            # On-Chain Health
-            if onchain:
-                html_parts.append(f"\n<b>⛓️ On-Chain</b>")
-                if onchain.hash_rate:
-                    html_parts.append(f"Hash Rate: {onchain.hash_rate:.1f} EH/s")
-                if onchain.active_addresses:
-                    html_parts.append(f"Active Addresses: {onchain.active_addresses:,}")
-
-            # Dominance
-            if dominance and dominance.btc_dominance:
-                html_parts.append(f"\n<b>📈 Market</b>")
-                html_parts.append(f"Gold Market Share: {dominance.btc_dominance:.1f}%")
+            # Macro Context (gold-relevant drivers)
+            if macro:
+                macro_lines = []
+                if macro.dxy is not None:
+                    macro_lines.append(f"DXY: {macro.dxy:.2f}")
+                if macro.treasury_10y is not None:
+                    macro_lines.append(f"10Y Yield: {macro.treasury_10y:.2f}%")
+                if macro.vix is not None:
+                    macro_lines.append(f"VIX: {macro.vix:.1f}")
+                if macro.silver is not None:
+                    macro_lines.append(f"Silver: ${macro.silver:.2f}")
+                if macro_lines:
+                    html_parts.append(f"\n<b>🌍 Macro Context</b>")
+                    html_parts.append(" | ".join(macro_lines))
 
             # Accuracy Report
             if total_eval > 0:
                 html_parts.append(f"\n<b>🎯 Accuracy</b>")
                 html_parts.append(f"Recent: {correct_eval}/{total_eval} ({accuracy:.0f}%)")
-
-            # Notable Events
-            if arb_count > 0:
-                html_parts.append(f"\n<b>💱 Arbitrage</b>")
-                html_parts.append(f"{arb_count} actionable opportunities detected")
 
             summary_html = "\n".join(html_parts)
             summary_text = summary_html.replace("<b>", "").replace("</b>", "").replace("<h3>", "").replace("</h3>", "").replace("\n\n", "\n")
@@ -215,10 +189,10 @@ async def generate_daily_briefing():
                 "signal": {"action": signal.action, "entry": signal.entry_price} if signal else None,
                 "fear_greed": macro.fear_greed_index if macro else None,
                 "news_sentiment": news_sentiment_avg,
-                "whale_count": whale_count,
-                "whale_volume": whale_volume,
+                "dxy": macro.dxy if macro else None,
+                "treasury_10y": macro.treasury_10y if macro else None,
+                "vix": macro.vix if macro else None,
                 "accuracy": accuracy,
-                "arb_count": arb_count,
                 "overall_sentiment": overall_sentiment,
             }
 

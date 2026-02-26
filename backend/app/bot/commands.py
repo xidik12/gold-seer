@@ -909,7 +909,7 @@ async def cmd_alert(message: Message):
         for a in alerts:
             emoji = "📈" if a.direction == "above" else "📉"
             repeat = " 🔄" if a.is_repeating else ""
-            lines.append(f"{emoji} {a.coin_id.upper()[:6]} {'above' if a.direction == 'above' else 'below'} ${a.target_price:,.0f}{repeat}")
+            lines.append(f"{emoji} {a.asset_id.upper()[:6]} {'above' if a.direction == 'above' else 'below'} ${a.target_price:,.0f}{repeat}")
 
         await message.answer("\n".join(lines), parse_mode="HTML", reply_markup=alert_list_keyboard(alerts))
         return

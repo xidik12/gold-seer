@@ -166,12 +166,12 @@ class AlertSender:
                 logger.error(f"Failed to send breaking alert to {user.telegram_id}: {e}")
                 await self._log_alert(user.telegram_id, "breaking", "failed", str(e))
 
-    async def send_arbitrage_alert(self, coin_id: str, buy_exchange: str, sell_exchange: str, net_profit_pct: float, buy_price: float, sell_price: float):
+    async def send_arbitrage_alert(self, asset_id: str, buy_exchange: str, sell_exchange: str, net_profit_pct: float, buy_price: float, sell_price: float):
         """Send alert when a significant arbitrage opportunity is detected (>0.5% net profit)."""
         if net_profit_pct < 0.5:
             return
 
-        symbol = coin_id.upper()[:6]
+        symbol = asset_id.upper()[:6]
         message = (
             f"💱 <b>Arbitrage Alert: {symbol}</b>\n\n"
             f"Buy on <b>{buy_exchange}</b>: ${buy_price:,.2f}\n"
@@ -252,7 +252,7 @@ class AlertSender:
 
                 triggered = 0
                 for alert in alerts:
-                    current = coin_prices.get(alert.coin_id)
+                    current = coin_prices.get(alert.asset_id)
                     if current is None:
                         continue
 
@@ -270,7 +270,7 @@ class AlertSender:
                         alert.is_active = False
 
                     # Send notification
-                    symbol = alert.coin_id.upper()[:6]
+                    symbol = alert.asset_id.upper()[:6]
                     dir_emoji = "📈" if alert.direction == "above" else "📉"
                     note_line = f"\n📝 {alert.note}" if alert.note else ""
                     msg = (

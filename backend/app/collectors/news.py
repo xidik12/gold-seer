@@ -138,15 +138,15 @@ class NewsCollector(BaseCollector):
         }
 
     async def _get_cryptopanic(self) -> list[dict] | None:
-        """Get news from CryptoPanic API."""
-        if not settings.cryptopanic_api_key:
-            logger.debug("CryptoPanic API key not set, skipping")
+        """Get news from CryptoPanic API (deprecated — crypto-specific, kept for compat)."""
+        api_key = getattr(settings, "cryptopanic_api_key", "")
+        if not api_key:
             return None
 
         data = await self.fetch_json(
             CRYPTOPANIC_URL,
             params={
-                "auth_token": settings.cryptopanic_api_key,
+                "auth_token": api_key,
                 "currencies": "GOLD",
                 "filter": "important",
                 "public": "true",

@@ -480,9 +480,13 @@ async def collect_cot_data():
 
 
 async def collect_fred_data():
-    """Collect FRED economic data series (runs every 6h)."""
+    """Collect FRED economic data series (runs every 6h).
+
+    FREDCollector.collect() returns a dict keyed by series name, e.g.:
+        {"real_yield_10y": {"value": 4.5, "previous": 4.3, "change": 0.2, "date": "2026-02-25"}, ...}
+    """
     try:
-        from app.collectors.fred import FREDCollector
+        from app.collectors.fred_data import FREDCollector
         from app.database import async_session, FREDSeries
         from sqlalchemy import select
 
@@ -492,13 +496,20 @@ async def collect_fred_data():
             logger.info("FRED: No new data returned")
             return
 
+        if "error" in data:
+            logger.warning(f"FRED: Skipping — {data['error']}")
+            return
+
+        inserted = 0
         async with async_session() as session:
-            for record in (data if isinstance(data, list) else [data]):
-                series_id = record.get("series_id")
-                date = record.get("date")
-                if not series_id or not date:
+            for series_id, series_data in data.items():
+                if series_id == "timestamp" or not isinstance(series_data, dict):
                     continue
-                # Upsert by series_id + date
+
+                date = series_data.get("date")
+                if not date:
+                    continue
+
                 existing = await session.execute(
                     select(FREDSeries).where(
                         FREDSeries.series_id == series_id,
@@ -507,17 +518,19 @@ async def collect_fred_data():
                 )
                 if existing.scalar_one_or_none():
                     continue
+
                 fred = FREDSeries(
                     series_id=series_id,
                     date=date,
-                    value=record.get("value", 0),
-                    previous_value=record.get("previous_value"),
-                    change=record.get("change"),
+                    value=series_data.get("value", 0),
+                    previous_value=series_data.get("previous"),
+                    change=series_data.get("change"),
                 )
                 session.add(fred)
+                inserted += 1
             await session.commit()
 
-        logger.info(f"FRED data collected successfully")
+        logger.info(f"FRED data collected: {inserted} new records")
     except Exception as e:
         logger.error(f"FRED collection error: {e}")
 
@@ -525,7 +538,7 @@ async def collect_fred_data():
 async def collect_etf_flows():
     """Collect gold ETF flow data (runs every hour)."""
     try:
-        from app.collectors.gold_etf import GoldETFFlowCollector
+        from app.collectors.gold_etf_flows import GoldETFFlowCollector
         from app.database import async_session, GoldETFFlow
         from sqlalchemy import select
 
@@ -535,13 +548,14 @@ async def collect_etf_flows():
             logger.info("ETF: No new flow data returned")
             return
 
+        today = datetime.utcnow().strftime("%Y-%m-%d")
+
         async with async_session() as session:
             for record in (data if isinstance(data, list) else [data]):
                 ticker = record.get("ticker")
-                date = record.get("date")
-                if not ticker or not date:
+                if not ticker:
                     continue
-                # Upsert by ticker + date
+                date = today
                 existing = await session.execute(
                     select(GoldETFFlow).where(
                         GoldETFFlow.ticker == ticker,
@@ -553,10 +567,10 @@ async def collect_etf_flows():
                 etf = GoldETFFlow(
                     date=date,
                     ticker=ticker,
-                    holdings_tonnes=record.get("holdings_tonnes"),
-                    holdings_usd=record.get("holdings_usd"),
-                    daily_change_tonnes=record.get("daily_change_tonnes"),
-                    daily_change_usd=record.get("daily_change_usd"),
+                    holdings_tonnes=record.get("estimated_holdings_tonnes"),
+                    holdings_usd=None,
+                    daily_change_tonnes=None,
+                    daily_change_usd=record.get("daily_change"),
                     volume=record.get("volume"),
                     price=record.get("price"),
                 )

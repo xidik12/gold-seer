@@ -10,17 +10,12 @@ class Settings(BaseSettings):
 
     # API Keys
     alpha_vantage_api_key: str = ""  # Free key from https://www.alphavantage.co/support/#api-key
-    cryptopanic_api_key: str = ""
     reddit_client_id: str = ""
     reddit_client_secret: str = ""
     reddit_user_agent: str = "griffin-gold/1.0"
 
     # External data APIs
-    fred_api_key: str = ""  # FRED API for M2 money supply (free from https://fred.stlouisfed.org/docs/api/api_key.html)
-    etherscan_api_key: str = ""  # Etherscan V2 API (free from https://etherscan.io/apis)
-    solscan_api_key: str = ""  # Solscan Pro API (free tier: 10M CU from https://pro-api.solscan.io)
-    arkham_api_key: str = ""  # Arkham Intelligence API (apply at intel.arkm.com/api)
-    coingecko_api_key: str = ""  # CoinGecko Demo API key (free: 30 req/min from https://www.coingecko.com/en/api/pricing)
+    fred_api_key: str = ""  # FRED API for economic data (free from https://fred.stlouisfed.org/docs/api/api_key.html)
 
     # Database — /data/ path is a Railway persistent volume
     # DATABASE_URL is required — set to postgresql:// for production or sqlite+aiosqlite:// for local dev
@@ -50,15 +45,10 @@ class Settings(BaseSettings):
     selective_retrain_accuracy: float = 0.50
     selective_retrain_window_hours: int = 72
 
-    # Legacy (unused — kept for backward compat with env vars)
-    binance_base_url: str = "https://api.binance.com"
-
     # Data collection intervals (seconds)
     price_collection_interval: int = 60
     news_collection_interval: int = 120  # every 2 minutes
     macro_collection_interval: int = 3600
-    onchain_collection_interval: int = 3600
-    fear_greed_collection_interval: int = 3600
 
     # Advisor settings
     advisor_enabled: bool = True

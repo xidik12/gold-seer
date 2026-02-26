@@ -68,7 +68,7 @@ class News(Base):
     __tablename__ = "news"
     __table_args__ = (
         Index("ix_news_published_at", "timestamp"),
-        Index("ix_news_coin_timestamp", "coin_id", "timestamp"),
+        Index("ix_news_asset_timestamp", "asset_id", "timestamp"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -79,7 +79,7 @@ class News(Base):
     sentiment_score: Mapped[float] = mapped_column(Float, nullable=True)
     raw_sentiment: Mapped[str] = mapped_column(String(20), nullable=True)
     language: Mapped[str] = mapped_column(String(10), nullable=True, default="en")
-    coin_id: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
+    asset_id: Mapped[str] = mapped_column(String(100), nullable=True, index=True)
 
 
 class Feature(Base):
@@ -620,11 +620,11 @@ class PredictionContext(Base):
     current_price: Mapped[float] = mapped_column(Float)
     features: Mapped[dict] = mapped_column(JSON, nullable=True)
     news_headlines: Mapped[dict] = mapped_column(JSON, nullable=True)
-    influencer_data: Mapped[dict] = mapped_column(JSON, nullable=True)
+    analyst_forecast_snapshot: Mapped[dict] = mapped_column(JSON, nullable=True)
     macro_snapshot: Mapped[dict] = mapped_column(JSON, nullable=True)
-    onchain_snapshot: Mapped[dict] = mapped_column(JSON, nullable=True)
-    funding_snapshot: Mapped[dict] = mapped_column(JSON, nullable=True)
-    dominance_snapshot: Mapped[dict] = mapped_column(JSON, nullable=True)
+    cot_snapshot: Mapped[dict] = mapped_column(JSON, nullable=True)
+    etf_snapshot: Mapped[dict] = mapped_column(JSON, nullable=True)
+    session_snapshot: Mapped[dict] = mapped_column(JSON, nullable=True)
     event_memory: Mapped[dict] = mapped_column(JSON, nullable=True)
     model_outputs: Mapped[dict] = mapped_column(JSON, nullable=True)
 
@@ -905,7 +905,7 @@ class PriceAlert(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     telegram_id: Mapped[int] = mapped_column(BigInteger, index=True)
-    coin_id: Mapped[str] = mapped_column(String(100), default="xauusd")
+    asset_id: Mapped[str] = mapped_column(String(100), default="xauusd")
     target_price: Mapped[float] = mapped_column(Float)
     direction: Mapped[str] = mapped_column(String(10))  # above, below
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

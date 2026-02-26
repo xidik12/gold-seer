@@ -17,7 +17,7 @@ router = APIRouter(prefix="/api/alerts", tags=["alerts"], dependencies=[Depends(
 
 
 class AlertCreate(BaseModel):
-    coin_id: str = "gold"
+    asset_id: str = "gold"
     target_price: float
     direction: str  # above, below
     is_repeating: bool = False
@@ -61,7 +61,7 @@ async def list_alerts(request: Request):
         "alerts": [
             {
                 "id": a.id,
-                "coin_id": a.coin_id,
+                "asset_id": a.asset_id,
                 "target_price": a.target_price,
                 "direction": a.direction,
                 "is_active": a.is_active,
@@ -111,7 +111,7 @@ async def create_alert(body: AlertCreate, request: Request):
 
         alert = PriceAlert(
             telegram_id=telegram_id,
-            coin_id=body.coin_id,
+            asset_id=body.asset_id,
             target_price=body.target_price,
             direction=body.direction,
             is_repeating=body.is_repeating,
@@ -123,7 +123,7 @@ async def create_alert(body: AlertCreate, request: Request):
 
     return {
         "id": alert.id,
-        "coin_id": alert.coin_id,
+        "asset_id": alert.asset_id,
         "target_price": alert.target_price,
         "direction": alert.direction,
         "is_active": alert.is_active,
