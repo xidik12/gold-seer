@@ -326,5 +326,9 @@
     "cftc": "CFTC",
     "cme": "CME Group",
     "kitco": "Kitco"
+  },
+  "partner": {
+    "dashboard": "Partner Dashboard",
+    "referralsDesc": "View your referrals & commission"
   }
 }

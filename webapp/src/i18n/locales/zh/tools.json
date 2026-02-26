@@ -90,5 +90,37 @@
       "item4": "没有计划和策略就盲目交易",
       "item5": "亏损后报复性交易"
     }
-  }
+  },
+  "weight": {
+    "title": "黄金重量换算",
+    "tabLabel": "重量换算",
+    "amount": "数量",
+    "fromUnit": "单位",
+    "troyOz": "金衡盎司",
+    "grams": "克",
+    "kilograms": "千克",
+    "tola": "托拉",
+    "taelHK": "两 (香港)",
+    "bahtThai": "铢 (泰国)"
+  },
+  "melt": {
+    "title": "黄金熔炼价值",
+    "tabLabel": "熔炼价值",
+    "description": "根据重量和纯度计算黄金的内在价值。",
+    "weightOz": "重量 (盎司)",
+    "karat": "纯度",
+    "spotPrice": "现货价 $/盎司",
+    "meltValue": "熔炼价值",
+    "pureGold": "纯金含量"
+  },
+  "pip": {
+    "title": "XAUUSD 点值",
+    "tabLabel": "点值",
+    "description": "1点 = $0.01变动。1标准手 = 100金衡盎司。",
+    "lotSize": "手数",
+    "pipValue": "点值",
+    "tenPipMove": "10点变动",
+    "dollarMove": "$1变动"
+  },
+  "goldPrice": "金价 ($)"
 }

@@ -90,5 +90,37 @@
       "item4": "ជួញដូរដោយគ្មានផែនការ ឬយុទ្ធសាស្ត្រ",
       "item5": "ជួញដូរសងសឹកបន្ទាប់ពីខាត"
     }
-  }
+  },
+  "weight": {
+    "title": "ឧបករណ៍បម្លែងទម្ងន់មាស",
+    "tabLabel": "ទម្ងន់",
+    "amount": "ចំនួន",
+    "fromUnit": "ពីឯកតា",
+    "troyOz": "Troy Oz",
+    "grams": "ក្រាម",
+    "kilograms": "គីឡូក្រាម",
+    "tola": "តូឡា",
+    "taelHK": "តាែល (HK)",
+    "bahtThai": "បាត (ថៃ)"
+  },
+  "melt": {
+    "title": "តម្លៃរលាយមាស",
+    "tabLabel": "តម្លៃរលាយ",
+    "description": "គណនាតម្លៃមាសផ្ទាល់ដោយផ្អែកលើទម្ងន់និងភាពបរិសុទ្ធ។",
+    "weightOz": "ទម្ងន់ (oz)",
+    "karat": "ការ៉ាត",
+    "spotPrice": "Spot $/oz",
+    "meltValue": "តម្លៃរលាយ",
+    "pureGold": "មាសបរិសុទ្ធ"
+  },
+  "pip": {
+    "title": "តម្លៃ Pip XAUUSD",
+    "tabLabel": "តម្លៃ Pip",
+    "description": "1 pip = ការផ្លាស់ប្តូរ $0.01។ 1 lot ស្តង់ដារ = 100 troy ounces។",
+    "lotSize": "ទំហំ Lot",
+    "pipValue": "តម្លៃ Pip",
+    "tenPipMove": "ការផ្លាស់ប្តូរ 10-pip",
+    "dollarMove": "ការផ្លាស់ប្តូរ $1"
+  },
+  "goldPrice": "តម្លៃមាស ($)"
 }

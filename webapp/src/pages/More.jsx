@@ -185,8 +185,8 @@ export default function More() {
             </svg>
           </span>
           <div className="flex-1 min-w-0">
-            <p className="text-text-primary text-sm font-medium">Partner Dashboard</p>
-            <p className="text-purple-400 text-[10px]">View your referrals & commission</p>
+            <p className="text-text-primary text-sm font-medium">{t('partner.dashboard')}</p>
+            <p className="text-purple-400 text-[10px]">{t('partner.referralsDesc')}</p>
           </div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-purple-400 shrink-0">
             <polyline points="9 18 15 12 9 6" />

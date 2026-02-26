@@ -447,7 +447,7 @@ async def save_indicator_snapshot():
 async def collect_cot_data():
     """Collect CFTC Commitments of Traders data for gold (runs every 6h)."""
     try:
-        from app.collectors.cot import COTCollector
+        from app.collectors.cot_data import COTCollector
         from app.database import async_session, COTData
         from sqlalchemy import select
 
@@ -601,19 +601,169 @@ async def collect_session_info():
     """Collect gold trading session data (runs every 5 minutes)."""
     try:
         from app.collectors.session_tracker import SessionTracker
+        from app.database import async_session, GoldSessionData
+        from sqlalchemy import select
 
         tracker = SessionTracker()
         data = await tracker.collect()
-        if data:
-            logger.info(f"Session data collected: {data.get('session_name', 'unknown')}")
+        if not data:
+            return
+
+        session_data_list = data.get("session_data", [])
+        active_sessions = data.get("active_sessions", [])
+        now = datetime.utcnow()
+        today_str = now.strftime("%Y-%m-%d")
+
+        async with async_session() as session:
+            for sd in session_data_list:
+                session_name = sd.get("session_name")
+                open_price = sd.get("open")
+                high_price = sd.get("high")
+                low_price = sd.get("low")
+                close_price = sd.get("close")
+                is_active = sd.get("is_active", False)
+
+                # Skip sessions with no price data at all
+                if open_price is None and high_price is None:
+                    continue
+
+                # Upsert by (date, session_name) — update if existing record found
+                existing = await session.execute(
+                    select(GoldSessionData).where(
+                        GoldSessionData.date == today_str,
+                        GoldSessionData.session_name == session_name,
+                    )
+                )
+                existing_row = existing.scalar_one_or_none()
+
+                range_usd = None
+                if high_price is not None and low_price is not None:
+                    range_usd = round(high_price - low_price, 2)
+
+                direction = None
+                if open_price is not None and close_price is not None:
+                    if close_price > open_price:
+                        direction = "up"
+                    elif close_price < open_price:
+                        direction = "down"
+                    else:
+                        direction = "flat"
+
+                if existing_row:
+                    # Update in-place so we always have the latest OHLC for the session
+                    existing_row.open_price = open_price or existing_row.open_price
+                    existing_row.high_price = high_price or existing_row.high_price
+                    existing_row.low_price = low_price or existing_row.low_price
+                    existing_row.close_price = close_price
+                    existing_row.range_usd = range_usd
+                    existing_row.direction = direction
+                    existing_row.is_active = is_active
+                    if is_active:
+                        existing_row.session_end = None
+                    else:
+                        existing_row.session_end = now
+                else:
+                    row = GoldSessionData(
+                        date=today_str,
+                        session_name=session_name,
+                        open_price=open_price or 0.0,
+                        high_price=high_price or 0.0,
+                        low_price=low_price or 0.0,
+                        close_price=close_price,
+                        volume=None,
+                        range_usd=range_usd,
+                        direction=direction,
+                        session_start=now,
+                        session_end=None if is_active else now,
+                        is_active=is_active,
+                    )
+                    session.add(row)
+
+            await session.commit()
+
+        logger.info(f"Session data saved: active={active_sessions}")
     except Exception as e:
         logger.error(f"Session collection error: {e}")
+
+
+async def collect_economic_calendar():
+    """Collect upcoming economic calendar events (runs every 6h).
+
+    EconomicCalendarCollector.collect() returns:
+        {"events": [...], "count": N}
+    Each event dict has: event_date, event_name, country, importance,
+    actual, forecast, previous, source.
+    """
+    try:
+        from app.collectors.economic_calendar import EconomicCalendarCollector
+        from app.database import async_session, EconomicEvent
+        from sqlalchemy import select
+
+        collector = EconomicCalendarCollector()
+        result = await collector.collect()
+        if not result:
+            logger.info("Economic calendar: No data returned")
+            return
+
+        events = result.get("events", [])
+        if not events:
+            logger.info("Economic calendar: No events returned")
+            return
+
+        inserted = 0
+        async with async_session() as session:
+            for ev in events:
+                event_date_raw = ev.get("event_date")
+                event_name = ev.get("event_name")
+                if not event_date_raw or not event_name:
+                    continue
+
+                # Parse event_date string to datetime
+                if isinstance(event_date_raw, str):
+                    try:
+                        event_date = datetime.fromisoformat(event_date_raw.replace("Z", "+00:00"))
+                        # Store as naive UTC
+                        if event_date.tzinfo is not None:
+                            event_date = event_date.replace(tzinfo=None)
+                    except ValueError:
+                        event_date = datetime.utcnow()
+                else:
+                    event_date = event_date_raw
+
+                # Dedup by (event_name, event_date) — don't insert duplicates
+                existing = await session.execute(
+                    select(EconomicEvent).where(
+                        EconomicEvent.event_name == event_name,
+                        EconomicEvent.event_date == event_date,
+                    )
+                )
+                if existing.scalar_one_or_none():
+                    continue
+
+                event = EconomicEvent(
+                    event_date=event_date,
+                    event_name=event_name,
+                    country=ev.get("country", "US"),
+                    importance=ev.get("importance", "medium"),
+                    actual=ev.get("actual"),
+                    forecast=ev.get("forecast"),
+                    previous=ev.get("previous"),
+                    source=ev.get("source", "scheduled"),
+                )
+                session.add(event)
+                inserted += 1
+
+            await session.commit()
+
+        logger.info(f"Economic calendar: {inserted} new events saved (total fetched: {len(events)})")
+    except Exception as e:
+        logger.error(f"Economic calendar collection error: {e}")
 
 
 async def collect_central_bank_gold():
     """Collect central bank gold purchase data (runs every 24h)."""
     try:
-        from app.collectors.central_bank import CentralBankGoldCollector
+        from app.collectors.central_bank_gold import CentralBankGoldCollector
         from app.database import async_session, CentralBankGold
         from sqlalchemy import select
 
@@ -626,8 +776,10 @@ async def collect_central_bank_gold():
         async with async_session() as session:
             for record in (data if isinstance(data, list) else [data]):
                 report_date = record.get("report_date")
+                if not report_date:
+                    report_date = datetime.utcnow().date()
                 country = record.get("country")
-                if not report_date or not country:
+                if not country:
                     continue
                 existing = await session.execute(
                     select(CentralBankGold).where(

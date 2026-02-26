@@ -325,5 +325,9 @@
     "cftc": "CFTC",
     "cme": "CME",
     "kitco": "Kitco"
+  },
+  "partner": {
+    "dashboard": "Панель партнёра",
+    "referralsDesc": "Ваши рефералы и комиссия"
   }
 }

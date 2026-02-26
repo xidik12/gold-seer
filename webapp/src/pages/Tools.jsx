@@ -265,7 +265,7 @@ function DCACalc() {
             placeholder="12" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
         <div>
-          <label className="text-text-muted text-[10px]">Gold Price ($)</label>
+          <label className="text-text-muted text-[10px]">{t('tools:goldPrice')}</label>
           <input type="number" value={currentPrice} onChange={e => setCurrentPrice(e.target.value)}
             placeholder="2900" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
@@ -303,6 +303,7 @@ function DCACalc() {
 }
 
 function WeightConverter() {
+  const { t } = useTranslation(['tools', 'common'])
   const [amount, setAmount] = useState('1')
   const [fromUnit, setFromUnit] = useState('troy_oz')
   const amountNum = parseFloat(amount) || 0
@@ -316,38 +317,38 @@ function WeightConverter() {
     tael: 37.429,
     baht: 15.244,
   }
-  const labels = {
-    troy_oz: 'Troy Oz',
-    gram: 'Grams',
-    kg: 'Kilograms',
-    tola: 'Tola',
-    tael: 'Tael (HK)',
-    baht: 'Baht (Thai)',
+  const labelKeys = {
+    troy_oz: 'tools:weight.troyOz',
+    gram: 'tools:weight.grams',
+    kg: 'tools:weight.kilograms',
+    tola: 'tools:weight.tola',
+    tael: 'tools:weight.taelHK',
+    baht: 'tools:weight.bahtThai',
   }
 
   const baseGrams = amountNum * (toGrams[fromUnit] || 1)
 
   return (
     <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
-      <h3 className="text-text-secondary text-xs font-semibold mb-3">GOLD WEIGHT CONVERTER</h3>
+      <h3 className="text-text-secondary text-xs font-semibold mb-3">{t('tools:weight.title').toUpperCase()}</h3>
       <div className="grid grid-cols-2 gap-2 mb-3">
         <div>
-          <label className="text-text-muted text-[10px]">Amount</label>
+          <label className="text-text-muted text-[10px]">{t('tools:weight.amount')}</label>
           <input type="number" value={amount} onChange={e => setAmount(e.target.value)}
             placeholder="1" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
         <div>
-          <label className="text-text-muted text-[10px]">From Unit</label>
+          <label className="text-text-muted text-[10px]">{t('tools:weight.fromUnit')}</label>
           <select value={fromUnit} onChange={e => setFromUnit(e.target.value)}
             className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5">
-            {Object.entries(labels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            {Object.entries(labelKeys).map(([k, key]) => <option key={k} value={k}>{t(key)}</option>)}
           </select>
         </div>
       </div>
       {amountNum > 0 && (
         <div className="grid grid-cols-3 gap-2">
           {Object.entries(toGrams).filter(([k]) => k !== fromUnit).map(([unit, factor]) => (
-            <ResultBox key={unit} label={labels[unit]} value={(baseGrams / factor).toFixed(4)} />
+            <ResultBox key={unit} label={t(labelKeys[unit])} value={(baseGrams / factor).toFixed(4)} />
           ))}
         </div>
       )}
@@ -356,6 +357,7 @@ function WeightConverter() {
 }
 
 function MeltValueCalc() {
+  const { t } = useTranslation(['tools', 'common'])
   const [weight, setWeight] = useState('1')
   const [purity, setPurity] = useState('24')
   const [spotPrice, setSpotPrice] = useState('2900')
@@ -368,16 +370,16 @@ function MeltValueCalc() {
 
   return (
     <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
-      <h3 className="text-text-secondary text-xs font-semibold mb-3">GOLD MELT VALUE</h3>
-      <p className="text-text-muted text-[10px] mb-3">Calculate the intrinsic gold value based on weight and purity.</p>
+      <h3 className="text-text-secondary text-xs font-semibold mb-3">{t('tools:melt.title').toUpperCase()}</h3>
+      <p className="text-text-muted text-[10px] mb-3">{t('tools:melt.description')}</p>
       <div className="grid grid-cols-3 gap-2 mb-3">
         <div>
-          <label className="text-text-muted text-[10px]">Weight (oz)</label>
+          <label className="text-text-muted text-[10px]">{t('tools:melt.weightOz')}</label>
           <input type="number" value={weight} onChange={e => setWeight(e.target.value)}
             placeholder="1" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
         <div>
-          <label className="text-text-muted text-[10px]">Karat</label>
+          <label className="text-text-muted text-[10px]">{t('tools:melt.karat')}</label>
           <select value={purity} onChange={e => setPurity(e.target.value)}
             className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5">
             <option value="24">24K (99.9%)</option>
@@ -388,15 +390,15 @@ function MeltValueCalc() {
           </select>
         </div>
         <div>
-          <label className="text-text-muted text-[10px]">Spot $/oz</label>
+          <label className="text-text-muted text-[10px]">{t('tools:melt.spotPrice')}</label>
           <input type="number" value={spotPrice} onChange={e => setSpotPrice(e.target.value)}
             placeholder="2900" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
         </div>
       </div>
       {weightNum > 0 && spotNum > 0 && (
         <div className="grid grid-cols-2 gap-2">
-          <ResultBox label="Melt Value" value={`$${meltValue.toFixed(2)}`} highlight />
-          <ResultBox label="Pure Gold" value={`${(weightNum * purityFactor).toFixed(4)} oz`} />
+          <ResultBox label={t('tools:melt.meltValue')} value={`$${meltValue.toFixed(2)}`} highlight />
+          <ResultBox label={t('tools:melt.pureGold')} value={`${(weightNum * purityFactor).toFixed(4)} oz`} />
         </div>
       )}
     </div>
@@ -404,26 +406,28 @@ function MeltValueCalc() {
 }
 
 function PipValueCalc() {
+  const { t } = useTranslation(['tools', 'common'])
   const [lotSize, setLotSize] = useState('1.0')
   const lotNum = parseFloat(lotSize) || 0
   // XAUUSD: 1 pip = $0.01, 1 lot = 100 oz
   const pipValue = lotNum * 100 * 0.01
-  const tickValue = lotNum * 100 * 0.10
+  // $1 move per lot = lotSize * 100 oz * $1.00 = $100 per standard lot
+  const dollarMoveValue = lotNum * 100 * 1.0
 
   return (
     <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
-      <h3 className="text-text-secondary text-xs font-semibold mb-3">XAUUSD PIP VALUE</h3>
-      <p className="text-text-muted text-[10px] mb-3">1 pip = $0.01 move. 1 standard lot = 100 troy ounces.</p>
+      <h3 className="text-text-secondary text-xs font-semibold mb-3">{t('tools:pip.title').toUpperCase()}</h3>
+      <p className="text-text-muted text-[10px] mb-3">{t('tools:pip.description')}</p>
       <div className="mb-3">
-        <label className="text-text-muted text-[10px]">Lot Size</label>
+        <label className="text-text-muted text-[10px]">{t('tools:pip.lotSize')}</label>
         <input type="number" value={lotSize} onChange={e => setLotSize(e.target.value)} step="0.01"
           placeholder="1.0" className="w-full bg-bg-hover border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary mt-0.5" />
       </div>
       {lotNum > 0 && (
         <div className="grid grid-cols-3 gap-2">
-          <ResultBox label="Pip Value" value={`$${pipValue.toFixed(2)}`} highlight />
-          <ResultBox label="10-pip Move" value={`$${(pipValue * 10).toFixed(2)}`} />
-          <ResultBox label="$1 Move" value={`$${tickValue.toFixed(2)}`} highlight />
+          <ResultBox label={t('tools:pip.pipValue')} value={`$${pipValue.toFixed(2)}`} highlight />
+          <ResultBox label={t('tools:pip.tenPipMove')} value={`$${(pipValue * 10).toFixed(2)}`} />
+          <ResultBox label={t('tools:pip.dollarMove')} value={`$${dollarMoveValue.toFixed(2)}`} highlight />
         </div>
       )}
     </div>
@@ -448,9 +452,9 @@ export default function Tools() {
     { key: 'pnl', label: t('tools:pnl.title') },
     { key: 'rr', label: t('tools:riskReward.title') },
     { key: 'dca', label: t('tools:dca.title') },
-    { key: 'weight', label: 'Weight Convert' },
-    { key: 'melt', label: 'Melt Value' },
-    { key: 'pip', label: 'Pip Value' },
+    { key: 'weight', label: t('tools:weight.tabLabel') },
+    { key: 'melt', label: t('tools:melt.tabLabel') },
+    { key: 'pip', label: t('tools:pip.tabLabel') },
   ]
 
   return (

@@ -28,6 +28,7 @@ from app.scheduler.domain_market import (  # noqa: F401
     collect_etf_flows,
     collect_session_info,
     collect_central_bank_gold,
+    collect_economic_calendar,
 )
 
 # ── ML predictions & evaluation ─────────────────────────────────

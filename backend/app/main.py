@@ -50,6 +50,7 @@ from app.scheduler.jobs import (
     collect_etf_flows,
     collect_session_info,
     collect_central_bank_gold,
+    collect_economic_calendar,
     generate_prediction,
     generate_prediction_1h,
     generate_prediction_4h,
@@ -168,6 +169,7 @@ async def lifespan(app: FastAPI):
         scheduler.add_job(collect_etf_flows, "interval", hours=1, id="collect_etf_flows", **_job_defaults)
         scheduler.add_job(collect_session_info, "interval", minutes=5, id="collect_sessions", **_job_defaults)
         scheduler.add_job(collect_central_bank_gold, "interval", hours=24, id="collect_cb_gold", **_job_defaults)
+        scheduler.add_job(collect_economic_calendar, "interval", hours=6, id="collect_econ_calendar", **_job_defaults)
 
         # Prediction jobs — time-aligned cron schedules (UTC)
         # 1h: every hour at :00

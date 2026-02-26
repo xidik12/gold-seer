@@ -90,5 +90,37 @@
       "item4": "Trading without a plan or strategy",
       "item5": "Revenge trading after a loss"
     }
-  }
+  },
+  "weight": {
+    "title": "Gold Weight Converter",
+    "tabLabel": "Weight",
+    "amount": "Amount",
+    "fromUnit": "From Unit",
+    "troyOz": "Troy Oz",
+    "grams": "Grams",
+    "kilograms": "Kilograms",
+    "tola": "Tola",
+    "taelHK": "Tael (HK)",
+    "bahtThai": "Baht (Thai)"
+  },
+  "melt": {
+    "title": "Gold Melt Value",
+    "tabLabel": "Melt Value",
+    "description": "Calculate the intrinsic gold value based on weight and purity.",
+    "weightOz": "Weight (oz)",
+    "karat": "Karat",
+    "spotPrice": "Spot $/oz",
+    "meltValue": "Melt Value",
+    "pureGold": "Pure Gold"
+  },
+  "pip": {
+    "title": "XAUUSD Pip Value",
+    "tabLabel": "Pip Value",
+    "description": "1 pip = $0.01 move. 1 standard lot = 100 troy ounces.",
+    "lotSize": "Lot Size",
+    "pipValue": "Pip Value",
+    "tenPipMove": "10-pip Move",
+    "dollarMove": "$1 Move"
+  },
+  "goldPrice": "Gold Price ($)"
 }
