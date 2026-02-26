@@ -1284,7 +1284,7 @@ def _add_missing_columns(connection):
                     )
                     _db_logger.info(f"Added missing column: {table.name}.{col.name} ({col_type})")
                 except Exception as e:
-                    _db_logger.debug(f"Column add skipped {table.name}.{col.name}: {e}")
+                    _db_logger.warning(f"Column add skipped {table.name}.{col.name}: {e}")
 
 
 async def init_db():
@@ -1292,6 +1292,9 @@ async def init_db():
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+        # Run column migration in a separate transaction so the inspector
+        # sees the freshly-committed tables/columns from create_all above.
+        async with engine.begin() as conn:
             await conn.run_sync(_add_missing_columns)
         _db_logger.info("Database tables ready")
     except Exception as e:
