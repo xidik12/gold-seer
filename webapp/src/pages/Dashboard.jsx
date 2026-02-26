@@ -233,7 +233,7 @@ const CATEGORIES = [
     titleKey: 'category.analysis',
     links: [
       { path: '/technical', labelKey: 'link.technical', icon: 'technical' },
-      { path: '/quant', labelKey: 'link.quantAnalysis', icon: 'quant' },
+      { path: '/technical', labelKey: 'link.quantAnalysis', icon: 'quant' },
       { path: '/elliott-wave', labelKey: 'link.elliottWave', icon: 'elliott' },
       { path: '/cot', labelKey: 'link.cotData', icon: 'cot' },
       { path: '/sessions', labelKey: 'link.sessions', icon: 'sessions' },

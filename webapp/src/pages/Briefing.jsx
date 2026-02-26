@@ -88,7 +88,7 @@ export default function Briefing() {
                 ${briefing.gold_price?.toLocaleString() || '—'}
               </span>
               <span className={`text-sm font-medium ${changeColor}`}>
-                {change > 0 ? '+' : ''}{change?.toFixed(2)}%
+                {change != null ? `${change > 0 ? '+' : ''}${change.toFixed(2)}%` : '--'}
               </span>
             </div>
             {briefing.confidence && (

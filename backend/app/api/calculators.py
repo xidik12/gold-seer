@@ -1,8 +1,21 @@
-"""Gold trading calculators — pure math endpoints, no DB."""
+"""Gold trading calculators — pure math endpoints, minimal DB for live price."""
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import select, desc
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database import get_session, Price
 
 router = APIRouter(prefix="/api/calculators", tags=["calculators"])
+
+
+async def _get_latest_gold_price(session: AsyncSession) -> float:
+    """Fetch the latest gold close price from the DB, fallback to 2900."""
+    result = await session.execute(
+        select(Price).order_by(desc(Price.timestamp)).limit(1)
+    )
+    price = result.scalar_one_or_none()
+    return price.close if price and price.close else 2900.0
 
 
 @router.get("/pip-value")
@@ -28,10 +41,12 @@ async def lot_size(
     account_balance: float = Query(..., ge=0, description="Account balance in USD"),
     risk_pct: float = Query(2.0, ge=0.1, le=100, description="Risk percentage"),
     stop_loss_pips: float = Query(..., ge=1, description="Stop loss distance in pips"),
+    session: AsyncSession = Depends(get_session),
 ):
     """Calculate optimal lot size based on risk management."""
     contract_size = 100
     pip_size = 0.01
+    gold_price = await _get_latest_gold_price(session)
     risk_amount = account_balance * (risk_pct / 100)
     pip_value_per_lot = contract_size * pip_size  # $1.00 per pip per lot
     lot_size = risk_amount / (stop_loss_pips * pip_value_per_lot) if stop_loss_pips > 0 else 0
@@ -41,7 +56,8 @@ async def lot_size(
         "risk_amount_usd": round(risk_amount, 2),
         "stop_loss_pips": stop_loss_pips,
         "recommended_lot_size": round(lot_size, 2),
-        "position_value_usd": round(lot_size * contract_size * 2900, 2),  # approximate
+        "position_value_usd": round(lot_size * contract_size * gold_price, 2),
+        "gold_price_used": gold_price,
     }
 
 

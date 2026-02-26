@@ -62,12 +62,13 @@ function IndicatorRow({ label, value, unit, signal, description, t }) {
 }
 
 function GaugeBar({ value, min, max, zones, label, explanation }) {
+  if (value == null) return null
   const pct = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100))
   return (
     <div className="mb-3">
       <div className="flex items-center justify-between mb-1">
         <span className="text-text-secondary text-xs">{label}</span>
-        <span className="text-text-primary text-sm font-bold tabular-nums">{value?.toFixed(1)}</span>
+        <span className="text-text-primary text-sm font-bold tabular-nums">{value.toFixed(1)}</span>
       </div>
       <div className="relative w-full h-3 rounded-full overflow-hidden flex">
         {zones.map((z, i) => (
@@ -778,9 +779,20 @@ export default function Technical() {
         color="text-accent-gold"
         explain={t('technical.advanced.explain')}
       >
-        <IndicatorRow label="Gold/Silver Ratio" value={data?.gold_silver_ratio || (price && data?.moving_averages?.sma_20 ? null : null)} t={t}
+        <IndicatorRow label={t('technical.advanced.goldSilverRatio')} value={data?.gold_silver_ratio} t={t}
           signal="neutral"
-          description="The gold/silver ratio indicates relative precious metal valuations. Historically averages ~65. Above 80 = silver undervalued, below 50 = silver overvalued."
+          description={data?.gold_silver_ratio != null
+            ? data.gold_silver_ratio > 80
+              ? t('technical.advanced.goldSilverHigh', { value: data.gold_silver_ratio.toFixed(1) })
+              : data.gold_silver_ratio > 65
+              ? t('technical.advanced.goldSilverElevated', { value: data.gold_silver_ratio.toFixed(1) })
+              : data.gold_silver_ratio > 50
+              ? t('technical.advanced.goldSilverNormal', { value: data.gold_silver_ratio.toFixed(1) })
+              : data.gold_silver_ratio > 40
+              ? t('technical.advanced.goldSilverLow', { value: data.gold_silver_ratio.toFixed(1) })
+              : t('technical.advanced.goldSilverVeryLow', { value: data.gold_silver_ratio.toFixed(1) })
+            : null
+          }
         />
         <IndicatorRow label={t('technical.advanced.goldenDeath')} value={adv.ema_cross} t={t}
           signal={adv.ema_cross > 1 ? 'bullish' : 'bearish'}

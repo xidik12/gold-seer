@@ -4,6 +4,7 @@ import { api } from '../utils/api.js'
 import {
   formatPricePrecise,
   formatTimeAgo,
+  safeFixed,
 } from '../utils/format.js'
 
 const POLL_INTERVAL = 30_000
@@ -75,7 +76,7 @@ function SignalBreakdown({ breakdown, expanded, t }) {
               <div className="flex items-center justify-between">
                 <span className="text-text-secondary font-medium">{label}</span>
                 <span className="text-text-muted text-[10px] tabular-nums">
-                  {(sig.confidence * 100).toFixed(0)}%
+                  {sig.confidence != null ? safeFixed(sig.confidence * 100, 0) : '--'}%
                 </span>
               </div>
               <p className="text-text-muted text-[10px] truncate">{sig.reasoning}</p>
@@ -169,7 +170,7 @@ export default function QuantPredictionCard() {
         <div className="flex items-center justify-between mb-1">
           <span className="text-text-muted text-[10px]">{t('common:direction.bearish')}</span>
           <span className={`text-xs font-bold tabular-nums ${isUp ? 'text-accent-green' : 'text-accent-red'}`}>
-            {score > 0 ? '+' : ''}{score.toFixed(0)}
+            {score > 0 ? '+' : ''}{safeFixed(score, 0)}
           </span>
           <span className="text-text-muted text-[10px]">{t('common:direction.bullish')}</span>
         </div>
@@ -177,7 +178,7 @@ export default function QuantPredictionCard() {
         <div className="flex items-center justify-between mt-1.5">
           <span className="text-text-muted text-[10px]">
             {data.bullish_signals || 0}{t('prediction.bullishShort')} / {data.bearish_signals || 0}{t('prediction.bearishShort')}
-            {data.agreement_ratio ? ` (${(data.agreement_ratio * 100).toFixed(0)}% ${t('prediction.agreement')})` : ''}
+            {data.agreement_ratio != null && isFinite(data.agreement_ratio) ? ` (${safeFixed(data.agreement_ratio * 100, 0)}% ${t('prediction.agreement')})` : ''}
           </span>
           <span className="text-text-muted text-[10px] tabular-nums">
             {data.active_signals || 0}/{Object.keys(data.signal_breakdown || {}).length} {t('prediction.activeSignals')}
@@ -214,7 +215,7 @@ export default function QuantPredictionCard() {
                       </span>
                     ) : null}
                     <span className={`text-xs ml-1.5 ${color} opacity-80`}>
-                      ({changePct > 0 ? '+' : ''}{changePct.toFixed(2)}%)
+                      ({changePct > 0 ? '+' : ''}{safeFixed(changePct, 2)}%)
                     </span>
                   </div>
                 </div>
@@ -228,7 +229,7 @@ export default function QuantPredictionCard() {
                     />
                   </div>
                   <span className="text-text-muted text-[10px] tabular-nums w-7 text-right">
-                    {(data.confidence || 0).toFixed(0)}%
+                    {safeFixed(data.confidence ?? 0, 0)}%
                   </span>
                 </div>
               </div>

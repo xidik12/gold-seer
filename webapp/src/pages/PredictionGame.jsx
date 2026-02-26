@@ -363,7 +363,7 @@ export default function PredictionGame() {
               <p className="text-text-muted text-[10px]">{t('game.streak')}</p>
             </div>
             <div className="bg-bg-secondary rounded-xl p-2 text-center">
-              <p className="text-text-primary font-bold text-lg">{Math.round(profile.accuracy_pct)}%</p>
+              <p className="text-text-primary font-bold text-lg">{profile.accuracy_pct != null && isFinite(profile.accuracy_pct) ? Math.round(profile.accuracy_pct) : '--'}%</p>
               <p className="text-text-muted text-[10px]">{t('game.accuracy')}</p>
             </div>
           </div>

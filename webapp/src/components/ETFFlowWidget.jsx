@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
+import { safeFixed } from '../utils/format'
 
 const ETF_NAMES = ['GLD', 'IAU', 'SGOL', 'GLDM']
 
@@ -44,11 +45,11 @@ export default function ETFFlowWidget({ flows = [] }) {
             tick={{ fill: '#999', fontSize: 9 }}
             axisLine={false}
             tickLine={false}
-            tickFormatter={(v) => `${v > 0 ? '+' : ''}${v.toFixed(0)}`}
+            tickFormatter={(v) => v != null && isFinite(v) ? `${v > 0 ? '+' : ''}${safeFixed(v, 0)}` : '--'}
           />
           <Tooltip
             contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }}
-            formatter={(value) => [`${value > 0 ? '+' : ''}${value.toFixed(1)} tonnes`, t('etfFlow.flow', 'Flow')]}
+            formatter={(value) => [value != null && isFinite(value) ? `${value > 0 ? '+' : ''}${safeFixed(value, 1)} tonnes` : '--', t('etfFlow.flow', 'Flow')]}
           />
           <Bar dataKey="flow" radius={[3, 3, 0, 0]}>
             {chartData.map((entry, i) => (

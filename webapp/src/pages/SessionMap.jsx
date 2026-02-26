@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../utils/api'
-import { formatPricePrecise, formatPercent } from '../utils/format'
+import { formatPricePrecise, formatPercent, safeFixed } from '../utils/format'
 import SessionClock from '../components/SessionClock'
 
 const POLL_INTERVAL = 60_000
@@ -64,12 +64,12 @@ function SessionCard({ session, data = {} }) {
         )}
         {range != null && (
           <span className="text-text-muted text-[10px] tabular-nums">
-            {t('sessions.range', 'Range')}: ${range.toFixed(2)}
+            {t('sessions.range', 'Range')}: ${safeFixed(range, 2)}
           </span>
         )}
         {data.volume != null && (
           <span className="text-text-muted text-[10px] tabular-nums">
-            {t('sessions.vol', 'Vol')}: {(data.volume / 1000).toFixed(1)}K
+            {t('sessions.vol', 'Vol')}: {safeFixed(data.volume / 1000, 1)}K
           </span>
         )}
       </div>
@@ -212,8 +212,8 @@ export default function SessionMap() {
           <h4 className="text-text-primary text-xs font-semibold mb-2">{t('sessions.todayStats', 'Today\'s Stats')}</h4>
           <div className="grid grid-cols-3 gap-2">
             {[
-              { label: t('sessions.totalRange', 'Total Range'), value: data.stats.total_range ? `$${data.stats.total_range.toFixed(2)}` : '--' },
-              { label: t('sessions.totalVol', 'Total Volume'), value: data.stats.total_volume ? `${(data.stats.total_volume / 1000).toFixed(1)}K` : '--' },
+              { label: t('sessions.totalRange', 'Total Range'), value: data.stats.total_range != null && isFinite(data.stats.total_range) ? `$${safeFixed(data.stats.total_range, 2)}` : '--' },
+              { label: t('sessions.totalVol', 'Total Volume'), value: data.stats.total_volume != null && isFinite(data.stats.total_volume) ? `${safeFixed(data.stats.total_volume / 1000, 1)}K` : '--' },
               { label: t('sessions.dayChange', 'Day Change'), value: data.stats.day_change != null ? formatPercent(data.stats.day_change) : '--' },
             ].map((s) => (
               <div key={s.label} className="text-center">

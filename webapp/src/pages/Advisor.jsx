@@ -219,7 +219,7 @@ function AnalysisCard({ analysis, t }) {
             <span className={`text-xs font-bold ${ew.direction === 'bullish' ? 'text-accent-green' : ew.direction === 'bearish' ? 'text-accent-red' : 'text-text-muted'}`}>
               W{ew.current_wave} {ew.pattern}
             </span>
-            <span className="text-text-muted text-[10px]">{(ew.confidence * 100)?.toFixed(0)}%</span>
+            <span className="text-text-muted text-[10px]">{ew.confidence != null ? (ew.confidence * 100).toFixed(0) : '--'}%</span>
           </div>
         </div>
       )}
@@ -286,8 +286,8 @@ function AIAccuracyCard({ feedback, t }) {
       <div className="grid grid-cols-3 gap-2">
         <div className="text-center">
           <div className="text-text-muted text-[9px]">{t('advisor.directionLabel')}</div>
-          <div className={`text-sm font-bold ${feedback.direction_accuracy >= 55 ? 'text-accent-green' : 'text-accent-red'}`}>
-            {feedback.direction_accuracy.toFixed(0)}%
+          <div className={`text-sm font-bold ${(feedback.direction_accuracy ?? 0) >= 55 ? 'text-accent-green' : 'text-accent-red'}`}>
+            {feedback.direction_accuracy != null ? feedback.direction_accuracy.toFixed(0) : '--'}%
           </div>
         </div>
         <div className="text-center">
@@ -298,8 +298,8 @@ function AIAccuracyCard({ feedback, t }) {
         </div>
         <div className="text-center">
           <div className="text-text-muted text-[9px]">{t('advisor.avgRRLabel')}</div>
-          <div className={`text-sm font-bold ${feedback.avg_achieved_rr >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
-            {feedback.avg_achieved_rr.toFixed(1)}
+          <div className={`text-sm font-bold ${(feedback.avg_achieved_rr ?? 0) >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
+            {feedback.avg_achieved_rr != null ? feedback.avg_achieved_rr.toFixed(1) : '--'}
           </div>
         </div>
       </div>
@@ -403,7 +403,7 @@ function TradeCard({ trade, onOpen, onClose, currentPrice, t }) {
         <div className="text-right">
           <div className="text-text-muted text-[9px]">{t('trade.pnl', { ns: 'common' })}</div>
           <div className={`font-bold tabular-nums ${pnlPct >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
-            {pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%
+            {pnlPct >= 0 ? '+' : ''}{isNaN(pnlPct) ? '--' : pnlPct.toFixed(2)}%
           </div>
         </div>
       </div>

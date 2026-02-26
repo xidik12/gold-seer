@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../utils/api'
-import { formatPrice, formatTime, formatDate, formatTimeAgo, getActionColor, getActionBg } from '../utils/format'
+import { formatPrice, formatTime, formatDate, formatTimeAgo, getActionColor, getActionBg, safeFixed } from '../utils/format'
 import SubTabBar from '../components/SubTabBar'
 import DataSourceFooter from '../components/DataSourceFooter'
 
@@ -51,7 +51,7 @@ function LiveSignalCard({ signal, t }) {
         <div className="flex-1">
           <div className="flex items-center justify-between text-[9px] text-text-muted mb-0.5">
             <span>{t('signals.confidence')}</span>
-            <span className="font-mono">{signal.confidence?.toFixed(0)}%</span>
+            <span className="font-mono">{safeFixed(signal.confidence, 0)}%</span>
           </div>
           <div className="h-1.5 bg-bg-hover rounded-full overflow-hidden">
             <div
@@ -143,7 +143,7 @@ function SignalCard({ signal, t }) {
       {expanded && (
         <div className="mt-2 pt-2 border-t border-white/5 space-y-1.5">
           <div className="flex items-center justify-between text-[10px]">
-            <span className="text-text-muted">{t('signals.confidence')}: {signal.confidence?.toFixed(0)}%</span>
+            <span className="text-text-muted">{t('signals.confidence')}: {safeFixed(signal.confidence, 0)}%</span>
             <span className="text-text-muted">{t('signals.risk')}: {signal.risk_rating}/10</span>
           </div>
           <div className="text-text-muted text-[10px]">

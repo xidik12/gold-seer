@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../utils/api'
-import { formatNumber, formatPricePrecise, formatDate } from '../utils/format'
+import { formatNumber, formatPricePrecise, formatDate, safeFixed } from '../utils/format'
 import ETFFlowWidget from '../components/ETFFlowWidget'
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, ComposedChart,
@@ -99,7 +99,7 @@ export default function GoldETF() {
               <YAxis tick={{ fill: '#999', fontSize: 9 }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }}
-                formatter={(v) => [`${v > 0 ? '+' : ''}${v.toFixed(2)}t`, t('goldEtf.flow', 'Flow')]}
+                formatter={(v) => [v != null && isFinite(v) ? `${v > 0 ? '+' : ''}${safeFixed(v, 2)}t` : '--', t('goldEtf.flow', 'Flow')]}
               />
               <Bar dataKey="flow" radius={[2, 2, 0, 0]}>
                 {dailyFlows.slice(-30).map((entry, i) => (
@@ -132,7 +132,7 @@ export default function GoldETF() {
               <YAxis tick={{ fill: '#999', fontSize: 9 }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{ background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, fontSize: 11 }}
-                formatter={(v) => [`${v.toFixed(1)} tonnes`, t('goldEtf.holdings', 'Holdings')]}
+                formatter={(v) => [v != null && isFinite(v) ? `${safeFixed(v, 1)} tonnes` : '--', t('goldEtf.holdings', 'Holdings')]}
               />
               <Line type="monotone" dataKey="holdings" stroke="#D4AF37" strokeWidth={2} dot={false} />
             </LineChart>
@@ -188,7 +188,7 @@ export default function GoldETF() {
                 <div className="flex justify-between">
                   <span className="text-text-muted text-[10px]">{t('goldEtf.holdings', 'Holdings')}</span>
                   <span className="text-text-primary text-[10px] font-semibold tabular-nums">
-                    {etf.holdings != null ? `${etf.holdings.toFixed(1)}t` : '--'}
+                    {etf.holdings != null ? `${safeFixed(etf.holdings, 1)}t` : '--'}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -197,7 +197,7 @@ export default function GoldETF() {
                     (etf.daily_flow ?? etf.net_flow ?? 0) >= 0 ? 'text-accent-green' : 'text-accent-red'
                   }`}>
                     {etf.daily_flow != null || etf.net_flow != null
-                      ? `${(etf.daily_flow ?? etf.net_flow) > 0 ? '+' : ''}${(etf.daily_flow ?? etf.net_flow).toFixed(2)}t`
+                      ? `${(etf.daily_flow ?? etf.net_flow) > 0 ? '+' : ''}${safeFixed(etf.daily_flow ?? etf.net_flow, 2)}t`
                       : '--'
                     }
                   </span>

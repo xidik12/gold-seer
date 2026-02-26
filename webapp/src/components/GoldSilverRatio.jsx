@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../utils/api'
+import { safeFixed } from '../utils/format'
 
 export default function GoldSilverRatio() {
   const { t } = useTranslation()
@@ -49,7 +50,7 @@ export default function GoldSilverRatio() {
       </h4>
 
       <div className="flex items-baseline gap-2 mb-3">
-        <span className="text-2xl font-bold text-accent-goldBright tabular-nums">{ratio.toFixed(1)}</span>
+        <span className="text-2xl font-bold text-accent-goldBright tabular-nums">{safeFixed(ratio, 1)}</span>
         {isExtended && (
           <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-accent-red/10 text-accent-red">
             {t('goldSilverRatio.extended', 'Extended')}
@@ -69,9 +70,9 @@ export default function GoldSilverRatio() {
       </div>
 
       <div className="flex justify-between mt-1">
-        <span className="text-text-muted text-[9px] tabular-nums">{bbLow.toFixed(0)}</span>
+        <span className="text-text-muted text-[9px] tabular-nums">{safeFixed(bbLow, 0)}</span>
         <span className="text-text-muted text-[9px]">{t('goldSilverRatio.range', 'BB Range')}</span>
-        <span className="text-text-muted text-[9px] tabular-nums">{bbHigh.toFixed(0)}</span>
+        <span className="text-text-muted text-[9px] tabular-nums">{safeFixed(bbHigh, 0)}</span>
       </div>
     </div>
   )

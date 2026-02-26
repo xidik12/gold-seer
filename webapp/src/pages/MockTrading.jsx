@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../utils/api'
 import { useTelegram } from '../hooks/useTelegram'
 import { useTutorial } from '../hooks/useTutorial'
-import { formatPrice, formatPercent, formatTimeAgo } from '../utils/format'
+import { formatPrice, formatPercent, formatTimeAgo, safeFixed } from '../utils/format'
 import SubTabBar from '../components/SubTabBar'
 import TutorialOverlay from '../components/tutorial/TutorialOverlay'
 
@@ -475,7 +475,7 @@ const PriceBanner = memo(function PriceBanner({ t }) {
           <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${
             change >= 0 ? 'bg-accent-green/15 text-accent-green' : 'bg-accent-red/15 text-accent-red'
           }`}>
-            {change >= 0 ? '+' : ''}{change.toFixed(2)}%
+            {change >= 0 ? '+' : ''}{safeFixed(change, 2)}%
           </span>
         )}
       </div>
@@ -513,7 +513,7 @@ const PositionCard = memo(function PositionCard({ trade, onClose, t }) {
           <span className="text-[9px] px-1.5 py-0.5 rounded bg-accent-goldBright/15 text-accent-goldBright">{t('app.paper', { ns: 'common' })}</span>
         </div>
         <div className={`text-sm font-bold tabular-nums ${pnlPct >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
-          {pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%
+          {pnlPct >= 0 ? '+' : ''}{safeFixed(pnlPct, 2)}%
         </div>
       </div>
 
@@ -534,7 +534,7 @@ const PositionCard = memo(function PositionCard({ trade, onClose, t }) {
         <div className="text-right">
           <div className="text-text-muted text-[9px]">{t('trade.pnl', { ns: 'common' })}</div>
           <div className={`font-bold tabular-nums ${pnlPct >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
-            {pnlUsdt >= 0 ? '+' : ''}${Math.abs(pnlUsdt).toFixed(2)}
+            {pnlUsdt >= 0 ? '+' : ''}${safeFixed(Math.abs(pnlUsdt), 2)}
           </div>
         </div>
       </div>
@@ -603,7 +603,7 @@ const HistoryRow = memo(function HistoryRow({ trade, t }) {
             {trade.pnl_usdt >= 0 ? '+' : ''}{formatPrice(trade.pnl_usdt)}
           </span>
           <span className={`text-[9px] ml-1 ${trade.pnl_pct_leveraged >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
-            ({trade.pnl_pct_leveraged >= 0 ? '+' : ''}{trade.pnl_pct_leveraged?.toFixed(1)}%)
+            ({trade.pnl_pct_leveraged >= 0 ? '+' : ''}{safeFixed(trade.pnl_pct_leveraged, 1)}%)
           </span>
         </div>
       </div>
@@ -640,19 +640,19 @@ const PortfolioSummary = memo(function PortfolioSummary({ trades, history, t }) 
       <div className="flex items-center justify-between mb-2">
         <div>
           <div className="text-text-muted text-[9px]">{t('portfolio.balance')}</div>
-          <div className="text-text-primary text-lg font-bold tabular-nums">${balance.toFixed(2)}</div>
+          <div className="text-text-primary text-lg font-bold tabular-nums">${safeFixed(balance, 2)}</div>
         </div>
         <div className="text-right">
           <div className="text-text-muted text-[9px]">{t('portfolio.totalPnl')}</div>
           <div className={`text-lg font-bold tabular-nums ${totalPnl >= 0 ? 'text-accent-green' : 'text-accent-red'}`}>
-            {totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)}
+            {totalPnl >= 0 ? '+' : ''}${safeFixed(totalPnl, 2)}
           </div>
         </div>
       </div>
       <div className="grid grid-cols-3 gap-2 text-center mb-3">
         <div>
           <div className="text-text-muted text-[9px]">{t('portfolio.winRate')}</div>
-          <div className="text-text-primary text-sm font-bold">{winRate.toFixed(0)}%</div>
+          <div className="text-text-primary text-sm font-bold">{safeFixed(winRate, 0)}%</div>
         </div>
         <div>
           <div className="text-text-muted text-[9px]">{t('portfolio.totalTrades')}</div>

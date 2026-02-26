@@ -114,8 +114,8 @@ async def get_current_price(session: AsyncSession = Depends(get_session)):
         "high": price.high,
         "low": price.low,
         "volume": price.volume,
-        "change_24h": round(change_24h, 2) if change_24h else None,
-        "change_24h_pct": round(change_24h_pct, 2) if change_24h_pct else None,
+        "change_24h": round(change_24h, 2) if change_24h is not None else None,
+        "change_24h_pct": round(change_24h_pct, 2) if change_24h_pct is not None else None,
         "timestamp": price.timestamp.isoformat(),
     }
 

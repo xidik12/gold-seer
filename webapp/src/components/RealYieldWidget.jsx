@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../utils/api'
+import { safeFixed } from '../utils/format'
 
 export default function RealYieldWidget() {
   const { t } = useTranslation()
@@ -47,7 +48,7 @@ export default function RealYieldWidget() {
 
       <div className="flex items-center gap-3 mb-2">
         <span className="text-xl font-bold tabular-nums text-accent-goldBright">
-          {realYield != null ? `${realYield.toFixed(2)}%` : '--'}
+          {realYield != null ? `${safeFixed(realYield, 2)}%` : '--'}
         </span>
         {/* Trend arrow */}
         <span className={`text-lg ${trend === 'falling' ? 'text-accent-green' : 'text-accent-red'}`}>
@@ -67,7 +68,7 @@ export default function RealYieldWidget() {
 
       {tipsBreakeven != null && (
         <p className="text-text-muted text-[10px]">
-          {t('realYield.tipsBreakeven', 'TIPS Breakeven')}: {tipsBreakeven.toFixed(2)}%
+          {t('realYield.tipsBreakeven', 'TIPS Breakeven')}: {safeFixed(tipsBreakeven, 2)}%
         </p>
       )}
     </div>

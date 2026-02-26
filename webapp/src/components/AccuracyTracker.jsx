@@ -10,7 +10,7 @@ import {
   Brush,
 } from 'recharts'
 import { api } from '../utils/api.js'
-import { formatDate, formatPercent } from '../utils/format.js'
+import { formatDate, formatPercent, safeFixed } from '../utils/format.js'
 
 function TrendTooltip({ active, payload }) {
   if (!active || !payload?.length) return null
@@ -19,7 +19,7 @@ function TrendTooltip({ active, payload }) {
     <div className="bg-bg-card border border-text-muted/20 rounded-lg px-2.5 py-1.5 shadow-xl text-xs">
       <p className="text-text-secondary">{formatDate(d.date)}</p>
       <p className="text-text-primary font-medium">
-        {d.accuracy?.toFixed(1)}%
+        {safeFixed(d.accuracy, 1)}%
       </p>
     </div>
   )
@@ -35,7 +35,7 @@ function ProgressBar({ label, value, total }) {
       <div className="flex items-center justify-between">
         <span className="text-text-secondary text-xs">{label}</span>
         <span className="text-text-primary text-xs font-medium">
-          {pct.toFixed(1)}%
+          {safeFixed(pct, 1)}%
         </span>
       </div>
       <div className="h-1.5 bg-bg-secondary rounded-full overflow-hidden">
@@ -128,7 +128,7 @@ export default function AccuracyTracker() {
           {/* Overall accuracy */}
           <div className="text-center mb-4">
             <p className={`text-4xl font-bold ${overallColor}`}>
-              {overall.toFixed(1)}%
+              {safeFixed(overall, 1)}%
             </p>
             <p className="text-text-muted text-xs mt-1">
               {t('accuracy.basedOn', 'Based on {{count}} predictions', { count: totalPredictions.toLocaleString() })}
