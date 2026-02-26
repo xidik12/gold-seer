@@ -878,6 +878,93 @@ async def get_ta_summary(session: AsyncSession = Depends(get_session)):
     return result
 
 
+@router.get("/silver")
+async def get_silver_data(session: AsyncSession = Depends(get_session)):
+    """Get current silver price, 24h change, and gold/silver ratio."""
+    cached = _get_cached("silver")
+    if cached is not None:
+        return cached
+
+    try:
+        macro, prev_macro, daily_macro = await _get_macro_trio(session)
+    except Exception as e:
+        logger.warning(f"Silver data query failed: {e}")
+        macro = None
+
+    if not macro or macro.silver is None:
+        return {
+            "silver_price": None,
+            "change_24h": None,
+            "change_24h_pct": None,
+            "gold_price": None,
+            "gold_silver_ratio": None,
+            "ratio_signal": None,
+            "ratio_interpretation": None,
+            "timestamp": None,
+        }
+
+    silver_price = macro.silver
+    gold_price = macro.gold
+
+    # 24h change
+    change_24h = None
+    change_24h_pct = None
+    if daily_macro and daily_macro.silver and daily_macro.silver > 0:
+        change_24h = round(silver_price - daily_macro.silver, 4)
+        change_24h_pct = round((change_24h / daily_macro.silver) * 100, 2)
+
+    # Gold/Silver ratio
+    ratio = None
+    if gold_price and silver_price and silver_price > 0:
+        ratio = round(gold_price / silver_price, 2)
+
+    # 24h ratio change
+    ratio_prev = None
+    ratio_change = None
+    if daily_macro and daily_macro.gold and daily_macro.silver and daily_macro.silver > 0:
+        ratio_prev = round(daily_macro.gold / daily_macro.silver, 2)
+        if ratio is not None:
+            ratio_change = round(ratio - ratio_prev, 2)
+
+    # Signal interpretation based on historical gold/silver ratio
+    # Historical range: ~15 (all-time low) to ~130 (2020 peak), average ~65
+    ratio_signal = "neutral"
+    ratio_interpretation = "Gold/silver ratio is within normal range"
+    if ratio is not None:
+        if ratio > 90:
+            ratio_signal = "silver_very_undervalued"
+            ratio_interpretation = "Extreme ratio — silver is historically very undervalued vs gold. Mean-reversion favors silver."
+        elif ratio > 80:
+            ratio_signal = "silver_undervalued"
+            ratio_interpretation = "High ratio — silver appears undervalued relative to gold. Historically tends to revert."
+        elif ratio > 70:
+            ratio_signal = "slightly_high"
+            ratio_interpretation = "Ratio above average — slight silver undervaluation signal."
+        elif ratio > 55:
+            ratio_signal = "neutral"
+            ratio_interpretation = "Gold/silver ratio near historical average (~65). No strong directional signal."
+        elif ratio > 50:
+            ratio_signal = "slightly_low"
+            ratio_interpretation = "Ratio below average — slight silver overvaluation signal."
+        else:
+            ratio_signal = "silver_overvalued"
+            ratio_interpretation = "Low ratio — silver is relatively expensive vs gold. Could mean-revert downward."
+
+    result = {
+        "silver_price": silver_price,
+        "change_24h": change_24h,
+        "change_24h_pct": change_24h_pct,
+        "gold_price": gold_price,
+        "gold_silver_ratio": ratio,
+        "ratio_change_24h": ratio_change,
+        "ratio_signal": ratio_signal,
+        "ratio_interpretation": ratio_interpretation,
+        "timestamp": macro.timestamp.isoformat(),
+    }
+    _set_cache("silver", result, 120)
+    return result
+
+
 @router.get("/correlations")
 async def get_correlations(session: AsyncSession = Depends(get_session)):
     """Get rolling 30-day correlations between gold and key macro variables."""

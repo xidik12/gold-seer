@@ -1,20 +1,19 @@
 {
   "title": "资源与工具",
-  "subtitle": "专家精选的专业交易者使用的平台和工具。基于社区推荐、专家评测和实际表现。",
+  "subtitle": "专家精选的专业黄金和外汇交易者使用的平台与数据来源。基于行业标准、专家评测和实际表现。",
   "categories": {
-    "exchanges": "交易所",
-    "analysis": "分析工具",
-    "onChain": "市场数据",
-    "portfolio": "投资组合追踪",
-    "bots": "交易机器人",
-    "learning": "学习平台",
+    "marketData": "市场数据",
+    "economicData": "经济数据",
+    "analysis": "分析与资讯",
+    "etf": "ETF与持仓",
+    "platforms": "交易平台",
     "learn": "学习"
   },
   "tierGuide": "等级指南",
   "tiers": {
     "essential": {
       "name": "必备",
-      "desc": "每个交易者必备的工具"
+      "desc": "每个黄金交易者必备的工具"
     },
     "beginner": {
       "name": "入门",
@@ -32,78 +31,78 @@
   "gettingStarted": {
     "title": "入门指南",
     "beginner_label": "初学者：",
-    "beginner_desc": "从 TradingView（图表）+ Kitco（实时金价）+ FRED（宏观数据）开始。学习基础知识。",
+    "beginner_desc": "从 TradingView（XAUUSD图表）+ Kitco（实时金价）+ FRED（实际收益率与宏观数据）开始。学习影响黄金价格的基本因素。",
     "intermediate_label": "中级：",
-    "intermediate_desc": "添加 CME Group（期货/持仓数据）+ World Gold Council（市场报告）+ 投资组合追踪器。开始使用指标。",
+    "intermediate_desc": "添加 CME Group（期货未平仓量）+ World Gold Council（ETF资金流向与需求）+ CFTC COT报告（持仓数据）。开始分析宏观驱动因素。",
     "advanced_label": "高级：",
-    "advanced_desc": "加入 CFTC COT 报告（机构持仓）+ LBMA（定价数据）+ 交易机器人。构建系统化策略。"
+    "advanced_desc": "加入 LBMA 基准数据 + Bloomberg Terminal（专业分析）+ MetaTrader EA自动化交易。构建系统化黄金交易策略。"
   },
   "keyMetrics": {
-    "title": "每个交易者都应追踪的关键指标",
-    "fearGreed": {
-      "name": "恐惧与贪婪指数",
-      "source": "CNN Business / Alternative.me",
-      "why": "一目了然的市场情绪。极度恐惧 = 潜在买入，极度贪婪 = 潜在卖出。"
+    "title": "每位黄金交易者都应追踪的关键指标",
+    "goldSilverRatio": {
+      "name": "金银比",
+      "source": "Kitco / TradingView",
+      "why": "衡量黄金与白银的相对价值。历史高位（>80）= 白银被低估；低位（<50）= 黄金相对偏贵。"
     },
-    "mvrv": {
-      "name": "MVRV Z-Score",
-      "source": "World Gold Council / Kitco",
-      "why": "基于市场估值识别黄金周期顶部和底部。"
-    },
-    "fundingRates": {
-      "name": "资金费率",
-      "source": "CME Group / CFTC",
-      "why": "显示衍生品市场定位。极端资金费率 = 潜在反转信号。"
-    },
-    "exchangeNetflows": {
-      "name": "交易所净流量",
-      "source": "World Gold Council / CFTC",
-      "why": "Gold流入市场 = 潜在抛售。流出 = 积累。"
-    },
-    "openInterest": {
-      "name": "未平仓合约",
-      "source": "CME Group / CFTC",
-      "why": "OI上升 + 价格上涨 = 强势趋势。OI上升 + 价格下跌 = 空头压力。"
-    },
-    "rsiMacd": {
-      "name": "RSI + MACD 组合",
-      "source": "TradingView / Griffin Gold",
-      "why": "最可靠的指标组合。RSI用于超买/超卖，MACD用于趋势确认。"
-    },
-    "btcDominance": {
-      "name": "Gold主导地位",
-      "source": "World Gold Council / Griffin Gold",
-      "why": "黄金市场份额上升 = 资金流向Gold避险。下降 = 资金流向其他资产。"
+    "realYields": {
+      "name": "实际收益率（TIPS）",
+      "source": "FRED / TradingView",
+      "why": "对黄金影响最大的单一因素。实际收益率下降 = 黄金看涨。实际收益率上升 = 黄金看跌。每日关注10年期TIPS。"
     },
     "dxy": {
       "name": "DXY（美元指数）",
       "source": "TradingView / Griffin Gold",
-      "why": "Gold通常与美元强度负相关。美元走弱 = Gold看涨。"
+      "why": "黄金以美元计价，与美元负相关。DXY下跌是黄金最稳定的看涨信号。"
+    },
+    "vix": {
+      "name": "VIX（恐慌指数）",
+      "source": "CBOE / TradingView",
+      "why": "黄金是避险资产。VIX上升表示避险情绪升温，资金流入黄金。关注突破20的信号。"
+    },
+    "cotNetPositioning": {
+      "name": "COT净持仓",
+      "source": "CFTC / Barchart",
+      "why": "每周报告大型投机者在黄金期货中的持仓。净多头极端 = 过度拥挤警告。净空头极端 = 逆势买入信号。"
+    },
+    "etfHoldings": {
+      "name": "ETF持仓量（吨）",
+      "source": "World Gold Council / GLD",
+      "why": "ETF中持有的黄金总量是机构需求的代理指标。持仓增加 = 机构买入。持仓减少 = 风险偏好上升、资金流出黄金。"
+    },
+    "centralBankBuying": {
+      "name": "央行购金",
+      "source": "World Gold Council",
+      "why": "央行是最大的黄金买家。创纪录的购买量（2022-2024）为价格提供结构性支撑。关注WGC季度需求报告。"
+    },
+    "rsiMacd": {
+      "name": "RSI + MACD 组合",
+      "source": "TradingView / Griffin Gold",
+      "why": "XAUUSD最可靠的指标组合。RSI用于超买/超卖水平，MACD用于趋势方向和动能确认。"
     }
   },
-  "exchanges": {
-    "title": "交易所和交易平台",
-    "description": "在哪里交易。由专家按可靠性、费用和功能排名。"
+  "marketData": {
+    "title": "黄金市场数据",
+    "description": "黄金市场的实时价格、基准数据和权威数据来源。"
+  },
+  "economicData": {
+    "title": "经济与宏观数据",
+    "description": "推动黄金价格的宏观指标、期货持仓和经济数据。"
   },
   "analysis": {
-    "title": "图表与分析工具",
-    "description": "技术分析、图表和市场研究平台。"
+    "title": "分析与资讯",
+    "description": "为XAUUSD交易者提供的技术分析、基本面研究和实时新闻。"
   },
-  "onchain": {
-    "title": "市场结构分析",
-    "description": "机构持仓数据、大户追踪和聪明钱分析。"
+  "etf": {
+    "title": "ETF与持仓数据",
+    "description": "追踪黄金ETF的资金流入、流出和总持仓量，作为机构需求信号。"
   },
-  "portfolio": {
-    "title": "投资组合与税务工具",
-    "description": "追踪您的持仓、计算税款和管理投资组合。"
-  },
-  "bots": {
-    "title": "交易机器人与自动化",
-    "description": "自动交易、网格机器人、跟单交易和算法策略。"
+  "platforms": {
+    "title": "交易平台",
+    "description": "在哪里交易XAUUSD。按可靠性、点差和功能排名。"
   },
   "learn": {
-    "title": "学习资源",
-    "description": "适合所有级别的教育、课程、社区和研究。"
+    "title": "教育与学习",
+    "description": "适合所有技能水平的黄金和外汇交易免费及付费教育资源。"
   },
   "visitSite": "访问网站"
 }

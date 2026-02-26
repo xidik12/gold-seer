@@ -1,20 +1,19 @@
 {
   "title": "ធនធាន និងឧបករណ៍",
-  "subtitle": "វេទិកា និងឧបករណ៍ដែលបានជ្រើសរើសដោយអ្នកជំនាញ ប្រើដោយអ្នកជួញដូរជំនាញ។ ផ្អែកលើការណែនាំពីសហគមន៍ ការពិនិត្យអ្នកជំនាញ និងលទ្ធផលពិតប្រាកដ។",
+  "subtitle": "វេទិកា និងប្រភពទិន្នន័យដែលបានជ្រើសរើសដោយអ្នកជំនាញ ប្រើដោយអ្នកជួញដូរមាស និង forex ជំនាញ។ ផ្អែកលើស្តង់ដារឧស្សាហកម្ម ការពិនិត្យអ្នកជំនាញ និងលទ្ធផលពិតប្រាកដ។",
   "categories": {
-    "exchanges": "ផ្សារផ្លាស់ប្តូរ",
-    "analysis": "ឧបករណ៍វិភាគ",
-    "onChain": "ទិន្នន័យ Macro",
-    "portfolio": "ការតាមដានផលប័ត្រ",
-    "bots": "Bot ជួញដូរ",
-    "learning": "វេទិកាសិក្សា",
+    "marketData": "ទិន្នន័យទីផ្សារ",
+    "economicData": "ទិន្នន័យសេដ្ឋកិច្ច",
+    "analysis": "វិភាគ និងព័ត៌មាន",
+    "etf": "ETF និងទីតាំង",
+    "platforms": "វេទិកាជួញដូរ",
     "learn": "រៀន"
   },
   "tierGuide": "មគ្គុទ្ទេសក៍កម្រិត",
   "tiers": {
     "essential": {
       "name": "ចាំបាច់",
-      "desc": "ឧបករណ៍ដែលអ្នកជួញដូរគ្រប់គ្នាត្រូវការ"
+      "desc": "ឧបករណ៍ដែលអ្នកជួញដូរមាសគ្រប់គ្នាត្រូវការ"
     },
     "beginner": {
       "name": "អ្នកចាប់ផ្តើម",
@@ -32,358 +31,78 @@
   "gettingStarted": {
     "title": "ចាប់ផ្តើម",
     "beginner_label": "អ្នកចាប់ផ្តើម:",
-    "beginner_desc": " ចាប់ផ្តើមជាមួយ TradingView (តារាង) + Kitco (ព័ត៌មានមាស) + FRED (ទិន្នន័យម៉ាក្រូ)។ រៀនមូលដ្ឋាន។",
+    "beginner_desc": " ចាប់ផ្តើមជាមួយ TradingView (តារាង XAUUSD) + Kitco (តម្លៃមាសសន្ទានៅ) + FRED (ទិន្នន័យ real yield និងម៉ាក្រូ)។ រៀនអ្វីដែលជំរុញតម្លៃមាស។",
     "intermediate_label": "កម្រិតមធ្យម:",
-    "intermediate_desc": " បន្ថែម CME Group (ទិន្នន័យ futures) + World Gold Council (fundamental) + ការតាមដានផលប័ត្រ។ ចាប់ផ្តើមប្រើ indicators។",
+    "intermediate_desc": " បន្ថែម CME Group (open interest futures) + World Gold Council (ទំហំហូរ ETF និងតម្រូវការ) + របាយការណ៍ CFTC COT (ទីតាំង)។ ចាប់ផ្តើមអានចំណុចជំរុញម៉ាក្រូ។",
     "advanced_label": "កម្រិតខ្ពស់:",
-    "advanced_desc": " បន្ថែម CFTC COT របាយការណ៍ (ទីតាំង) + Bloomberg Terminal (ការវិភាគផ្ទាល់ខ្លួន) + bot ជួញដូរ។ កសាងយុទ្ធសាស្ត្រជាប្រព័ន្ធ។"
+    "advanced_desc": " បន្ថែម ទិន្នន័យ benchmark LBMA + Bloomberg Terminal (ការវិភាគជំនាញ) + MetaTrader EA automation។ កសាងយុទ្ធសាស្ត្រជួញដូរមាសជាប្រព័ន្ធ។"
   },
   "keyMetrics": {
-    "title": "រង្វាស់សំខាន់ដែលអ្នកជួញដូរគ្រប់គ្នាគួរតាមដាន",
-    "fearGreed": {
-      "name": "សន្ទស្សន៍ Fear & Greed",
-      "source": "Griffin Gold / Alternative.me",
-      "why": "អារម្មណ៍ទីផ្សារភ្លាមៗ។ ភ័យខ្លាចខ្លាំង = ឱកាសទិញ ឆោមពន្ធំខ្លាំង = ឱកាសលក់។"
+    "title": "រង្វាស់សំខាន់ដែលអ្នកជួញដូរមាសគ្រប់គ្នាគួរតាមដាន",
+    "goldSilverRatio": {
+      "name": "អត្រាមាស/ប្រាក់",
+      "source": "Kitco / TradingView",
+      "why": "វាស់តម្លៃដែលទាក់ទងគ្នារវាងមាស និងប្រាក់។ អត្រាខ្ពស់ប្រវត្តិ (>80) = ប្រាក់ถูកវាយតម្លៃ; ទាប (<50) = មាសថ្លៃដូច្នេះ។"
     },
-    "mvrv": {
-      "name": "MVRV Z-Score",
-      "source": "World Gold Council / Kitco Gold",
-      "why": "កំណត់កំពូលទីផ្សារ (>7) និងបាត (<0.1) ផ្អែកលើការវាយតម្លៃ fundamental។"
-    },
-    "fundingRates": {
-      "name": "Funding Rates",
-      "source": "CME Group / CFTC",
-      "why": "បង្ហាញទីតាំងទីផ្សារ derivatives។ Funding ខ្លាំង = សញ្ញាបញ្ច្រាសដែលអាចកើតមាន។"
-    },
-    "exchangeNetflows": {
-      "name": "Exchange Netflows",
-      "source": "World Gold Council / CFTC",
-      "why": "Gold ចូលទៅផ្សារ = ការលក់ដែលអាចកើតមាន។ ចេញទៅក្រៅ = ការប្រមូល។"
-    },
-    "openInterest": {
-      "name": "Open Interest",
-      "source": "CME Group / CFTC",
-      "why": "OI កើន + តម្លៃកើន = និន្នាការខ្លាំង។ OI កើន + តម្លៃធ្លាក់ = សម្ពាធ bearish។"
-    },
-    "rsiMacd": {
-      "name": "RSI + MACD Combo",
-      "source": "TradingView / Griffin Gold",
-      "why": "ការរួមបញ្ចូល indicator ដែលគួរឱ្យទុកចិត្តបំផុត។ RSI សម្រាប់ overbought/oversold, MACD សម្រាប់បញ្ជាក់និន្នាការ។"
-    },
-    "btcDominance": {
-      "name": "Gold Dominance",
-      "source": "World Gold Council / Griffin Gold",
-      "why": "Dominance កើន = លុយហូរទៅ Gold សុវត្ថិភាព។ ធ្លាក់ = សម័យ other metal។"
+    "realYields": {
+      "name": "Real Yields (TIPS)",
+      "source": "FRED / TradingView",
+      "why": "កត្តាសំខាន់បំផុតសម្រាប់មាស។ Real yields ធ្លាក់ = bullish មាស។ Real yields ឡើង = bearish មាស។ តាមដាន 10Y TIPS ប្រចាំថ្ងៃ។"
     },
     "dxy": {
       "name": "DXY (Dollar Index)",
       "source": "TradingView / Griffin Gold",
-      "why": "Gold ជារឿយៗមានទំនាក់ទំនងផ្ទុយជាមួយកម្លាំង Dollar។ Dollar ខ្សោយ = Gold bullish។"
+      "why": "មាសកំណត់តម្លៃជា USD ហើយមានទំនាក់ទំនងផ្ទុយ។ DXY ធ្លាក់ = សញ្ញា bullish ថេរបំផុតសម្រាប់មាស។"
+    },
+    "vix": {
+      "name": "VIX (Fear Index)",
+      "source": "CBOE / TradingView",
+      "why": "មាសជាទ្រព្យ safe-haven។ VIX ឡើងបង្ហាញ sentiment risk-off — លុយហូរចូលមាស។ តាមដានការឡើងខ្ពស់ជាង 20 ជាសញ្ញាទិញ។"
+    },
+    "cotNetPositioning": {
+      "name": "COT Net Positioning",
+      "source": "CFTC / Barchart",
+      "why": "របាយការណ៍ប្រចាំសប្ដាហ៍លើទីតាំង speculator ធំៗក្នុង gold futures។ Net long ខ្លាំងណាស់ = ការព្រមានសញ្ញានៃការ overloaded ។ Net short ខ្លាំងណាស់ = សញ្ញា contrarian ទិញ។"
+    },
+    "etfHoldings": {
+      "name": "ETF Holdings (tonnes)",
+      "source": "World Gold Council / GLD",
+      "why": "ចំនួនមាសសរុបក្នុង ETF ជាសញ្ញាតម្រូវការស្ថាប័ន។ Holdings ឡើង = ស្ថាប័នកំពុងប្រមូល។ Holdings ធ្លាក់ = ការផ្លាស់ប្ដូរទៅអ្វីមានហានិភ័យ។"
+    },
+    "centralBankBuying": {
+      "name": "ការទិញរបស់ធនាគារកណ្តាល",
+      "source": "World Gold Council",
+      "why": "ធនាគារកណ្តាលជាអ្នកទិញមាសធំបំផុត។ ការទិញកំណត់ត្រា (2022-2024) ផ្ដល់ការគាំទ្រតម្លៃរចនាសម្ព័ន្ធ។ តាមដានរបាយការណ៍ WGC ប្រចាំត្រីមាស។"
+    },
+    "rsiMacd": {
+      "name": "RSI + MACD Combo",
+      "source": "TradingView / Griffin Gold",
+      "why": "ការរួមបញ្ចូល indicator ដែលគួរឱ្យទុកចិត្តបំផុតសម្រាប់ XAUUSD។ RSI សម្រាប់ overbought/oversold, MACD សម្រាប់ ទិសដៅនិន្នាការ និងការបញ្ជាក់ momentum។"
     }
   },
-  "exchanges": {
-    "title": "ផ្សារ និងវេទិកាជួញដូរ",
-    "description": "កន្លែងជួញដូរ។ ចំណាត់ថ្នាក់ដោយអ្នកជំនាញសម្រាប់ភាពគួរឱ្យទុកចិត្ត ថ្លៃសេវា និងមុខងារ។",
-    "binance": {
-      "desc": "#1 តាមបរិមាណពិភពលោក។ ឈុតជួញដូរពេញលេញជាមួយ leverage, automation និង Gold futures។ ល្អបំផុតសម្រាប់អ្នកជួញដូរសកម្ម។",
-      "tags": [
-        "ថ្លៃទាប",
-        "Liquidity ជ្រៅ",
-        "Futures"
-      ]
-    },
-    "coinbase": {
-      "desc": "ល្អបំផុតសម្រាប់អ្នកចាប់ផ្តើម។ បទប្បញ្ញត្តិ US ធានា ទិញ/លក់សាមញ្ញ។ វេទិកា Advanced សម្រាប់អ្នកមានបទពិសោធ។",
-      "tags": [
-        "បទប្បញ្ញត្តិ",
-        "UI ងាយ",
-        "ETF Gold"
-      ]
-    },
-    "kraken": {
-      "desc": "ភាពគួរឱ្យទុកចិត្តរឹងមាំតាំងពី 2011។ Kraken Pro ផ្តល់មុខងារកម្រិតស្ថាប័ន។ ល្អសម្រាប់ day traders។",
-      "tags": [
-        "គួរឱ្យទុកចិត្ត",
-        "ថ្លៃទាប",
-        "Futures"
-      ]
-    },
-    "bybit": {
-      "desc": "ផ្សារ derivatives កំពូល។ Copy trading, ប្រភេទ order កម្រិតខ្ពស់ និង liquidity ជ្រៅសម្រាប់អ្នកមិនមែន US។",
-      "tags": [
-        "Derivatives",
-        "Copy trading",
-        "Leverage ខ្ពស់"
-      ]
-    },
-    "okx": {
-      "desc": "វេទិកាជួញដូរពហុទ្រព្យ។ ជួញដូរមាស futures, spot, ETF និង derivatives។ ប្រព័ន្ធអេកូពេញលេញ។",
-      "tags": [
-        "ETFs",
-        "Futures",
-        "Derivatives"
-      ]
-    },
-    "bydfi": {
-      "desc": "មុខងារសម្បូរបំផុតសម្រាប់ 2026។ Spot + Futures, copy trading, grid bots, ការគាំទ្រទ្រព្យទូលំទូលាយ។ ជម្រើសអ្នកជួញដូរសកម្ម។",
-      "tags": [
-        "Spot+Futures",
-        "Copy trading",
-        "Grid bots"
-      ]
-    }
+  "marketData": {
+    "title": "ទិន្នន័យទីផ្សារមាស",
+    "description": "តម្លៃក្នុងពេលជាក់ស្តែង benchmark និងប្រភពទិន្នន័យដែលគួរឱ្យទុកចិត្តសម្រាប់ទីផ្សារមាស។"
+  },
+  "economicData": {
+    "title": "ទិន្នន័យសេដ្ឋកិច្ច និងម៉ាក្រូ",
+    "description": "សន្ទស្សន៍ម៉ាក្រូ ទីតាំង futures និងទិន្នន័យសេដ្ឋកិច្ចដែលជំរុញតម្លៃមាស។"
   },
   "analysis": {
-    "title": "ឧបករណ៍តារាង និងវិភាគ",
-    "description": "វេទិកាវិភាគបច្ចេកទេស តារាង និងស្រាវជ្រាវទីផ្សារ។",
-    "tradingview": {
-      "desc": "វេទិកាតារាង #1។ 100+ indicators យុទ្ធសាស្ត្រចែករំលែកសហគមន៍ ទិន្នន័យក្នុងពេលជាក់ស្តែង។ ប្រើដោយ 90% នៃអ្នកជួញដូរ។",
-      "tags": [
-        "តារាង",
-        "100+ indicators",
-        "សហគមន៍"
-      ]
-    },
-    "coinglass": {
-      "desc": "ល្អបំផុតសម្រាប់ទិន្នន័យ derivatives។ Liquidation heatmaps, open interest, funding rates, order flow និង whale tracking។",
-      "tags": [
-        "Liquidations",
-        "OI",
-        "Funding rates"
-      ]
-    },
-    "coinmarketcap": {
-      "desc": "សម្រាប់ទិដ្ឋភាពទីផ្សារ។ ការតាមដានតម្លៃ ចំណាត់ថ្នាក់ market cap សន្ទស្សន៍ Fear & Greed ប្រតិទិនទីផ្សារមាស។",
-      "tags": [
-        "តម្លៃ",
-        "ចំណាត់ថ្នាក់",
-        "Fear & Greed"
-      ]
-    },
-    "trendspider": {
-      "desc": "វិភាគបច្ចេកទេសដោយ AI។ ការរកឃើញ trendline ដោយស្វ័យប្រវត្តិ ការវិភាគ multi-timeframe ការ backtest យុទ្ធសាស្ត្រ។",
-      "tags": [
-        "Auto trendlines",
-        "Backtesting",
-        "Alerts"
-      ]
-    },
-    "coinalyze": {
-      "desc": "ទិន្នន័យ futures បូកបញ្ចូលគ្នាពីគ្រប់ផ្សារសំខាន់។ Open interest, funding, volume និង basis analytics។",
-      "tags": [
-        "ទិន្នន័យ Futures",
-        "OI",
-        "បូកបញ្ចូល"
-      ]
-    },
-    "bitcoinmagazinepro": {
-      "desc": "តារាងជាក់លាក់ Gold: MVRV Z-Score, Pi Cycle, Puell Multiple, Stock-to-Flow។ ឧបករណ៍វដ្ត Gold ល្អបំផុត។",
-      "tags": [
-        "តារាង Gold",
-        "ការវិភាគវដ្ត",
-        "MVRV"
-      ]
-    }
+    "title": "ការវិភាគ និងព័ត៌មាន",
+    "description": "ការវិភាគបច្ចេកទេស ការស្រាវជ្រាវវិនិយោគ និងព័ត៌មានក្នុងពេលជាក់ស្តែងសម្រាប់អ្នកជួញដូរ XAUUSD។"
   },
-  "onchain": {
-    "title": "ការវិភាគ MACRO",
-    "description": "ទិន្នន័យ Market data ការតាមដាន whale និងការវិភាគ smart money។",
-    "glassnode": {
-      "desc": "ស្តង់ដារឧស្សាហកម្មសម្រាប់ fundamental។ MVRV Z-Score, SOPR, NVT អាកប្បកិរិយាអ្នកវិនិយោគ ហូរទីផ្សារ។ កម្រិតឥតគិតថ្លៃមាន។",
-      "tags": [
-        "MVRV",
-        "SOPR",
-        "Supply metrics"
-      ]
-    },
-    "cryptoquant": {
-      "desc": "ល្អបំផុតសម្រាប់ការវិភាគការហូរទីផ្សារ។ តាមដាន whale deposits/withdrawals សកម្មភាពស្ថាប័ន និងសញ្ញា stress ទីផ្សារ។",
-      "tags": [
-        "ការហូរទីផ្សារ",
-        "ទិន្នន័យស្ថាប័ន",
-        "Alerts"
-      ]
-    },
-    "nansen": {
-      "desc": "វេទិកា market intelligence។ តាមដាន smart money ចលនាមូលនិធិ ហិបកាបូប whale។ ដាក់ស្លាក 250M+ ហិបកាបូប។",
-      "tags": [
-        "Smart money",
-        "Entity labels",
-        "ETFs"
-      ]
-    },
-    "santiment": {
-      "desc": "រួមបញ្ចូល fundamental + sentiment សង្គម។ ការតាមដានសកម្មភាពអ្នកអភិវឌ្ឍន៍ បរិមាណសង្គម ការចែកចាយអ្នកកាន់។",
-      "tags": [
-        "ទិន្នន័យសង្គម",
-        "សកម្មភាពអ្នកអភិវឌ្ឍន៍",
-        "Fundamental"
-      ]
-    },
-    "defillama": {
-      "desc": "ការវិភាគ ETFs ឥតគិតថ្លៃល្អបំផុត។ TVL នៅគ្រប់ protocol ការតាមដាន yield ចំណូលថ្លៃសេវា។ 100% ឥតគិតថ្លៃ គ្មានគណនីត្រូវការ។",
-      "tags": [
-        "TVL",
-        "ETFs",
-        "Yields"
-      ]
-    },
-    "whalealert": {
-      "desc": "ការតាមដានប្រតិបត្តិការធំក្នុងពេលជាក់ស្តែង។ តាមដាន Gold, ETH និង market data សំខាន់សម្រាប់ចលនា whale។",
-      "tags": [
-        "Txs ធំ",
-        "ក្នុងពេលជាក់ស្តែង",
-        "Multi-chain"
-      ]
-    },
-    "dune": {
-      "desc": "កសាង dashboard fundamental ផ្ទាល់ខ្លួនជាមួយ SQL។ Dashboard ចែករំលែកសហគមន៍សម្រាប់គ្រប់ protocol។ កម្រិតឥតគិតថ្លៃមាន។",
-      "tags": [
-        "Custom queries",
-        "Dashboards",
-        "SQL"
-      ]
-    }
+  "etf": {
+    "title": "ទិន្នន័យ ETF និងទីតាំង",
+    "description": "តាមដានការហូរចូល ចេញ និង holdings សរុបរបស់ gold ETF ជាសញ្ញាតម្រូវការស្ថាប័ន។"
   },
-  "portfolio": {
-    "title": "ផលប័ត្រ និងឧបករណ៍ពន្ធ",
-    "description": "តាមដានទ្រព្យកម្មរបស់អ្នក គណនាពន្ធ និងគ្រប់គ្រងផលប័ត្រ។",
-    "cointracker": {
-      "desc": "ដំណោះស្រាយផលប័ត្រ + ពន្ធឈានមុខ។ 300+ ការភ្ជាប់ផ្សារ ការតាមដាន ETFs ដោយស្វ័យប្រវត្តិ ឆបគ្នា TurboTax។",
-      "tags": [
-        "ពន្ធ",
-        "ផលប័ត្រ",
-        "ETFs"
-      ]
-    },
-    "koinly": {
-      "desc": "ល្អបំផុតសម្រាប់អ្នកប្រើអន្តរជាតិ។ គាំទ្រ 100+ ប្រទេស ETFs, NFT និង margin trades។ របាយការណ៍ពន្ធសាមញ្ញ។",
-      "tags": [
-        "ពន្ធ",
-        "100+ ប្រទេស",
-        "ETFs/NFT"
-      ]
-    },
-    "cointracking": {
-      "desc": "ជម្រើសអ្នកប្រើកម្រិតខ្ពស់។ ការនាំចូលទិន្នន័យប្រវត្តិសាស្រ្តជ្រៅ ការវិភាគទូលំទូលាយ និងរបាយការណ៍ពន្ធលម្អិត។",
-      "tags": [
-        "ពន្ធ",
-        "ការវិភាគ",
-        "300+ ផ្សារ"
-      ]
-    },
-    "coinledger": {
-      "desc": "ល្អបំផុតសម្រាប់អ្នកប្រើ US។ ការភ្ជាប់ TurboTax និង TaxAct ផ្ទាល់។ របាយការណ៍ពន្ធសាមញ្ញ។",
-      "tags": [
-        "ពន្ធ",
-        "ផ្តោត US",
-        "TurboTax"
-      ]
-    },
-    "debank": {
-      "desc": "ការតាមដានផលប័ត្រ ETFs ឥតគិតថ្លៃល្អបំផុត។ តាមដានគ្រប់ទីតាំង portfolio នៅគ្រប់ chain។ មិនចាំបាច់ចុះឈ្មោះ។",
-      "tags": [
-        "ផលប័ត្រ ETFs",
-        "Multi-chain",
-        "ឥតគិតថ្លៃ"
-      ]
-    },
-    "zenledger": {
-      "desc": "ល្អបំផុតសម្រាប់អ្នកប្រើ ETFs ច្រើន។ ជំនាញលើ staking rewards ការតាមដាន liquidity pool និងសេណារីយ៉ូពន្ធ ETFs ស្មុគស្មាញ។",
-      "tags": [
-        "ពន្ធ ETFs",
-        "Staking",
-        "LP"
-      ]
-    }
-  },
-  "bots": {
-    "title": "BOT ជួញដូរ និង AUTOMATION",
-    "description": "ការជួញដូរស្វ័យប្រវត្តិ grid bots copy trading និងយុទ្ធសាស្ត្រ algorithmic។",
-    "cryptohopper": {
-      "desc": "វេទិកា bot ពហុមុខ។ Cloud-based ដំណើរការជាមួយ broker មាសធំៗ។ Marketplace យុទ្ធសាស្ត្រសម្រាប់អ្នកចាប់ផ្តើម។",
-      "tags": [
-        "Cloud-based",
-        "Marketplace យុទ្ធសាស្ត្រ",
-        "DCA bots"
-      ]
-    },
-    "threecommas": {
-      "desc": "ពេញនិយមសម្រាប់ smart trade terminals។ Grid bots, DCA bots និង portfolio rebalancing នៅគ្រប់ផ្សារសំខាន់។",
-      "tags": [
-        "Smart trades",
-        "Grid bots",
-        "DCA"
-      ]
-    },
-    "pionex": {
-      "desc": "ផ្សារជាមួយ bot ឥតគិតថ្លៃភ្ជាប់។ 16+ ប្រភេទ bot រួមទាំង grid, DCA និង rebalancing។ គ្មានថ្លៃបន្ថែម។",
-      "tags": [
-        "Bot ឥតគិតថ្លៃ",
-        "Grid trading",
-        "ភ្ជាប់"
-      ]
-    },
-    "haasonline": {
-      "desc": "សម្រាប់អ្នកជួញដូរ algorithmic កម្រិតខ្ពស់។ ភាសា scripting ផ្ទាល់ខ្លួន backtesting ទូលំទូលាយ និងការធ្វើ optimize យុទ្ធសាស្ត្រ។",
-      "tags": [
-        "Custom scripts",
-        "Backtesting",
-        "កម្រិតខ្ពស់"
-      ]
-    }
+  "platforms": {
+    "title": "វេទិកាជួញដូរ",
+    "description": "កន្លែងជួញដូរ XAUUSD។ ចំណាត់ថ្នាក់តាមភាពគួរឱ្យទុកចិត្ត spreads និងមុខងារ។"
   },
   "learn": {
-    "title": "ធនធានសិក្សា",
-    "description": "ការអប់រំ វគ្គសិក្សា សហគមន៍ និងការស្រាវជ្រាវសម្រាប់គ្រប់កម្រិត។",
-    "investopedia": {
-      "desc": "ការអប់រំ gold market ឥតគិតថ្លៃល្អបំផុត។ មគ្គុទ្ទេសក៍ទូលំទូលាយលើការជួញដូរ វិភាគបច្ចេកទេស និងមូលដ្ឋានវិនិយោគ។",
-      "tags": [
-        "ការអប់រំ",
-        "មគ្គុទ្ទេសក៍",
-        "ឥតគិតថ្លៃ"
-      ]
-    },
-    "binanceacademy": {
-      "desc": "ការអប់រំ gold market ឥតគិតថ្លៃមានរចនាសម្ព័ន្ធ។ វគ្គពីអ្នកចាប់ផ្តើមដល់កម្រិតខ្ពស់លើ market data ជួញដូរ ETFs និងសុវត្ថិភាព។",
-      "tags": [
-        "វគ្គឥតគិតថ្លៃ",
-        "វីដេអូ",
-        "កម្រងសំណួរ"
-      ]
-    },
-    "coinbureau": {
-      "desc": "ការស្រាវជ្រាវ និងការពិនិត្យ gold market ដែលគួរឱ្យទុកចិត្ត។ ការវិភាគលម្អិត ការពិនិត្យគម្រោង និងមាតិកា YouTube អប់រំ។",
-      "tags": [
-        "ការពិនិត្យ",
-        "ការស្រាវជ្រាវ",
-        "YouTube"
-      ]
-    },
-    "messari": {
-      "desc": "ការស្រាវជ្រាវ gold market កម្រិតស្ថាប័ន។ របាយការណ៍វិស័យ profile token ទិន្នន័យអភិបាលកិច្ច និងព័ត៌មាន fundraising។",
-      "tags": [
-        "ការស្រាវជ្រាវ",
-        "ទិន្នន័យ",
-        "របាយការណ៍"
-      ]
-    },
-    "theblock": {
-      "desc": "ព័ត៌មាន gold market premium និង dashboards ទិន្នន័យ។ ការរាយការណ៍ឈានមុខលើការទទួលយកស្ថាប័ន និងរចនាសម្ព័ន្ធទីផ្សារ។",
-      "tags": [
-        "ព័ត៌មាន",
-        "ទិន្នន័យ",
-        "ការស្រាវជ្រាវ"
-      ]
-    },
-    "reddit": {
-      "desc": "សហគមន៍ gold market ធំបំផុតនៅ Reddit។ ការពិភាក្សាក្នុងពេលជាក់ស្តែង ការវាស់អារម្មណ៍ និងព័ត៌មានដែលសហគមន៍បានផ្ទៀងផ្ទាត់។",
-      "tags": [
-        "សហគមន៍",
-        "ការពិភាក្សា",
-        "ព័ត៌មាន"
-      ]
-    }
+    "title": "ការអប់រំ និងការរៀន",
+    "description": "ធនធានអប់រំឥតគិតថ្លៃ និងបង់ប្រាក់ សម្រាប់ការជួញដូរមាស និង forex គ្រប់កម្រិតជំនាញ។"
   },
   "visitSite": "ទស្សនាគេហទំព័រ"
 }

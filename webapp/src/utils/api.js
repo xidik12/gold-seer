@@ -327,6 +327,9 @@ export const api = {
   // Correlations
   getCorrelations: () => cachedFetch('/market/correlations', T120),
 
+  // Silver
+  getSilverData: () => cachedFetch('/market/silver', T120),
+
   // Gold Supply
   getGoldSupply: () => cachedFetch('/market/supply', T300),
 }

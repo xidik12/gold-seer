@@ -20,6 +20,7 @@ import ETFFlowWidget from '../components/ETFFlowWidget'
 import COTChart from '../components/COTChart'
 import CentralBankWidget from '../components/CentralBankWidget'
 import CorrelationWidget from '../components/CorrelationWidget'
+import SilverWidget from '../components/SilverWidget'
 import SeasonalityWidget from '../components/SeasonalityWidget'
 
 class SafeWrap extends Component {
@@ -476,6 +477,10 @@ export default function Dashboard() {
 
           <SafeWrap name="CorrelationWidget" t={t}>
             <CorrelationWidget />
+          </SafeWrap>
+
+          <SafeWrap name="SilverWidget" t={t}>
+            <SilverWidget />
           </SafeWrap>
 
           <SafeWrap name="RealYieldWidget" t={t}>
