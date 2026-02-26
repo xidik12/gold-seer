@@ -1,4 +1,4 @@
-"""Economic calendar with hardcoded recurring US macro events + FRED enrichment."""
+"""Economic calendar with Finnhub live data + hardcoded recurring US macro events fallback."""
 import logging
 from datetime import datetime, timedelta
 
@@ -6,6 +6,13 @@ from app.collectors.base import BaseCollector
 from app.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Finnhub impact mapping
+_FINNHUB_IMPACT_MAP = {
+    "high": "high",
+    "medium": "medium",
+    "low": "low",
+}
 
 # Major recurring events
 RECURRING_EVENTS = [
@@ -27,12 +34,82 @@ RECURRING_EVENTS = [
 
 
 class EconomicCalendarCollector(BaseCollector):
-    """Generates upcoming economic events from hardcoded schedule."""
+    """Generates upcoming economic events from Finnhub (primary) or hardcoded schedule (fallback)."""
 
     async def collect(self) -> dict:
-        """Implement abstract method — returns upcoming events."""
+        """Implement abstract method — try Finnhub first, fall back to hardcoded."""
+        # Try Finnhub live data first if API key is configured
+        if settings.finnhub_api_key:
+            try:
+                finnhub_events = await self._fetch_finnhub_calendar(days=14)
+                if finnhub_events:
+                    logger.info(f"EconomicCalendar: Fetched {len(finnhub_events)} events from Finnhub")
+                    return {"events": finnhub_events, "count": len(finnhub_events)}
+            except Exception as e:
+                logger.warning(f"EconomicCalendar: Finnhub fetch failed, falling back to hardcoded: {e}")
+
+        # Fallback to hardcoded schedule
         events = await self.get_upcoming_events(days=14)
         return {"events": events, "count": len(events)}
+
+    async def _fetch_finnhub_calendar(self, days: int = 14) -> list[dict]:
+        """Fetch economic calendar events from Finnhub API.
+
+        Finnhub response format:
+        {"economicCalendar": [{"actual": 3.5, "country": "US", "estimate": 3.2,
+         "event": "CPI YoY", "impact": "high", "prev": 3.1, "time": "13:30:00", "unit": "%"}]}
+        """
+        now = datetime.utcnow()
+        start = now.strftime("%Y-%m-%d")
+        end = (now + timedelta(days=days)).strftime("%Y-%m-%d")
+
+        url = "https://finnhub.io/api/v1/calendar/economic"
+        params = {
+            "from": start,
+            "to": end,
+            "token": settings.finnhub_api_key,
+        }
+
+        data = await self.fetch_json(url, params=params)
+        if not data or "economicCalendar" not in data:
+            return []
+
+        events = []
+        for item in data["economicCalendar"]:
+            # Map Finnhub impact to our importance levels
+            raw_impact = (item.get("impact") or "").lower()
+            importance = _FINNHUB_IMPACT_MAP.get(raw_impact, "low")
+
+            # Build the event date string from the date + time fields
+            event_date_str = item.get("date", now.strftime("%Y-%m-%d"))
+            event_time_str = item.get("time", "00:00:00")
+            try:
+                event_dt = datetime.strptime(f"{event_date_str}T{event_time_str}", "%Y-%m-%dT%H:%M:%S")
+                event_date_iso = event_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+            except (ValueError, TypeError):
+                event_date_iso = f"{event_date_str}T00:00:00Z"
+
+            # Parse actual/forecast/previous values
+            actual = item.get("actual")
+            forecast = item.get("estimate")
+            previous = item.get("prev")
+            unit = item.get("unit", "")
+
+            events.append({
+                "event_date": event_date_iso,
+                "event_name": item.get("event", "Unknown Event"),
+                "country": item.get("country", "US"),
+                "importance": importance,
+                "actual": actual,
+                "forecast": forecast,
+                "previous": previous,
+                "unit": unit,
+                "source": "finnhub",
+            })
+
+        # Sort by date
+        events.sort(key=lambda e: e["event_date"])
+        return events
 
     async def get_upcoming_events(self, days: int = 14) -> list[dict]:
         """Return upcoming economic events in the next N days."""

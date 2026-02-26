@@ -16,17 +16,57 @@ const ETF_INFO = {
   GLDM: { name: 'SPDR Gold MiniShares', color: '#f59e0b' },
 }
 
+const SIGNAL_COLORS = {
+  STRONG_INFLOW: 'text-green-400 bg-green-500/15',
+  INFLOW: 'text-green-300 bg-green-500/10',
+  NEUTRAL: 'text-gray-400 bg-gray-500/10',
+  OUTFLOW: 'text-red-300 bg-red-500/10',
+  STRONG_OUTFLOW: 'text-red-400 bg-red-500/15',
+}
+
+function MomentumSparkline({ dailyFlows }) {
+  if (!dailyFlows || dailyFlows.length < 2) return null
+  const w = 100
+  const h = 24
+  const max = Math.max(...dailyFlows.map((d) => Math.abs(d.flow ?? d.value ?? d)))
+  if (max === 0) return null
+  const points = dailyFlows.map((d, i) => {
+    const val = d.flow ?? d.value ?? d
+    const x = (i / (dailyFlows.length - 1)) * w
+    const y = h / 2 - (val / max) * (h / 2)
+    return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+  }).join(' ')
+
+  return (
+    <svg width={w} height={h} className="shrink-0">
+      <line x1="0" y1={h / 2} x2={w} y2={h / 2} stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+      <path d={points} fill="none" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export default function GoldETF() {
   const { t } = useTranslation()
   const [data, setData] = useState(null)
+  const [momentum, setMomentum] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   const fetchData = useCallback(async () => {
     try {
-      const result = await fetchETFData()
-      setData(result)
-      setError(null)
+      const [etfResult, momentumResult] = await Promise.allSettled([
+        fetchETFData(),
+        api.getETFMomentum(),
+      ])
+      if (etfResult.status === 'fulfilled') {
+        setData(etfResult.value)
+        setError(null)
+      } else {
+        setError(etfResult.reason?.message || 'Failed to load ETF data')
+      }
+      if (momentumResult.status === 'fulfilled') {
+        setMomentum(momentumResult.value)
+      }
     } catch (err) {
       setError(err.message)
     } finally {
@@ -77,6 +117,58 @@ export default function GoldETF() {
 
       {/* Compact daily flows bar chart */}
       <ETFFlowWidget flows={etfs} />
+
+      {/* Flow Momentum card */}
+      {momentum && (
+        <div className="bg-bg-card rounded-2xl p-4 border border-white/5 slide-up">
+          <h4 className="text-text-primary text-sm font-semibold mb-3">
+            {t('etfMomentum.title', 'Flow Momentum')}
+          </h4>
+          <div className="flex items-center justify-between mb-3">
+            <div className="grid grid-cols-2 gap-4 flex-1">
+              <div>
+                <p className="text-text-muted text-[9px]">{t('etfMomentum.fiveDay', '5-Day Momentum')}</p>
+                <p className={`text-sm font-bold tabular-nums ${
+                  (momentum.five_day_momentum ?? momentum.momentum_5d ?? 0) >= 0 ? 'text-accent-green' : 'text-accent-red'
+                }`}>
+                  {(() => {
+                    const val = momentum.five_day_momentum ?? momentum.momentum_5d ?? null
+                    if (val == null) return '--'
+                    return `${val > 0 ? '+' : ''}${safeFixed(val, 2)}t`
+                  })()}
+                </p>
+              </div>
+              <div>
+                <p className="text-text-muted text-[9px]">{t('etfMomentum.thirtyDay', '30-Day Cumulative')}</p>
+                <p className={`text-sm font-bold tabular-nums ${
+                  (momentum.cumulative_30d ?? momentum.thirty_day ?? 0) >= 0 ? 'text-accent-green' : 'text-accent-red'
+                }`}>
+                  {(() => {
+                    const val = momentum.cumulative_30d ?? momentum.thirty_day ?? null
+                    if (val == null) return '--'
+                    return `${val > 0 ? '+' : ''}${safeFixed(val, 2)}t`
+                  })()}
+                </p>
+              </div>
+            </div>
+            <MomentumSparkline dailyFlows={momentum.daily_flows || momentum.sparkline || []} />
+          </div>
+          {(() => {
+            const signal = momentum.signal || momentum.flow_signal || null
+            if (!signal) return null
+            const signalKey = signal.toUpperCase().replace(/[\s-]+/g, '_')
+            const colorClass = SIGNAL_COLORS[signalKey] || SIGNAL_COLORS.NEUTRAL
+            return (
+              <div className="flex items-center gap-2">
+                <span className="text-text-muted text-[9px]">{t('etfMomentum.signal', 'Signal')}</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${colorClass}`}>
+                  {signal.replace(/_/g, ' ')}
+                </span>
+              </div>
+            )
+          })()}
+        </div>
+      )}
 
       {/* Daily flow history */}
       {dailyFlows.length > 1 && (

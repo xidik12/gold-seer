@@ -1,13 +1,31 @@
 """Gold ETF flows API."""
 import logging
+import time
 from collections import defaultdict
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter
-from sqlalchemy import select
+from sqlalchemy import select, desc
 
 from app.database import async_session, GoldETFFlow, Price
 
 logger = logging.getLogger(__name__)
+
+# ── Simple TTL cache for ETF endpoints ──
+_etf_cache: dict[str, tuple[dict, float]] = {}
+
+
+def _get_etf_cached(key: str) -> dict | None:
+    if key in _etf_cache:
+        data, expires = _etf_cache[key]
+        if time.monotonic() < expires:
+            return data
+        del _etf_cache[key]
+    return None
+
+
+def _set_etf_cache(key: str, data, ttl: int) -> None:
+    _etf_cache[key] = (data, time.monotonic() + ttl)
 
 router = APIRouter(prefix="/api/gold-etf", tags=["gold_etf"])
 
@@ -128,3 +146,81 @@ async def get_latest_etf():
             "holdings_trend": holdings_trend,
             "flow_vs_price": flow_vs_price,
         }
+
+
+@router.get("/momentum")
+async def get_etf_momentum():
+    """Get enhanced ETF flow momentum analysis.
+
+    Computes 30-day cumulative flow, 5-day momentum, and a directional signal.
+    Signals:
+    - STRONG_INFLOW: 5d momentum > +5 tonnes
+    - INFLOW: 5d momentum > +1 tonne
+    - OUTFLOW: 5d momentum < -1 tonne
+    - STRONG_OUTFLOW: 5d momentum < -5 tonnes
+    - NEUTRAL: otherwise
+    """
+    cached = _get_etf_cached("etf_momentum")
+    if cached is not None:
+        return cached
+
+    async with async_session() as session:
+        # Query last 30 days of GoldETFFlow data
+        cutoff_date = (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%d")
+
+        result = await session.execute(
+            select(GoldETFFlow)
+            .where(GoldETFFlow.date >= cutoff_date)
+            .order_by(GoldETFFlow.date.asc())
+        )
+        rows = result.scalars().all()
+
+        if not rows:
+            return {
+                "momentum_5d": 0,
+                "cumulative_30d": 0,
+                "signal": "NEUTRAL",
+                "daily_flows": [],
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+
+        # Aggregate daily flows across all tickers by date
+        flow_by_date: dict[str, float] = defaultdict(float)
+        for r in rows:
+            flow_by_date[r.date] += r.daily_change_tonnes or 0.0
+
+        # Sorted daily flows
+        sorted_dates = sorted(flow_by_date.keys())
+        daily_flows = [
+            {"date": d, "flow": round(flow_by_date[d], 4)}
+            for d in sorted_dates
+        ]
+
+        # 30-day cumulative flow
+        cumulative_30d = sum(flow_by_date[d] for d in sorted_dates)
+
+        # 5-day momentum (sum of last 5 days of flows)
+        last_5_dates = sorted_dates[-5:] if len(sorted_dates) >= 5 else sorted_dates
+        momentum_5d = sum(flow_by_date[d] for d in last_5_dates)
+
+        # Classify signal based on 5-day momentum (in tonnes)
+        if momentum_5d > 5.0:
+            signal = "STRONG_INFLOW"
+        elif momentum_5d > 1.0:
+            signal = "INFLOW"
+        elif momentum_5d < -5.0:
+            signal = "STRONG_OUTFLOW"
+        elif momentum_5d < -1.0:
+            signal = "OUTFLOW"
+        else:
+            signal = "NEUTRAL"
+
+        data = {
+            "momentum_5d": round(momentum_5d, 4),
+            "cumulative_30d": round(cumulative_30d, 4),
+            "signal": signal,
+            "daily_flows": daily_flows,
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+        _set_etf_cache("etf_momentum", data, 300)
+        return data

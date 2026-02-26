@@ -29,6 +29,7 @@ from app.scheduler.domain_market import (  # noqa: F401
     collect_session_info,
     collect_central_bank_gold,
     collect_economic_calendar,
+    check_central_bank_alerts,
 )
 
 # ── ML predictions & evaluation ─────────────────────────────────

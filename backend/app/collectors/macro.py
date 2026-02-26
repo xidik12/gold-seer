@@ -44,6 +44,8 @@ class MacroCollector(BaseCollector):
         "silver": ["SI=F"],
         "copper": ["HG=F"],
         "natural_gas": ["NG=F"],
+        "platinum": ["PL=F"],
+        "palladium": ["PA=F"],
         # Gold mining/ETF equities
         "gdx": ["GDX"],
         "gld": ["GLD"],

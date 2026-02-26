@@ -338,4 +338,61 @@ export const api = {
 
   // Upcoming Events
   getUpcomingEvents: () => cachedFetch('/events/recent', T60),
+
+  // Trade Journal CRUD
+  createJournalEntry: (body) => fetchAPI('/trade-journal/entries', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  }),
+  updateJournalEntry: (id, body) => fetchAPI(`/trade-journal/entries/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  }),
+  deleteJournalEntry: (id) => fetchAPI(`/trade-journal/entries/${id}`, {
+    method: 'DELETE',
+  }),
+
+  // Central Bank
+  getCentralBankData: () => cachedFetch('/market/central-bank', T300),
+
+  // Analyst Forecasts
+  getAnalystForecasts: () => cachedFetch('/analysts/forecasts', T300),
+
+  // Macro Regime
+  getMacroRegime: () => cachedFetch('/market/regime', T120),
+
+  // Gold Miners
+  getGoldMiners: () => cachedFetch('/market/miners', T120),
+
+  // Intraday Patterns
+  getIntradayPatterns: () => cachedFetch('/market/intraday-patterns', T300),
+
+  // ETF Momentum
+  getETFMomentum: () => cachedFetch('/gold-etf/momentum', T120),
+
+  // Physical Gold Premium
+  getPhysicalPremium: () => cachedFetch('/market/physical-premium', T300),
+
+  // Supply & Demand
+  getSupplyDemand: () => cachedFetch('/fundamentals/supply-demand', T300),
+
+  // Forward Curve
+  getForwardCurve: () => cachedFetch('/market/forward-curve', T300),
+
+  // Backtest
+  runBacktest: (params) => fetchAPI('/backtest/run', {
+    method: 'POST',
+    body: JSON.stringify(params),
+  }),
+
+  // Community
+  getCommunityTrades: () => cachedFetch('/community/trades', T60),
+  shareTrade: (body) => fetchAPI('/community/trades', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  }),
+  getCommunityLeaderboard: () => cachedFetch('/community/leaderboard', T120),
+  likeTrade: (tradeId) => fetchAPI(`/community/trades/${tradeId}/like`, {
+    method: 'POST',
+  }),
 }

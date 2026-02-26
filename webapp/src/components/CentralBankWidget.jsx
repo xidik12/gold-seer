@@ -9,7 +9,7 @@ export default function CentralBankWidget() {
 
   const fetchData = useCallback(async () => {
     try {
-      const result = await api.getMacroData()
+      const result = await api.getCentralBankData()
       setData(result)
     } catch {
       // silent
@@ -96,6 +96,21 @@ export default function CentralBankWidget() {
             : t('centralBank.neutral', 'Neutral positioning')
           }
         </p>
+      )}
+
+      {data?.top_buyers?.length > 0 && (
+        <div className="mt-3 border-t border-white/5 pt-2">
+          <p className="text-text-muted text-[9px] font-medium mb-1">
+            {t('centralBank.topBuyers', 'Top Buyers')}
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {data.top_buyers.slice(0, 5).map((buyer, i) => (
+              <span key={i} className="text-[9px] bg-bg-hover rounded px-1.5 py-0.5 text-text-secondary">
+                {typeof buyer === 'string' ? buyer : buyer.name || buyer.country}
+              </span>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   )

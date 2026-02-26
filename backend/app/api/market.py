@@ -6,7 +6,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_session, Price, MacroData, IndicatorSnapshot
+from sqlalchemy import func as sa_func
+
+from app.database import get_session, Price, MacroData, IndicatorSnapshot, CentralBankGold
 from app.collectors.market import GoldMarketCollector as MarketCollector
 from app.collectors.macro import MacroCollector
 
@@ -516,7 +518,7 @@ async def get_macro_data(session: AsyncSession = Depends(get_session)):
     all_macro_keys = [
         "dxy", "gold", "sp500", "treasury_10y", "nasdaq", "vix", "eurusd",
         "gbpusd", "usdjpy", "usdchf", "audusd", "usdcad", "nzdusd",
-        "wti_oil", "silver", "copper", "natural_gas",
+        "wti_oil", "silver", "copper", "natural_gas", "platinum", "palladium",
         "dow_jones", "russell_2000", "dax", "nikkei_225", "ftse_100",
         "treasury_2y", "treasury_5y", "treasury_30y",
     ]
@@ -791,7 +793,7 @@ async def get_commodities_data(session: AsyncSession = Depends(get_session)):
     if cached is not None:
         return cached
 
-    commodity_keys = ["gold", "wti_oil", "silver", "copper", "natural_gas"]
+    commodity_keys = ["gold", "wti_oil", "silver", "copper", "natural_gas", "platinum", "palladium"]
 
     macro, prev_macro, daily_macro = await _get_macro_trio(session)
     if not macro:
@@ -1036,4 +1038,488 @@ async def get_correlations(session: AsyncSession = Depends(get_session)):
         "timestamp": rows[-1].timestamp.isoformat() if rows else None,
     }
     _set_cache("correlations", data, 300)
+    return data
+
+
+@router.get("/central-bank")
+async def get_central_bank_data(session: AsyncSession = Depends(get_session)):
+    """Get central bank gold purchase data: net purchases, trend, history, top buyers."""
+    cached = _get_cached("central_bank")
+    if cached is not None:
+        return cached
+
+    # Last 12 months of CentralBankGold data
+    twelve_months_ago = datetime.utcnow() - timedelta(days=365)
+
+    result = await session.execute(
+        select(CentralBankGold)
+        .where(CentralBankGold.report_date >= twelve_months_ago)
+        .order_by(CentralBankGold.report_date)
+    )
+    rows = result.scalars().all()
+
+    if not rows:
+        return {
+            "cb_net_purchases": 0,
+            "cb_trend": "neutral",
+            "cb_history": [],
+            "top_buyers": [],
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+    # Net purchases: sum of monthly_change_tonnes
+    cb_net_purchases = sum(
+        r.monthly_change_tonnes for r in rows if r.monthly_change_tonnes is not None
+    )
+
+    # Trend from last 3 months of aggregated monthly changes
+    three_months_ago = datetime.utcnow() - timedelta(days=90)
+    recent_rows = [r for r in rows if r.report_date >= three_months_ago]
+    recent_net = sum(
+        r.monthly_change_tonnes for r in recent_rows if r.monthly_change_tonnes is not None
+    )
+    if recent_net > 5:
+        cb_trend = "buying"
+    elif recent_net < -5:
+        cb_trend = "selling"
+    else:
+        cb_trend = "neutral"
+
+    # History: aggregate monthly_change_tonnes by month for sparkline
+    monthly_agg: dict[str, float] = {}
+    for r in rows:
+        month_key = r.report_date.strftime("%Y-%m")
+        if r.monthly_change_tonnes is not None:
+            monthly_agg[month_key] = monthly_agg.get(month_key, 0) + r.monthly_change_tonnes
+    cb_history = [
+        {"date": k, "value": round(v, 2)} for k, v in sorted(monthly_agg.items())
+    ]
+
+    # Top buyers: top 5 countries by total_tonnes (latest record per country)
+    country_latest: dict[str, float] = {}
+    for r in rows:
+        if r.total_tonnes is not None:
+            # Keep the latest record per country (rows are ordered by date)
+            country_latest[r.country] = r.total_tonnes
+    top_buyers = sorted(
+        [{"country": c, "total_tonnes": round(t, 2)} for c, t in country_latest.items()],
+        key=lambda x: x["total_tonnes"],
+        reverse=True,
+    )[:5]
+
+    data = {
+        "cb_net_purchases": round(cb_net_purchases, 2),
+        "cb_trend": cb_trend,
+        "cb_history": cb_history,
+        "top_buyers": top_buyers,
+        "timestamp": rows[-1].report_date.isoformat() if rows else datetime.utcnow().isoformat(),
+    }
+    _set_cache("central_bank", data, 600)
+    return data
+
+
+@router.get("/forward-curve")
+async def get_forward_curve():
+    """Get gold futures forward curve from CME via Yahoo Finance.
+
+    Fetches GC=F (front month) and further-dated contracts to determine
+    contango/backwardation and the term structure of gold futures.
+    """
+    cached = _get_cached("forward_curve")
+    if cached is not None:
+        return cached
+
+    import aiohttp
+    import ssl
+    import certifi
+
+    ssl_ctx = ssl.create_default_context(cafile=certifi.where())
+
+    # CME gold futures tickers on Yahoo Finance
+    contracts = [
+        {"ticker": "GC=F", "label": "Front Month", "expiry_approx": "2026-04"},
+        {"ticker": "GCJ26.CMX", "label": "Apr 2026", "expiry_approx": "2026-04"},
+        {"ticker": "GCK26.CMX", "label": "May 2026", "expiry_approx": "2026-05"},
+        {"ticker": "GCM26.CMX", "label": "Jun 2026", "expiry_approx": "2026-06"},
+        {"ticker": "GCQ26.CMX", "label": "Aug 2026", "expiry_approx": "2026-08"},
+        {"ticker": "GCZ26.CMX", "label": "Dec 2026", "expiry_approx": "2026-12"},
+        {"ticker": "GCG27.CMX", "label": "Feb 2027", "expiry_approx": "2027-02"},
+    ]
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Accept": "application/json",
+    }
+
+    async def _fetch_yahoo_v8_price(session: aiohttp.ClientSession, symbol: str) -> float | None:
+        """Fetch price for a single ticker via Yahoo v8 chart API."""
+        try:
+            url = f"https://query2.finance.yahoo.com/v8/finance/chart/{symbol}"
+            params = {"interval": "1d", "range": "2d"}
+            async with session.get(url, params=params, headers=headers, ssl=ssl_ctx, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                if resp.status != 200:
+                    return None
+                data = await resp.json()
+                if data and "chart" in data:
+                    results = data["chart"].get("result", [])
+                    if results:
+                        meta = results[0].get("meta", {})
+                        price = meta.get("regularMarketPrice")
+                        if price:
+                            return float(price)
+        except Exception as e:
+            logger.debug(f"Forward curve: Failed to fetch {symbol}: {e}")
+        return None
+
+    spot_price = None
+    forwards = []
+
+    try:
+        connector = aiohttp.TCPConnector(ssl=ssl_ctx)
+        async with aiohttp.ClientSession(connector=connector) as session:
+            # Fetch spot (front month) first
+            spot_price = await _fetch_yahoo_v8_price(session, "GC=F")
+
+            if spot_price is None:
+                return {"error": "Could not fetch gold spot price", "timestamp": datetime.utcnow().isoformat()}
+
+            # Fetch each forward contract
+            for contract in contracts:
+                price = await _fetch_yahoo_v8_price(session, contract["ticker"])
+                if price is not None:
+                    forwards.append({
+                        "contract": contract["label"],
+                        "ticker": contract["ticker"],
+                        "price": round(price, 2),
+                        "expiry_approx": contract["expiry_approx"],
+                    })
+
+    except Exception as e:
+        logger.warning(f"Forward curve fetch error: {e}")
+
+    # If we got no forward data, synthesize from spot with typical forward points
+    if len(forwards) <= 1 and spot_price:
+        # Typical gold contango: ~0.3-0.5% per month (storage + interest carry)
+        synthetic_months = [
+            ("Apr 2026", "2026-04", 0),
+            ("May 2026", "2026-05", 1),
+            ("Jun 2026", "2026-06", 2),
+            ("Aug 2026", "2026-08", 4),
+            ("Dec 2026", "2026-12", 8),
+            ("Feb 2027", "2027-02", 10),
+        ]
+        forwards = []
+        for label, expiry, months_out in synthetic_months:
+            fwd_price = round(spot_price * (1 + 0.004 * months_out), 2)
+            forwards.append({
+                "contract": label,
+                "ticker": "synthetic",
+                "price": fwd_price,
+                "expiry_approx": expiry,
+            })
+
+    # Determine curve shape
+    curve_shape = "flat"
+    spread_pct = 0.0
+    if forwards and spot_price:
+        farthest_price = forwards[-1]["price"]
+        if farthest_price > spot_price * 1.001:
+            curve_shape = "contango"
+        elif farthest_price < spot_price * 0.999:
+            curve_shape = "backwardation"
+        spread_pct = round(((farthest_price - spot_price) / spot_price) * 100, 3)
+
+    result = {
+        "spot": round(spot_price, 2) if spot_price else None,
+        "forwards": forwards,
+        "curve_shape": curve_shape,
+        "spread_pct": spread_pct,
+        "timestamp": datetime.utcnow().isoformat(),
+    }
+    _set_cache("forward_curve", result, 300)  # 5 min TTL
+    return result
+
+
+# ── Macro Regime Detector ──────────────────────────────────────────
+
+# Historical average gold returns by regime (annualized %, approximate)
+_REGIME_GOLD_RETURNS = {
+    "RISK_OFF": 12.5,       # Flight to safety benefits gold
+    "RISK_ON": -2.0,        # Risk appetite reduces gold demand
+    "STAGFLATION": 18.0,    # Inflation + stagnation = gold's best environment
+    "DEFLATION": 3.0,       # Mild positive — safe haven but deflationary pressure
+    "REFLATION": 8.0,       # Central bank easing supports gold
+    "NEUTRAL": 5.0,         # Long-term average gold return
+}
+
+_REGIME_DESCRIPTIONS = {
+    "RISK_OFF": "Elevated volatility with weakening dollar. Flight to safety favors gold as a hedge.",
+    "RISK_ON": "Low volatility and rising equities. Risk appetite reduces demand for safe havens like gold.",
+    "STAGFLATION": "Rising inflation amid slowing growth. Historically gold's strongest environment.",
+    "DEFLATION": "Falling prices and declining yields. Gold acts as a store of value but faces headwinds from deflation.",
+    "REFLATION": "Moderate volatility with gold outperforming. Central banks likely easing, supporting gold.",
+    "NEUTRAL": "No strong macro signal. Gold tracking long-term average returns.",
+}
+
+
+@router.get("/regime")
+async def get_macro_regime(session: AsyncSession = Depends(get_session)):
+    """Classify the current macro regime and its implications for gold.
+
+    Regimes:
+    - RISK_OFF: VIX > 25 AND DXY dropping
+    - RISK_ON: VIX < 15 AND SP500 rising
+    - STAGFLATION: CPI rising AND GDP slowing
+    - DEFLATION: CPI falling AND yields falling
+    - REFLATION: VIX 15-25 AND gold rising
+    - NEUTRAL: Default
+    """
+    cached = _get_cached("macro_regime")
+    if cached is not None:
+        return cached
+
+    try:
+        macro, prev_macro, daily_macro = await _get_macro_trio(session)
+    except Exception as e:
+        logger.warning(f"Regime: macro query failed: {e}")
+        macro = None
+
+    if not macro:
+        return {
+            "regime": "NEUTRAL",
+            "confidence": 0,
+            "description": _REGIME_DESCRIPTIONS["NEUTRAL"],
+            "gold_historical_avg_return": _REGIME_GOLD_RETURNS["NEUTRAL"],
+            "components": {"vix": None, "dxy": None, "cpi": None, "real_yield": None},
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+
+    # Extract component values
+    vix = macro.vix
+    dxy = getattr(macro, "dxy", None)
+    dxy_prev = getattr(daily_macro, "dxy", None) if daily_macro else None
+    sp500 = getattr(macro, "sp500", None)
+    sp500_prev = getattr(daily_macro, "sp500", None) if daily_macro else None
+    gold = getattr(macro, "gold", None)
+    gold_prev = getattr(daily_macro, "gold", None) if daily_macro else None
+    cpi = getattr(macro, "cpi_yoy", None)
+    real_yield = getattr(macro, "real_yield_10y", None)
+    treasury_10y = macro.treasury_10y
+    treasury_10y_prev = getattr(daily_macro, "treasury_10y", None) if daily_macro else None
+
+    # Compute directional changes
+    dxy_dropping = False
+    if dxy is not None and dxy_prev is not None and dxy_prev > 0:
+        dxy_change_pct = ((dxy - dxy_prev) / dxy_prev) * 100
+        dxy_dropping = dxy_change_pct < -0.1
+
+    sp500_rising = False
+    if sp500 is not None and sp500_prev is not None and sp500_prev > 0:
+        sp500_change_pct = ((sp500 - sp500_prev) / sp500_prev) * 100
+        sp500_rising = sp500_change_pct > 0.1
+
+    gold_rising = False
+    if gold is not None and gold_prev is not None and gold_prev > 0:
+        gold_change_pct = ((gold - gold_prev) / gold_prev) * 100
+        gold_rising = gold_change_pct > 0.1
+
+    yields_falling = False
+    if treasury_10y is not None and treasury_10y_prev is not None:
+        yields_falling = treasury_10y < treasury_10y_prev - 0.02
+
+    # CPI signals
+    cpi_rising = cpi is not None and cpi > 3.0
+    cpi_falling = cpi is not None and cpi < 2.0
+
+    # GDP slowing proxy: SP500 declining as proxy for growth slowdown
+    gdp_slowing = False
+    if sp500 is not None and sp500_prev is not None and sp500_prev > 0:
+        gdp_slowing = ((sp500 - sp500_prev) / sp500_prev) * 100 < -0.5
+
+    # Classify regime with confidence scoring
+    regime = "NEUTRAL"
+    confidence = 30  # Base confidence
+
+    if vix is not None and vix > 25 and dxy_dropping:
+        regime = "RISK_OFF"
+        confidence = min(90, 50 + int((vix - 25) * 3))
+    elif vix is not None and vix < 15 and sp500_rising:
+        regime = "RISK_ON"
+        confidence = min(85, 50 + int((15 - vix) * 5))
+    elif cpi_rising and gdp_slowing:
+        regime = "STAGFLATION"
+        confidence = 65 if cpi is not None and cpi > 4.0 else 50
+    elif cpi_falling and yields_falling:
+        regime = "DEFLATION"
+        confidence = 55
+    elif vix is not None and 15 <= vix <= 25 and gold_rising:
+        regime = "REFLATION"
+        confidence = 55
+
+    # Build component snapshot
+    components = {
+        "vix": round(vix, 2) if vix is not None else None,
+        "dxy": round(dxy, 2) if dxy is not None else None,
+        "cpi": round(cpi, 2) if cpi is not None else None,
+        "real_yield": round(real_yield, 4) if real_yield is not None else None,
+    }
+
+    data = {
+        "regime": regime,
+        "confidence": confidence,
+        "description": _REGIME_DESCRIPTIONS[regime],
+        "gold_historical_avg_return": _REGIME_GOLD_RETURNS[regime],
+        "components": components,
+        "timestamp": macro.timestamp.isoformat(),
+    }
+    _set_cache("macro_regime", data, 300)
+    return data
+
+
+# ── Gold Miners Endpoint ──────────────────────────────────────────
+
+@router.get("/miners")
+async def get_gold_miners():
+    """Get gold miner stocks with prices, changes, and GDX/GLD ratio (leading indicator)."""
+    cached = _get_cached("gold_miners")
+    if cached is not None:
+        return cached
+
+    from app.collectors.gold_miners import GoldMinersCollector
+
+    collector = GoldMinersCollector()
+    try:
+        data = await collector.collect()
+    except Exception as e:
+        logger.error(f"Gold miners collector error: {e}")
+        return {
+            "miners": [],
+            "gdx_gld_ratio": None,
+            "gld_price": None,
+            "ratio_signal": "unknown",
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    finally:
+        await collector.close()
+
+    _set_cache("gold_miners", data, 120)
+    return data
+
+
+# ── Intraday Heatmap Endpoint ─────────────────────────────────────
+
+@router.get("/intraday-patterns")
+async def get_intraday_patterns(session: AsyncSession = Depends(get_session)):
+    """Get 24x7 intraday return heatmap from last 30 days of hourly data.
+
+    Returns average return, positive rate, and trade count for each
+    (hour_of_day, day_of_week) combination.
+    """
+    cached = _get_cached("intraday_patterns")
+    if cached is not None:
+        return cached
+
+    since = datetime.utcnow() - timedelta(days=30)
+
+    result = await session.execute(
+        select(Price)
+        .where(Price.timestamp >= since)
+        .order_by(Price.timestamp)
+    )
+    prices = result.scalars().all()
+
+    if len(prices) < 50:
+        return {
+            "heatmap": [],
+            "timestamp": datetime.utcnow().isoformat(),
+            "error": "Not enough data for intraday patterns",
+            "candle_count": len(prices),
+        }
+
+    # Compute return vs previous candle
+    day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+
+    # Accumulator: (hour, day_of_week) -> list of returns
+    from collections import defaultdict
+    buckets: dict[tuple[int, int], list[float]] = defaultdict(list)
+
+    for i in range(1, len(prices)):
+        prev_close = prices[i - 1].close
+        curr_close = prices[i].close
+        if prev_close and prev_close > 0 and curr_close:
+            ret = ((curr_close - prev_close) / prev_close) * 100
+            hour = prices[i].timestamp.hour
+            dow = prices[i].timestamp.weekday()  # 0=Monday
+            buckets[(hour, dow)].append(ret)
+
+    # Build heatmap
+    heatmap = []
+    for key in sorted(buckets.keys(), key=lambda k: (k[1], k[0])):
+        hour, dow = key
+        rets = buckets[key]
+        if not rets:
+            continue
+        avg_return = sum(rets) / len(rets)
+        positive_count = sum(1 for r in rets if r > 0)
+        positive_rate = positive_count / len(rets)
+
+        # Standard deviation
+        mean = avg_return
+        variance = sum((r - mean) ** 2 for r in rets) / len(rets) if len(rets) > 1 else 0
+        std_dev = variance ** 0.5
+
+        heatmap.append({
+            "hour": hour,
+            "day_of_week": dow,
+            "day_name": day_names[dow],
+            "avg_return": round(avg_return, 6),
+            "std_dev": round(std_dev, 6),
+            "positive_rate": round(positive_rate, 4),
+            "trade_count": len(rets),
+        })
+
+    # Sort by day then hour
+    heatmap.sort(key=lambda x: (x["day_of_week"], x["hour"]))
+
+    data = {
+        "heatmap": heatmap,
+        "timestamp": datetime.utcnow().isoformat(),
+        "period_days": 30,
+        "total_candles": len(prices),
+    }
+    _set_cache("intraday_patterns", data, 300)
+    return data
+
+
+# ── Physical Gold Premium (SGE) Endpoint ──────────────────────────
+
+@router.get("/physical-premium")
+async def get_physical_premium():
+    """Get estimated SGE physical gold premium over spot.
+
+    Uses CNY/USD rate to estimate the Shanghai Gold Exchange premium.
+    Signal: GREEN (<2%), YELLOW (2-4%), RED (>4%).
+    """
+    cached = _get_cached("physical_premium")
+    if cached is not None:
+        return cached
+
+    from app.collectors.physical_premium import PhysicalPremiumCollector
+
+    collector = PhysicalPremiumCollector()
+    try:
+        data = await collector.collect()
+    except Exception as e:
+        logger.error(f"Physical premium collector error: {e}")
+        return {
+            "spot_usd": None,
+            "cny_usd_rate": None,
+            "estimated_sge_premium_pct": None,
+            "signal": "unknown",
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    finally:
+        await collector.close()
+
+    _set_cache("physical_premium", data, 300)
     return data

@@ -37,6 +37,11 @@ const TradingBot = lazy(() => import('./pages/TradingBot'))
 const TradeJournal = lazy(() => import('./pages/TradeJournal'))
 const GoldETF = lazy(() => import('./pages/GoldETF'))
 const EconomicCalendarPage = lazy(() => import('./pages/EconomicCalendarPage'))
+const Analysts = lazy(() => import('./pages/Analysts'))
+const Miners = lazy(() => import('./pages/Miners'))
+const Fundamentals = lazy(() => import('./pages/Fundamentals'))
+const Backtest = lazy(() => import('./pages/Backtest'))
+const Community = lazy(() => import('./pages/Community'))
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -144,6 +149,11 @@ export default function App() {
             <Route path="/trade-journal" element={<PremiumRoute><TradeJournal /></PremiumRoute>} />
             <Route path="/gold-etf" element={<PremiumRoute><GoldETF /></PremiumRoute>} />
             <Route path="/calendar-full" element={<PremiumRoute><EconomicCalendarPage /></PremiumRoute>} />
+            <Route path="/analysts" element={<PremiumRoute><Analysts /></PremiumRoute>} />
+            <Route path="/miners" element={<PremiumRoute><Miners /></PremiumRoute>} />
+            <Route path="/fundamentals" element={<PremiumRoute><Fundamentals /></PremiumRoute>} />
+            <Route path="/backtest" element={<PremiumRoute><Backtest /></PremiumRoute>} />
+            <Route path="/community" element={<PremiumRoute><Community /></PremiumRoute>} />
           </Routes>
           </Suspense>
           </div>

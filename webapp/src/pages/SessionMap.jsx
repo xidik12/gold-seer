@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../utils/api'
 import { formatPricePrecise, formatPercent, safeFixed } from '../utils/format'
 import SessionClock from '../components/SessionClock'
+import IntradayHeatmap from '../components/IntradayHeatmap'
 
 const POLL_INTERVAL = 60_000
 
@@ -184,6 +185,8 @@ export default function SessionMap() {
 
       <SessionClock />
       <CountdownToNext sessions={sessions} />
+
+      <IntradayHeatmap />
 
       {error && (
         <div className="bg-bg-card rounded-2xl p-4 border border-accent-red/20">

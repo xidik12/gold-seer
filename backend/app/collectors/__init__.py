@@ -8,6 +8,8 @@ from app.collectors.central_bank_gold import CentralBankGoldCollector
 from app.collectors.gold_news import GoldNewsCollector
 from app.collectors.session_tracker import SessionTracker
 from app.collectors.gold_analysts import GoldAnalystCollector
+from app.collectors.gold_miners import GoldMinersCollector
+from app.collectors.physical_premium import PhysicalPremiumCollector
 from app.collectors.news import NewsCollector
 from app.collectors.macro import MacroCollector
 from app.collectors.reddit import RedditCollector
@@ -25,6 +27,8 @@ __all__ = [
     "GoldNewsCollector",
     "SessionTracker",
     "GoldAnalystCollector",
+    "GoldMinersCollector",
+    "PhysicalPremiumCollector",
     # Retained from original (still useful for gold context)
     "NewsCollector",
     "MacroCollector",

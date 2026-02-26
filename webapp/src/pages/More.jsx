@@ -56,6 +56,19 @@ const menuItems = [
     descKey: 'nav.forward',
   },
   {
+    path: '/analysts',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 00-3-3.87" />
+        <path d="M16 3.13a4 4 0 010 7.75" />
+      </svg>
+    ),
+    labelKey: 'link.analysts',
+    descKey: 'nav.forward',
+  },
+  {
     path: '/sessions',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
@@ -64,6 +77,62 @@ const menuItems = [
       </svg>
     ),
     labelKey: 'link.sessions',
+    descKey: 'nav.forward',
+  },
+  {
+    path: '/fundamentals',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="M3 15h18" />
+        <path d="M8 15v3" />
+        <path d="M12 15v3" />
+        <path d="M16 15v3" />
+        <path d="M8 3v8" />
+        <path d="M12 3v5" />
+        <path d="M16 3v10" />
+      </svg>
+    ),
+    labelKey: 'link.fundamentals',
+    descKey: 'nav.forward',
+  },
+  {
+    path: '/backtest',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+        <path d="M3 3v18h18" />
+        <path d="M7 14l3-3 3 3 5-7" />
+        <circle cx="18" cy="7" r="2" />
+      </svg>
+    ),
+    labelKey: 'link.backtest',
+    descKey: 'nav.forward',
+  },
+  {
+    path: '/community',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 00-3-3.87" />
+        <path d="M16 3.13a4 4 0 010 7.75" />
+      </svg>
+    ),
+    labelKey: 'link.community',
+    descKey: 'nav.forward',
+  },
+  {
+    path: '/miners',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+        <path d="M2 20h20" />
+        <path d="M5 20V8l4-4 4 4v12" />
+        <path d="M9 20v-4h-2v4" />
+        <path d="M15 20V12l4-4v12" />
+        <path d="M17 20v-4h-2v4" />
+      </svg>
+    ),
+    labelKey: 'link.miners',
     descKey: 'nav.forward',
   },
   {

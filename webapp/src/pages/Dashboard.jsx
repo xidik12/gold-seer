@@ -22,6 +22,9 @@ import CentralBankWidget from '../components/CentralBankWidget'
 import CorrelationWidget from '../components/CorrelationWidget'
 import SilverWidget from '../components/SilverWidget'
 import SeasonalityWidget from '../components/SeasonalityWidget'
+import MacroRegimeWidget from '../components/MacroRegimeWidget'
+import PhysicalPremiumWidget from '../components/PhysicalPremiumWidget'
+import ForwardCurveChart from '../components/ForwardCurveChart'
 
 class SafeWrap extends Component {
   constructor(props) {
@@ -206,6 +209,23 @@ const quickIcons = {
       <path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
     </svg>
   ),
+  analysts: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4-4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 00-3-3.87" />
+      <path d="M16 3.13a4 4 0 010 7.75" />
+    </svg>
+  ),
+  miners: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 20h20" />
+      <path d="M5 20V8l4-4 4 4v12" />
+      <path d="M9 20v-4h-2v4" />
+      <path d="M15 20V12l4-4v12" />
+      <path d="M17 20v-4h-2v4" />
+    </svg>
+  ),
   tradingbot: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="11" width="18" height="10" rx="2" />
@@ -214,6 +234,33 @@ const quickIcons = {
       <path d="M8 11V7a4 4 0 018 0v4" />
       <path d="M12 3v1" />
       <path d="M9 5l-1-2M15 5l1-2" />
+    </svg>
+  ),
+  fundamentals: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M3 15h18" />
+      <path d="M8 15v3" />
+      <path d="M12 15v3" />
+      <path d="M16 15v3" />
+      <path d="M8 3v8" />
+      <path d="M12 3v5" />
+      <path d="M16 3v10" />
+    </svg>
+  ),
+  backtest: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 3v18h18" />
+      <path d="M7 14l3-3 3 3 5-7" />
+      <circle cx="18" cy="7" r="2" />
+    </svg>
+  ),
+  community: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 00-3-3.87" />
+      <path d="M16 3.13a4 4 0 010 7.75" />
     </svg>
   ),
 }
@@ -236,6 +283,8 @@ const CATEGORIES = [
       { path: '/elliott-wave', labelKey: 'link.elliottWave', icon: 'elliott' },
       { path: '/cot', labelKey: 'link.cotData', icon: 'cot' },
       { path: '/sessions', labelKey: 'link.sessions', icon: 'sessions' },
+      { path: '/fundamentals', labelKey: 'link.fundamentals', icon: 'fundamentals' },
+      { path: '/backtest', labelKey: 'link.backtest', icon: 'backtest' },
     ],
   },
   {
@@ -243,6 +292,8 @@ const CATEGORIES = [
     links: [
       { path: '/markets', labelKey: 'link.markets', icon: 'market' },
       { path: '/gold-etf', labelKey: 'link.goldETF', icon: 'etf' },
+      { path: '/miners', labelKey: 'link.miners', icon: 'miners' },
+      { path: '/analysts', labelKey: 'link.analysts', icon: 'analysts' },
       { path: '/calendar-full', labelKey: 'link.calendar', icon: 'calendar' },
       { path: '/news', labelKey: 'link.news', icon: 'news' },
       { path: '/events', labelKey: 'link.events', icon: 'events' },
@@ -253,6 +304,7 @@ const CATEGORIES = [
     titleKey: 'category.more',
     links: [
       { path: '/game', labelKey: 'link.game', icon: 'game' },
+      { path: '/community', labelKey: 'link.community', icon: 'community' },
       { path: '/briefing', labelKey: 'link.briefing', icon: 'briefing' },
       { path: '/trade-journal', labelKey: 'link.journal', icon: 'journal' },
       { path: '/learn', labelKey: 'link.learn', icon: 'learn' },
@@ -470,6 +522,10 @@ export default function Dashboard() {
             <GoldSentimentGauge />
           </SafeWrap>
 
+          <SafeWrap name="MacroRegimeWidget" t={t}>
+            <MacroRegimeWidget />
+          </SafeWrap>
+
           <SafeWrap name="MacroDashboard" t={t}>
             <MacroDashboard />
           </SafeWrap>
@@ -490,8 +546,16 @@ export default function Dashboard() {
             <ETFFlowWidget />
           </SafeWrap>
 
+          <SafeWrap name="ForwardCurveChart" t={t}>
+            <ForwardCurveChart />
+          </SafeWrap>
+
           <SafeWrap name="CentralBankWidget" t={t}>
             <CentralBankWidget />
+          </SafeWrap>
+
+          <SafeWrap name="PhysicalPremiumWidget" t={t}>
+            <PhysicalPremiumWidget />
           </SafeWrap>
 
           <SafeWrap name="SeasonalityWidget" t={t}>

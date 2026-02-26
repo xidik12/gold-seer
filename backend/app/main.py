@@ -39,6 +39,10 @@ from app.api import trade_journal as trade_journal_api
 from app.api import gold_etf as gold_etf_api
 from app.api import copy_trade as copy_trade_api
 from app.api import calculators as calculators_api
+from app.api import analysts as analysts_api
+from app.api import fundamentals as fundamentals_api
+from app.api import backtest as backtest_api
+from app.api import community as community_api
 from app.scheduler.jobs import (
     backfill_historical_prices,
     collect_price_data,
@@ -72,6 +76,7 @@ from app.scheduler.jobs import (
     snapshot_daily_metrics,
     evaluate_game_predictions,
     reset_game_periods,
+    check_central_bank_alerts,
 )
 from app.scheduler.daily_briefing import generate_daily_briefing
 from app.advisor.feedback import run_training_feedback, run_adaptive_weight_learning
@@ -169,6 +174,7 @@ async def lifespan(app: FastAPI):
         scheduler.add_job(collect_etf_flows, "interval", hours=1, id="collect_etf_flows", **_job_defaults)
         scheduler.add_job(collect_session_info, "interval", minutes=5, id="collect_sessions", **_job_defaults)
         scheduler.add_job(collect_central_bank_gold, "interval", hours=24, id="collect_cb_gold", **_job_defaults)
+        scheduler.add_job(check_central_bank_alerts, "interval", hours=12, id="check_cb_alerts", **_job_defaults)
         scheduler.add_job(collect_economic_calendar, "interval", hours=6, id="collect_econ_calendar", **_job_defaults)
 
         # Prediction jobs — time-aligned cron schedules (UTC)
@@ -544,6 +550,10 @@ app.include_router(trade_journal_api.router)
 app.include_router(gold_etf_api.router)
 app.include_router(copy_trade_api.router)
 app.include_router(calculators_api.router)
+app.include_router(analysts_api.router)
+app.include_router(fundamentals_api.router)
+app.include_router(backtest_api.router)
+app.include_router(community_api.router)
 
 
 @app.get("/health")

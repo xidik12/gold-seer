@@ -243,6 +243,8 @@ async def collect_macro_data():
         silver = _price("silver")
         copper = _price("copper")
         natural_gas = _price("natural_gas")
+        platinum = _price("platinum")
+        palladium = _price("palladium")
         # Gold mining/ETF equities
         gdx = _price("gdx")
         gld = _price("gld")
@@ -256,7 +258,7 @@ async def collect_macro_data():
         # Don't save a row where ALL values are None
         all_prices = [dxy, gold, sp500, treasury_10y, nasdaq, vix, eurusd,
                       gbpusd, usdjpy, usdchf, audusd, usdcad, nzdusd,
-                      wti_oil, silver, copper, natural_gas,
+                      wti_oil, silver, copper, natural_gas, platinum, palladium,
                       gdx, gld,
                       dow_jones, russell_2000, dax, nikkei_225, ftse_100]
         if all(v is None for v in all_prices):
@@ -300,6 +302,8 @@ async def collect_macro_data():
                 silver=silver,
                 copper=copper,
                 natural_gas=natural_gas,
+                platinum=platinum,
+                palladium=palladium,
                 # Gold mining/ETF equities
                 gdx=gdx,
                 gld=gld,
@@ -758,6 +762,73 @@ async def collect_economic_calendar():
         logger.info(f"Economic calendar: {inserted} new events saved (total fetched: {len(events)})")
     except Exception as e:
         logger.error(f"Economic calendar collection error: {e}")
+
+
+async def check_central_bank_alerts():
+    """Check for acceleration in central bank gold buying.
+
+    Queries CentralBankGold for the last 6 months per country.
+    If any country's latest month change is 3x above their average,
+    logs an alert to AlertLog.
+    """
+    try:
+        from app.database import async_session, CentralBankGold, AlertLog
+        from sqlalchemy import select, desc
+
+        six_months_ago = datetime.utcnow() - timedelta(days=180)
+
+        async with async_session() as session:
+            result = await session.execute(
+                select(CentralBankGold)
+                .where(CentralBankGold.report_date >= six_months_ago)
+                .order_by(CentralBankGold.country, CentralBankGold.report_date)
+            )
+            rows = result.scalars().all()
+
+        if not rows:
+            logger.debug("Central bank alerts: No data in last 6 months")
+            return
+
+        # Group by country
+        country_data: dict[str, list[float]] = {}
+        for r in rows:
+            if r.monthly_change_tonnes is not None:
+                country_data.setdefault(r.country, []).append(r.monthly_change_tonnes)
+
+        alerts_logged = 0
+        async with async_session() as session:
+            for country, changes in country_data.items():
+                if len(changes) < 2:
+                    continue
+
+                # Average of all months except the latest
+                avg_change = sum(changes[:-1]) / len(changes[:-1])
+                latest_change = changes[-1]
+
+                # Check acceleration: latest > 3x average (only for buying, i.e. positive)
+                if avg_change > 0 and latest_change > avg_change * 3:
+                    alert_msg = (
+                        f"CB_ACCELERATION: {country} bought {latest_change:.1f}t last month "
+                        f"vs {avg_change:.1f}t avg (6mo). {latest_change/avg_change:.1f}x acceleration."
+                    )
+                    logger.warning(alert_msg)
+
+                    # Log to AlertLog (use telegram_id=0 for system alerts)
+                    alert_log = AlertLog(
+                        telegram_id=0,
+                        alert_type="central_bank_acceleration",
+                        status="logged",
+                        error=alert_msg,
+                    )
+                    session.add(alert_log)
+                    alerts_logged += 1
+
+            if alerts_logged:
+                await session.commit()
+                logger.info(f"Central bank alerts: {alerts_logged} acceleration alerts logged")
+
+    except Exception as e:
+        logger.error(f"Central bank alert check error: {e}")
 
 
 async def collect_central_bank_gold():

@@ -165,6 +165,8 @@ class MacroData(Base):
     silver: Mapped[float] = mapped_column(Float, nullable=True)
     copper: Mapped[float] = mapped_column(Float, nullable=True)
     natural_gas: Mapped[float] = mapped_column(Float, nullable=True)
+    platinum: Mapped[float] = mapped_column(Float, nullable=True)
+    palladium: Mapped[float] = mapped_column(Float, nullable=True)
     # Indices
     dow_jones: Mapped[float] = mapped_column(Float, nullable=True)
     russell_2000: Mapped[float] = mapped_column(Float, nullable=True)
@@ -1159,6 +1161,16 @@ class TradeJournalEntry(Base):
     self_rating: Mapped[int] = mapped_column(Integer, nullable=True)  # 1-5
     ai_entry_quality: Mapped[float] = mapped_column(Float, nullable=True)  # AI-assessed 0-100
     lessons: Mapped[str] = mapped_column(Text, nullable=True)
+    # Trade details
+    direction: Mapped[str] = mapped_column(String(10), nullable=True)  # buy/sell/long/short
+    symbol: Mapped[str] = mapped_column(String(20), nullable=True, default="XAUUSD")
+    open_price: Mapped[float] = mapped_column(Float, nullable=True)
+    exit_price: Mapped[float] = mapped_column(Float, nullable=True)
+    lot_size: Mapped[float] = mapped_column(Float, nullable=True)
+    pnl: Mapped[float] = mapped_column(Float, nullable=True)
+    open_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    close_date: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=True, default="open")  # open/closed
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
 
 
@@ -1215,6 +1227,30 @@ class WhiteLabelConfig(Base):
     api_config: Mapped[dict] = mapped_column(JSON, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+
+
+class SharedTrade(Base):
+    """Community shared trades for social trading / leaderboard."""
+    __tablename__ = "shared_trades"
+    __table_args__ = (
+        Index("ix_shared_trades_telegram_id", "telegram_id"),
+        Index("ix_shared_trades_created_at", "created_at"),
+        Index("ix_shared_trades_status", "status"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    telegram_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    username: Mapped[str] = mapped_column(String(100), nullable=True)
+    direction: Mapped[str] = mapped_column(String(10))  # long/short
+    entry_price: Mapped[float] = mapped_column(Float)
+    target_price: Mapped[float] = mapped_column(Float, nullable=True)
+    stop_loss: Mapped[float] = mapped_column(Float, nullable=True)
+    pnl: Mapped[float] = mapped_column(Float, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="open")  # open/closed
+    reasoning: Mapped[str] = mapped_column(Text, nullable=True)
+    likes: Mapped[int] = mapped_column(Integer, default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
+    closed_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
 
 
 # ──────────────────────────────────────────────────────────────

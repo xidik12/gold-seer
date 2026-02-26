@@ -3,33 +3,24 @@
 Subscribers can register to have AI advisor signals automatically copied to
 their broker accounts with configurable lot scaling and risk limits.
 
-Storage is in-memory for now — DB persistence will be added later.
+Storage uses the CopyTradeSubscription DB model for persistence.
 """
 import logging
-import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
+from sqlalchemy import select, func as sa_func
 
 from app.api.admin import _verify_telegram_init_data
 from app.broker.copy_trade import CopyTradeManager
 from app.config import settings
+from app.database import async_session, CopyTradeSubscription
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/copy-trade", tags=["copy_trade"])
-
-# ---------------------------------------------------------------------------
-# In-memory stores (keyed by telegram_id as str)
-# ---------------------------------------------------------------------------
-
-# subscriber_id → subscriber profile
-_subscribers: dict[str, dict] = {}
-
-# telegram_id → subscriber_id  (1-to-1 mapping for now)
-_user_to_subscriber: dict[str, str] = {}
 
 # Shared CopyTradeManager instance
 _manager = CopyTradeManager()
@@ -60,8 +51,8 @@ class UpdateSettingsRequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def _get_telegram_id(request: Request) -> str:
-    """Verify X-Telegram-Init-Data header and return the telegram_id as str."""
+def _get_telegram_id(request: Request) -> int:
+    """Verify X-Telegram-Init-Data header and return the telegram_id as int."""
     init_data = request.headers.get("X-Telegram-Init-Data", "")
     if not init_data:
         raise HTTPException(401, "Missing X-Telegram-Init-Data header")
@@ -69,7 +60,24 @@ def _get_telegram_id(request: Request) -> str:
     telegram_id = user_data.get("id")
     if not telegram_id:
         raise HTTPException(400, "No user ID in initData")
-    return str(telegram_id)
+    return int(telegram_id)
+
+
+# ---------------------------------------------------------------------------
+# Helper
+# ---------------------------------------------------------------------------
+
+
+def _sub_config(sub: CopyTradeSubscription) -> dict:
+    """Return the user-facing config subset from a CopyTradeSubscription row."""
+    return {
+        "lot_multiplier": sub.lot_multiplier,
+        "max_lot_size": sub.max_lot_size,
+        "max_daily_trades": sub.daily_trade_limit,
+        "max_daily_loss_usd": sub.daily_loss_limit_usd,
+        "enabled": sub.is_active,
+        "subscribed_at": sub.created_at.isoformat() if sub.created_at else None,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -95,23 +103,29 @@ async def get_copy_trade_status():
             },
         }
 
-    active_subscribers = [s for s in _subscribers.values() if s.get("enabled", True)]
+    async with async_session() as session:
+        # Count active subscribers
+        result = await session.execute(
+            select(sa_func.count()).select_from(CopyTradeSubscription).where(
+                CopyTradeSubscription.is_active == True  # noqa: E712
+            )
+        )
+        active_count = result.scalar() or 0
 
-    # Aggregate today's stats across all subscribers
-    total_trades_today = 0
-    today = datetime.now(timezone.utc).date().isoformat()
-    for sub in active_subscribers:
-        sid = sub["subscriber_id"]
-        state = _manager.get_subscriber_stats(sid)
-        if state and state.get("last_reset_date") == today:
-            total_trades_today += state.get("trades_today", 0)
+        # Sum today's trades across active subscribers
+        result = await session.execute(
+            select(sa_func.sum(CopyTradeSubscription.trades_today)).where(
+                CopyTradeSubscription.is_active == True  # noqa: E712
+            )
+        )
+        total_trades_today = result.scalar() or 0
 
     return {
         "enabled": True,
-        "connected_subscribers": len(active_subscribers),
+        "connected_subscribers": active_count,
         "today": {
             "total_trades": total_trades_today,
-            "active_subscribers": len(active_subscribers),
+            "active_subscribers": active_count,
         },
     }
 
@@ -127,57 +141,74 @@ async def subscribe(request: Request, body: SubscribeRequest):
     """
     telegram_id = _get_telegram_id(request)
 
-    # Idempotent — return existing profile if already subscribed
-    if telegram_id in _user_to_subscriber:
-        subscriber_id = _user_to_subscriber[telegram_id]
-        profile = _subscribers[subscriber_id]
+    async with async_session() as session:
+        # Idempotent -- return existing if already subscribed
+        result = await session.execute(
+            select(CopyTradeSubscription).where(
+                CopyTradeSubscription.telegram_id == telegram_id
+            )
+        )
+        existing = result.scalar_one_or_none()
+
+        if existing:
+            return {
+                "subscriber_id": existing.id,
+                "already_subscribed": True,
+                "config": _sub_config(existing),
+            }
+
+        sub = CopyTradeSubscription(
+            telegram_id=telegram_id,
+            is_active=True,
+            lot_multiplier=body.lot_multiplier,
+            max_lot_size=body.max_lot_size,
+            daily_trade_limit=body.max_daily_trades,
+            daily_loss_limit_usd=body.max_daily_loss_usd,
+        )
+        session.add(sub)
+        await session.commit()
+        await session.refresh(sub)
+
+        logger.info(
+            "New copy trade subscriber: telegram_id=%d subscriber_id=%d",
+            telegram_id, sub.id,
+        )
+
         return {
-            "subscriber_id": subscriber_id,
-            "already_subscribed": True,
-            "config": _profile_config(profile),
+            "subscriber_id": sub.id,
+            "already_subscribed": False,
+            "config": _sub_config(sub),
         }
-
-    subscriber_id = str(uuid.uuid4())
-    profile = {
-        "subscriber_id": subscriber_id,
-        "telegram_id": telegram_id,
-        "lot_multiplier": body.lot_multiplier,
-        "max_lot_size": body.max_lot_size,
-        "max_daily_trades": body.max_daily_trades,
-        "max_daily_loss_usd": body.max_daily_loss_usd,
-        "enabled": True,
-        "subscribed_at": datetime.now(timezone.utc).isoformat(),
-    }
-
-    _subscribers[subscriber_id] = profile
-    _user_to_subscriber[telegram_id] = subscriber_id
-
-    logger.info("New copy trade subscriber: telegram_id=%s subscriber_id=%s", telegram_id, subscriber_id)
-
-    return {
-        "subscriber_id": subscriber_id,
-        "already_subscribed": False,
-        "config": _profile_config(profile),
-    }
 
 
 @router.post("/unsubscribe")
 async def unsubscribe(request: Request):
     """Unsubscribe the authenticated user from copy trading.
 
-    Removes the subscriber profile. Future signals will not be copied.
+    Sets is_active=False instead of deleting the row, preserving history.
     """
     telegram_id = _get_telegram_id(request)
 
-    if telegram_id not in _user_to_subscriber:
-        raise HTTPException(404, "You are not subscribed to copy trading")
+    async with async_session() as session:
+        result = await session.execute(
+            select(CopyTradeSubscription).where(
+                CopyTradeSubscription.telegram_id == telegram_id
+            )
+        )
+        sub = result.scalar_one_or_none()
 
-    subscriber_id = _user_to_subscriber.pop(telegram_id)
-    _subscribers.pop(subscriber_id, None)
+        if not sub:
+            raise HTTPException(404, "You are not subscribed to copy trading")
 
-    logger.info("Copy trade unsubscribe: telegram_id=%s subscriber_id=%s", telegram_id, subscriber_id)
+        sub.is_active = False
+        await session.commit()
 
-    return {"unsubscribed": True, "subscriber_id": subscriber_id}
+        logger.info(
+            "Copy trade unsubscribe: telegram_id=%d subscriber_id=%d",
+            telegram_id, sub.id,
+        )
+
+        return {"unsubscribed": True, "subscriber_id": sub.id}
 
 
 @router.get("/stats")
@@ -189,57 +220,57 @@ async def get_stats(request: Request):
     """
     telegram_id = _get_telegram_id(request)
 
-    if telegram_id not in _user_to_subscriber:
-        raise HTTPException(404, "You are not subscribed to copy trading")
+    async with async_session() as session:
+        result = await session.execute(
+            select(CopyTradeSubscription).where(
+                CopyTradeSubscription.telegram_id == telegram_id
+            )
+        )
+        sub = result.scalar_one_or_none()
 
-    subscriber_id = _user_to_subscriber[telegram_id]
-    profile = _subscribers[subscriber_id]
+        if not sub:
+            raise HTTPException(404, "You are not subscribed to copy trading")
 
-    # Pull live daily stats from the manager
-    state = _manager.get_subscriber_stats(subscriber_id)
-    today = datetime.now(timezone.utc).date().isoformat()
+        trades_today = sub.trades_today or 0
+        daily_pnl = sub.loss_today_usd or 0.0
 
-    if state is None or state.get("last_reset_date") != today:
-        # No activity yet today
-        trades_today = 0
-        daily_pnl = 0.0
-    else:
-        trades_today = state.get("trades_today", 0)
-        daily_pnl = state.get("daily_pnl", 0.0)
+        # Pull copy log from the manager for this subscriber
+        subscriber_log = [
+            entry for entry in _manager.copy_log
+            if entry.get("subscriber_id") == str(sub.id)
+        ]
+        recent_log = subscriber_log[-50:]
 
-    # Filter copy log to this subscriber (most recent 50)
-    subscriber_log = [
-        entry for entry in _manager.copy_log
-        if entry.get("subscriber_id") == subscriber_id
-    ]
-    recent_log = subscriber_log[-50:]
-
-    return {
-        "subscriber_id": subscriber_id,
-        "enabled": profile.get("enabled", True),
-        "today": {
-            "trades": trades_today,
-            "pnl_usd": round(daily_pnl, 2),
-            "remaining_trades": max(0, profile["max_daily_trades"] - trades_today),
-            "remaining_loss_budget_usd": round(
-                max(0.0, profile["max_daily_loss_usd"] - abs(min(daily_pnl, 0.0))), 2
-            ),
-        },
-        "config": _profile_config(profile),
-        "trade_history": [
-            {
-                "timestamp": entry["timestamp"],
-                "symbol": entry["original_signal"].get("symbol"),
-                "direction": entry["original_signal"].get("direction"),
-                "original_lot_size": entry["original_signal"].get("lot_size"),
-                "subscriber_lot_size": entry["subscriber_lot_size"],
-                "multiplier": entry["lot_multiplier"],
-                "status": entry["order_result"].get("status"),
-                "order_id": entry["order_result"].get("order_id"),
-            }
-            for entry in recent_log
-        ],
-    }
+        return {
+            "subscriber_id": sub.id,
+            "enabled": sub.is_active,
+            "today": {
+                "trades": trades_today,
+                "pnl_usd": round(daily_pnl, 2),
+                "remaining_trades": max(0, sub.daily_trade_limit - trades_today),
+                "remaining_loss_budget_usd": round(
+                    max(0.0, sub.daily_loss_limit_usd - abs(min(daily_pnl, 0.0))), 2
+                ),
+            },
+            "lifetime": {
+                "total_copied_trades": sub.total_copied_trades or 0,
+                "total_pnl_usd": round(sub.total_pnl_usd or 0.0, 2),
+            },
+            "config": _sub_config(sub),
+            "trade_history": [
+                {
+                    "timestamp": entry["timestamp"],
+                    "symbol": entry["original_signal"].get("symbol"),
+                    "direction": entry["original_signal"].get("direction"),
+                    "original_lot_size": entry["original_signal"].get("lot_size"),
+                    "subscriber_lot_size": entry["subscriber_lot_size"],
+                    "multiplier": entry["lot_multiplier"],
+                    "status": entry["order_result"].get("status"),
+                    "order_id": entry["order_result"].get("order_id"),
+                }
+                for entry in recent_log
+            ],
+        }
 
 
 @router.put("/settings")
@@ -251,48 +282,47 @@ async def update_settings(request: Request, body: UpdateSettingsRequest):
     """
     telegram_id = _get_telegram_id(request)
 
-    if telegram_id not in _user_to_subscriber:
-        raise HTTPException(404, "You are not subscribed to copy trading")
+    async with async_session() as session:
+        result = await session.execute(
+            select(CopyTradeSubscription).where(
+                CopyTradeSubscription.telegram_id == telegram_id
+            )
+        )
+        sub = result.scalar_one_or_none()
 
-    subscriber_id = _user_to_subscriber[telegram_id]
-    profile = _subscribers[subscriber_id]
+        if not sub:
+            raise HTTPException(404, "You are not subscribed to copy trading")
 
-    update_fields = body.model_dump(exclude_none=True)
-    if not update_fields:
-        raise HTTPException(400, "No fields to update")
+        update_fields = body.model_dump(exclude_none=True)
+        if not update_fields:
+            raise HTTPException(400, "No fields to update")
 
-    allowed = {"lot_multiplier", "max_lot_size", "max_daily_trades", "max_daily_loss_usd", "enabled"}
-    for key, value in update_fields.items():
-        if key in allowed:
-            profile[key] = value
+        # Map Pydantic field names to DB column names
+        field_map = {
+            "lot_multiplier": "lot_multiplier",
+            "max_lot_size": "max_lot_size",
+            "max_daily_trades": "daily_trade_limit",
+            "max_daily_loss_usd": "daily_loss_limit_usd",
+            "enabled": "is_active",
+        }
 
-    profile["updated_at"] = datetime.now(timezone.utc).isoformat()
+        updated_keys = []
+        for key, value in update_fields.items():
+            db_col = field_map.get(key)
+            if db_col:
+                setattr(sub, db_col, value)
+                updated_keys.append(key)
 
-    logger.info(
-        "Copy trade settings updated: telegram_id=%s fields=%s",
-        telegram_id,
-        list(update_fields.keys()),
-    )
+        await session.commit()
+        await session.refresh(sub)
 
-    return {
-        "subscriber_id": subscriber_id,
-        "updated_fields": list(update_fields.keys()),
-        "config": _profile_config(profile),
-    }
+        logger.info(
+            "Copy trade settings updated: telegram_id=%d fields=%s",
+            telegram_id, updated_keys,
+        )
 
-
-# ---------------------------------------------------------------------------
-# Internal helper
-# ---------------------------------------------------------------------------
-
-
-def _profile_config(profile: dict) -> dict:
-    """Return the user-facing config subset from a subscriber profile."""
-    return {
-        "lot_multiplier": profile["lot_multiplier"],
-        "max_lot_size": profile["max_lot_size"],
-        "max_daily_trades": profile["max_daily_trades"],
-        "max_daily_loss_usd": profile["max_daily_loss_usd"],
-        "enabled": profile.get("enabled", True),
-        "subscribed_at": profile.get("subscribed_at"),
-    }
+        return {
+            "subscriber_id": sub.id,
+            "updated_fields": updated_keys,
+            "config": _sub_config(sub),
+        }
