@@ -20,8 +20,8 @@ export default function TradingBot() {
   const fetchData = useCallback(async () => {
     try {
       const [acctRes, posRes] = await Promise.allSettled([
-        fetchBrokerAccount(),
-        fetchBrokerPositions(),
+        api.getBrokerAccount(),
+        api.getBrokerPositions(),
       ])
       if (acctRes.status === 'fulfilled') setAccount(acctRes.value)
       if (posRes.status === 'fulfilled') setPositions(posRes.value?.positions || [])
@@ -42,10 +42,7 @@ export default function TradingBot() {
   const handleClosePosition = async (positionId) => {
     setClosingId(positionId)
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || '/api'}/broker/close/${positionId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      })
+      await api.closeBrokerPosition(positionId)
       await fetchData()
     } catch (err) {
       setError(err.message)
@@ -56,11 +53,7 @@ export default function TradingBot() {
 
   const handleExecuteTrade = async (trade) => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL || '/api'}/broker/order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(trade),
-      })
+      await api.placeBrokerOrder(trade)
       await fetchData()
     } catch (err) {
       setError(err.message)
@@ -68,10 +61,11 @@ export default function TradingBot() {
   }
 
   const connected = account?.connected ?? false
-  const balance = account?.balance ?? null
-  const equity = account?.equity ?? null
-  const margin = account?.margin ?? null
-  const freeMargin = account?.free_margin ?? null
+  const acctData = account?.account || {}
+  const balance = acctData.balance ?? null
+  const equity = acctData.equity ?? null
+  const margin = acctData.margin ?? null
+  const freeMargin = acctData.free_margin ?? null
 
   if (loading) {
     return (
@@ -216,14 +210,3 @@ export default function TradingBot() {
   )
 }
 
-async function fetchBrokerAccount() {
-  const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/broker/account`)
-  if (!res.ok) throw new Error(`Broker API error: ${res.status}`)
-  return res.json()
-}
-
-async function fetchBrokerPositions() {
-  const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/broker/positions`)
-  if (!res.ok) throw new Error(`Positions API error: ${res.status}`)
-  return res.json()
-}

@@ -36,7 +36,7 @@ export default function BrokerSettings() {
           setAccountId(data.account_id || '')
           setServer(data.server || '')
           setLogin(data.login || '')
-          setConnected(data.connected || false)
+          setConnected(data.is_connected || data.connected || false)
           setHasSettings(true)
         }
       })
@@ -68,7 +68,7 @@ export default function BrokerSettings() {
     try {
       await api.saveBrokerSettings({
         broker_type: brokerType,
-        token: brokerType === 'metaapi' ? token : undefined,
+        metaapi_token: brokerType === 'metaapi' ? token : undefined,
         account_id: brokerType === 'metaapi' ? accountId : undefined,
         server: brokerType === 'metaapi' ? server : undefined,
         login: brokerType === 'metaapi' ? login : undefined,

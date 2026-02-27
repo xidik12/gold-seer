@@ -42,7 +42,7 @@ export default function COTAnalysis() {
 
   const fetchData = useCallback(async () => {
     try {
-      const result = await api.getCOTLatest ? await api.getCOTLatest() : await fetchCOT()
+      const result = await api.getCOTLatest()
       setData(result)
       setError(null)
     } catch (err) {
@@ -203,9 +203,3 @@ export default function COTAnalysis() {
   )
 }
 
-// Fallback fetch if api.getCOTLatest isn't available
-async function fetchCOT() {
-  const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/cot/latest`)
-  if (!res.ok) throw new Error(`COT API error: ${res.status}`)
-  return res.json()
-}

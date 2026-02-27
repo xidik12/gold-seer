@@ -417,4 +417,20 @@ export const api = {
   connectBroker: () => fetchAPI('/broker/connect', { method: 'POST' }),
   disconnectBroker: () => fetchAPI('/broker/disconnect', { method: 'POST' }),
   getBrokerAccount: () => fetchAPI('/broker/account'),
+  getBrokerPositions: () => fetchAPI('/broker/positions'),
+  getBrokerPrice: (symbol = 'XAUUSD') => fetchAPI(`/broker/price?symbol=${symbol}`),
+  placeBrokerOrder: (body) => fetchAPI('/broker/order', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  }),
+  closeBrokerPosition: (positionId) => fetchAPI(`/broker/close/${positionId}`, {
+    method: 'POST',
+  }),
+  modifyBrokerPosition: (positionId, body) => fetchAPI(`/broker/modify/${positionId}`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  }),
+
+  // Trade Journal (read)
+  getJournalEntries: () => fetchAPI('/trade-journal/entries'),
 }

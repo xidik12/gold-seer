@@ -34,7 +34,7 @@ export default function TradeJournal() {
 
   const fetchData = useCallback(async () => {
     try {
-      const result = await fetchJournalEntries()
+      const result = await api.getJournalEntries()
       setEntries(result?.entries || result || [])
       setError(null)
     } catch (err) {
@@ -444,8 +444,3 @@ export default function TradeJournal() {
   )
 }
 
-async function fetchJournalEntries() {
-  const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/trade-journal/entries`)
-  if (!res.ok) throw new Error(`Journal API error: ${res.status}`)
-  return res.json()
-}
