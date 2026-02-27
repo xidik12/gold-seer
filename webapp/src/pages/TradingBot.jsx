@@ -194,10 +194,10 @@ export default function TradingBot() {
         <h4 className="text-text-primary text-xs font-semibold mb-2">{t('tradingBot.riskSettings', 'Risk Settings')}</h4>
         <div className="grid grid-cols-2 gap-2">
           {[
-            { label: t('tradingBot.maxRisk', 'Max Risk %'), value: account?.risk_pct ?? '2.0' },
-            { label: t('tradingBot.maxPositions', 'Max Positions'), value: account?.max_positions ?? '3' },
-            { label: t('tradingBot.dailyLoss', 'Daily Loss Limit'), value: account?.daily_loss_limit ? formatPricePrecise(account.daily_loss_limit) : '--' },
-            { label: t('tradingBot.trailingStop', 'Trailing Stop'), value: account?.trailing_stop ? 'On' : 'Off' },
+            { label: t('tradingBot.maxRisk', 'Max Risk %'), value: acctData.risk_pct ?? '2.0' },
+            { label: t('tradingBot.maxPositions', 'Max Positions'), value: acctData.max_positions ?? '3' },
+            { label: t('tradingBot.dailyLoss', 'Daily Loss Limit'), value: acctData.daily_loss_limit ? formatPricePrecise(acctData.daily_loss_limit) : '--' },
+            { label: t('tradingBot.trailingStop', 'Trailing Stop'), value: acctData.trailing_stop ? 'On' : 'Off' },
           ].map((item) => (
             <div key={item.label} className="bg-bg-secondary/50 rounded-lg px-2.5 py-1.5">
               <p className="text-text-muted text-[9px]">{item.label}</p>

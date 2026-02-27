@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import { api } from '../utils/api'
 
 const BrandingContext = createContext(null)
 
@@ -15,8 +16,7 @@ export function BrandingProvider({ children }) {
   const [branding, setBranding] = useState(DEFAULT_BRANDING)
 
   useEffect(() => {
-    fetch('/api/branding')
-      .then(r => r.json())
+    api.getBranding()
       .then(data => {
         setBranding(data)
         // Apply CSS custom properties

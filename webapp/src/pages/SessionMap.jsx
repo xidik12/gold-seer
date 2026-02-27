@@ -140,7 +140,7 @@ export default function SessionMap() {
 
   const fetchData = useCallback(async () => {
     try {
-      const result = await fetchSessions()
+      const result = await api.getSessionsCurrent()
       setData(result)
       setError(null)
     } catch (err) {
@@ -256,7 +256,3 @@ export default function SessionMap() {
   )
 }
 
-// Uses the api utility which sends X-Telegram-Init-Data auth header
-async function fetchSessions() {
-  return api.getSessionsCurrent()
-}

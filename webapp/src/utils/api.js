@@ -433,4 +433,10 @@ export const api = {
 
   // Trade Journal (read)
   getJournalEntries: () => fetchAPI('/trade-journal/entries'),
+
+  // Branding
+  getBranding: () => cachedFetch('/branding', T300),
+
+  // Dashboard Summary
+  getDashboardSummary: () => cachedFetch('/dashboard/summary', T60),
 }
