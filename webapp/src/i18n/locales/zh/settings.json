@@ -85,6 +85,9 @@
     "premium": "高级版",
     "active": "生效中",
     "expired": "已过期",
+    "daysShort": "天",
+    "expires": "到期 {{date}}",
+    "trialEnds": "试用期结束 {{date}}",
     "noPayments": "暂无支付记录"
   }
 }

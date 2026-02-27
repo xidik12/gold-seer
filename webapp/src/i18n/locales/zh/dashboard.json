@@ -65,7 +65,9 @@
     "title": "最新资讯",
     "sources": "来源",
     "new": "新",
-    "noNews": "暂无新闻"
+    "noNews": "暂无新闻",
+    "articles": "篇文章",
+    "willAppear": "收集后新闻将显示在这里"
   },
   "influencer": {
     "title": "社交信号",

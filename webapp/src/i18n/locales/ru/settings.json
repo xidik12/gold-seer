@@ -46,6 +46,15 @@
     "perMonth": "/мес",
     "save17": "Экономия 17%",
     "save25": "Экономия 25%",
+    "cancel": "Отменить подписку",
+    "pricing": {
+      "monthly": "$9.99",
+      "monthlyPerMonth": "$9.99",
+      "quarterly": "$24.99",
+      "quarterlyPerMonth": "$8.33",
+      "yearly": "$89.99",
+      "yearlyPerMonth": "$7.50"
+    },
     "features": {
       "predictions": "ИИ-прогнозы цен (1ч, 4ч, 24ч)",
       "signals": "Полные торговые сигналы с входом/целью/стоп-лоссом",
@@ -85,6 +94,9 @@
     "premium": "Премиум",
     "active": "Активна",
     "expired": "Истекла",
+    "daysShort": "д",
+    "expires": "Истекает {{date}}",
+    "trialEnds": "Пробный период заканчивается {{date}}",
     "noPayments": "Нет истории платежей"
   }
 }

@@ -9,23 +9,6 @@
   "detail": {
     "price": "价格",
     "change24h": "24小时涨跌",
-    "marketCap": "市值",
-    "volume24h": "24小时成交量",
-    "circulatingSupply": "流通量",
-    "totalSupply": "总供应量",
-    "allTimeHigh": "历史最高价",
-    "allTimeLow": "历史最低价",
-    "contracts": "合约地址",
-    "timeframes": {
-      "1d": "1日",
-      "7d": "7日",
-      "30d": "30日",
-      "90d": "90日"
-    }
-  },
-  "detail": {
-    "price": "价格",
-    "change24h": "24小时涨跌",
     "change24hLabel": "(24小时)",
     "change7d": "7天",
     "change30d": "30天",
