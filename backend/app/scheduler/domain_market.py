@@ -831,6 +831,65 @@ async def check_central_bank_alerts():
         logger.error(f"Central bank alert check error: {e}")
 
 
+async def collect_analyst_forecasts():
+    """Collect institutional gold analyst forecasts and upsert into DB (runs every 24h)."""
+    try:
+        from app.collectors.gold_analysts import GoldAnalystCollector
+        from app.database import async_session, GoldAnalystForecast
+        from sqlalchemy import select
+
+        collector = GoldAnalystCollector()
+        data = await collector.collect()
+        if not data:
+            logger.info("Analyst forecasts: No data returned")
+            return
+
+        upserted = 0
+        async with async_session() as session:
+            for record in data:
+                institution = record.get("institution")
+                if not institution:
+                    continue
+
+                # Check if forecast already exists for this institution
+                existing_result = await session.execute(
+                    select(GoldAnalystForecast).where(
+                        GoldAnalystForecast.institution == institution
+                    )
+                )
+                existing = existing_result.scalar_one_or_none()
+
+                if existing:
+                    # Update existing forecast
+                    existing.target_price = record.get("target", 0)
+                    existing.timeframe = record.get("timeframe")
+                    existing.direction = record.get("direction")
+                    existing.reasoning = record.get("rationale", "")
+                    existing.published_at = datetime.fromisoformat(record["timestamp"]) if record.get("timestamp") else datetime.utcnow()
+                else:
+                    # Insert new forecast
+                    forecast = GoldAnalystForecast(
+                        institution=institution,
+                        analyst_name=None,
+                        target_price=record.get("target", 0),
+                        timeframe=record.get("timeframe"),
+                        direction=record.get("direction"),
+                        reasoning=record.get("rationale", ""),
+                        published_at=datetime.fromisoformat(record["timestamp"]) if record.get("timestamp") else datetime.utcnow(),
+                        gold_price_at_forecast=None,
+                        was_accurate=None,
+                        source_url=None,
+                    )
+                    session.add(forecast)
+                upserted += 1
+
+            await session.commit()
+
+        logger.info(f"Analyst forecasts collected: {upserted} records upserted")
+    except Exception as e:
+        logger.error(f"Analyst forecasts collection error: {e}")
+
+
 async def collect_central_bank_gold():
     """Collect central bank gold purchase data (runs every 24h)."""
     try:

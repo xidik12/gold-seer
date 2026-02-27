@@ -16,9 +16,16 @@ const SESSION_META = {
 function SessionCard({ session, data = {} }) {
   const { t } = useTranslation()
   const meta = SESSION_META[session] || { label: session, emoji: '', hours: '' }
+  const ohlcv = data.ohlcv || {}
   const isActive = data.status === 'active'
-  const change = data.close && data.open ? ((data.close - data.open) / data.open) * 100 : data.change_pct ?? null
-  const range = data.high && data.low ? data.high - data.low : null
+  const label = data.label || meta.label
+  const hours = data.open_hour && data.close_hour
+    ? `${data.open_hour} - ${data.close_hour} UTC`
+    : meta.hours
+  const change = ohlcv.close && ohlcv.open
+    ? ((ohlcv.close - ohlcv.open) / ohlcv.open) * 100
+    : null
+  const range = ohlcv.range_usd ?? (ohlcv.high && ohlcv.low ? ohlcv.high - ohlcv.low : null)
 
   return (
     <div className={`bg-bg-card rounded-2xl p-4 border ${isActive ? 'border-accent-gold/30' : 'border-white/5'} slide-up`}>
@@ -26,8 +33,8 @@ function SessionCard({ session, data = {} }) {
         <div className="flex items-center gap-2">
           <span className="text-lg">{meta.emoji}</span>
           <div>
-            <h4 className="text-text-primary text-sm font-semibold">{meta.label}</h4>
-            <p className="text-text-muted text-[10px]">{meta.hours}</p>
+            <h4 className="text-text-primary text-sm font-semibold">{label}</h4>
+            <p className="text-text-muted text-[10px]">{hours}</p>
           </div>
         </div>
         <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium ${
@@ -41,19 +48,19 @@ function SessionCard({ session, data = {} }) {
       <div className="grid grid-cols-2 gap-2">
         <div className="bg-bg-secondary/50 rounded-lg px-2.5 py-1.5">
           <p className="text-text-muted text-[9px]">{t('sessions.open', 'Open')}</p>
-          <p className="text-text-primary text-xs font-semibold tabular-nums">{data.open ? formatPricePrecise(data.open) : '--'}</p>
+          <p className="text-text-primary text-xs font-semibold tabular-nums">{ohlcv.open ? formatPricePrecise(ohlcv.open) : '--'}</p>
         </div>
         <div className="bg-bg-secondary/50 rounded-lg px-2.5 py-1.5">
           <p className="text-text-muted text-[9px]">{t('sessions.close', 'Close')}</p>
-          <p className="text-text-primary text-xs font-semibold tabular-nums">{data.close ? formatPricePrecise(data.close) : '--'}</p>
+          <p className="text-text-primary text-xs font-semibold tabular-nums">{ohlcv.close ? formatPricePrecise(ohlcv.close) : '--'}</p>
         </div>
         <div className="bg-bg-secondary/50 rounded-lg px-2.5 py-1.5">
           <p className="text-text-muted text-[9px]">{t('sessions.high', 'High')}</p>
-          <p className="text-text-primary text-xs font-semibold tabular-nums">{data.high ? formatPricePrecise(data.high) : '--'}</p>
+          <p className="text-text-primary text-xs font-semibold tabular-nums">{ohlcv.high ? formatPricePrecise(ohlcv.high) : '--'}</p>
         </div>
         <div className="bg-bg-secondary/50 rounded-lg px-2.5 py-1.5">
           <p className="text-text-muted text-[9px]">{t('sessions.low', 'Low')}</p>
-          <p className="text-text-primary text-xs font-semibold tabular-nums">{data.low ? formatPricePrecise(data.low) : '--'}</p>
+          <p className="text-text-primary text-xs font-semibold tabular-nums">{ohlcv.low ? formatPricePrecise(ohlcv.low) : '--'}</p>
         </div>
       </div>
 
@@ -68,9 +75,9 @@ function SessionCard({ session, data = {} }) {
             {t('sessions.range', 'Range')}: ${safeFixed(range, 2)}
           </span>
         )}
-        {data.volume != null && (
+        {ohlcv.volume != null && (
           <span className="text-text-muted text-[10px] tabular-nums">
-            {t('sessions.vol', 'Vol')}: {safeFixed(data.volume / 1000, 1)}K
+            {t('sessions.vol', 'Vol')}: {safeFixed(ohlcv.volume / 1000, 1)}K
           </span>
         )}
       </div>
@@ -155,7 +162,8 @@ export default function SessionMap() {
   let biggestMove = null
   let biggestValue = 0
   for (const [key, s] of allSessions) {
-    const move = Math.abs((s.change_pct ?? 0) || (s.close && s.open ? ((s.close - s.open) / s.open) * 100 : 0))
+    const ohlcv = s.ohlcv || {}
+    const move = Math.abs(ohlcv.close && ohlcv.open ? ((ohlcv.close - ohlcv.open) / ohlcv.open) * 100 : 0)
     if (move > biggestValue) {
       biggestValue = move
       biggestMove = key
@@ -209,30 +217,46 @@ export default function SessionMap() {
         </div>
       ))}
 
-      {/* Performance stats */}
-      {data?.stats && (
-        <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
-          <h4 className="text-text-primary text-xs font-semibold mb-2">{t('sessions.todayStats', 'Today\'s Stats')}</h4>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { label: t('sessions.totalRange', 'Total Range'), value: data.stats.total_range != null && isFinite(data.stats.total_range) ? `$${safeFixed(data.stats.total_range, 2)}` : '--' },
-              { label: t('sessions.totalVol', 'Total Volume'), value: data.stats.total_volume != null && isFinite(data.stats.total_volume) ? `${safeFixed(data.stats.total_volume / 1000, 1)}K` : '--' },
-              { label: t('sessions.dayChange', 'Day Change'), value: data.stats.day_change != null ? formatPercent(data.stats.day_change) : '--' },
-            ].map((s) => (
-              <div key={s.label} className="text-center">
-                <p className="text-text-muted text-[9px]">{s.label}</p>
-                <p className="text-text-primary text-xs font-semibold tabular-nums">{s.value}</p>
-              </div>
-            ))}
+      {/* Performance stats — computed from session OHLCV data */}
+      {allSessions.length > 0 && (() => {
+        let globalHigh = -Infinity, globalLow = Infinity, totalVolume = 0
+        let firstOpen = null, lastClose = null
+        const order = ['asian', 'london', 'new_york']
+        for (const key of order) {
+          const s = sessions[key]
+          if (!s?.ohlcv) continue
+          const o = s.ohlcv
+          if (o.high != null && o.high > globalHigh) globalHigh = o.high
+          if (o.low != null && o.low < globalLow) globalLow = o.low
+          if (o.volume != null) totalVolume += o.volume
+          if (firstOpen == null && o.open != null) firstOpen = o.open
+          if (o.close != null) lastClose = o.close
+        }
+        const totalRange = globalHigh > -Infinity && globalLow < Infinity ? globalHigh - globalLow : null
+        const dayChange = firstOpen && lastClose ? ((lastClose - firstOpen) / firstOpen) * 100 : null
+        return (
+          <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
+            <h4 className="text-text-primary text-xs font-semibold mb-2">{t('sessions.todayStats', 'Today\'s Stats')}</h4>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: t('sessions.totalRange', 'Total Range'), value: totalRange != null ? `$${safeFixed(totalRange, 2)}` : '--' },
+                { label: t('sessions.totalVol', 'Total Volume'), value: totalVolume > 0 ? `${safeFixed(totalVolume / 1000, 1)}K` : '--' },
+                { label: t('sessions.dayChange', 'Day Change'), value: dayChange != null ? formatPercent(dayChange) : '--' },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <p className="text-text-muted text-[9px]">{s.label}</p>
+                  <p className="text-text-primary text-xs font-semibold tabular-nums">{s.value}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }
 
+// Uses the api utility which sends X-Telegram-Init-Data auth header
 async function fetchSessions() {
-  const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/sessions/current`)
-  if (!res.ok) throw new Error(`Sessions API error: ${res.status}`)
-  return res.json()
+  return api.getSessionsCurrent()
 }

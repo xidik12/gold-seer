@@ -369,10 +369,14 @@ export const api = {
   // Gold Miners
   getGoldMiners: () => cachedFetch('/market/miners', T120),
 
+  // Sessions
+  getSessionsCurrent: () => cachedFetch('/sessions/current', T60),
+
   // Intraday Patterns
   getIntradayPatterns: () => cachedFetch('/market/intraday-patterns', T300),
 
-  // ETF Momentum
+  // ETF
+  getGoldETFLatest: () => cachedFetch('/gold-etf/latest', T120),
   getETFMomentum: () => cachedFetch('/gold-etf/momentum', T120),
 
   // Physical Gold Premium

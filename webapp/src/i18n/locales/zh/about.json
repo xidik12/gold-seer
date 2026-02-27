@@ -133,6 +133,18 @@
     "phraseAnalysis": {
       "name": "短语分析 (3)",
       "desc": "热门看涨/看跌短语评分、基于新闻语言模式的净情绪信号"
+    },
+    "cot": {
+      "name": "COT 分析",
+      "desc": "CFTC 交易者持仓报告 — 商业与投机持仓对比"
+    },
+    "sessionAnalysis": {
+      "name": "时段分析",
+      "desc": "伦敦、纽约、亚洲时段的交易模式和成交量分布"
+    },
+    "realYields": {
+      "name": "实际收益率",
+      "desc": "TIPS 盈亏平衡利率及实际收益率对黄金定价的影响"
     }
   },
   "dataPipeline": {
@@ -359,6 +371,30 @@
     "referral": {
       "name": "推荐",
       "desc": "合作伙伴与推荐系统 — 赚取佣金、追踪推荐、合作伙伴数据分析"
+    },
+    "sessionMap": {
+      "name": "交易时段",
+      "desc": "实时时段追踪器，含伦敦、纽约和亚洲市场的 OHLCV 数据"
+    },
+    "cotAnalysis": {
+      "name": "COT 分析",
+      "desc": "每周 CFTC 持仓数据，含商业和投机持仓明细"
+    },
+    "goldETF": {
+      "name": "黄金 ETF 分析",
+      "desc": "追踪 GLD、IAU、SGOL 持仓、资金流和动量信号"
+    },
+    "econCalendar": {
+      "name": "经济日历",
+      "desc": "影响黄金的即将发布的经济事件，含实际值与预测值对比"
+    },
+    "tradingBot": {
+      "name": "交易机器人",
+      "desc": "连接您的 MT4/MT5 经纪商，实现信号自动执行"
+    },
+    "goldCalculators": {
+      "name": "黄金计算器",
+      "desc": "仓位大小、点值、盈亏和保证金计算器"
     }
   },
   "features": {

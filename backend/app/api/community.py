@@ -105,7 +105,7 @@ async def share_trade(
     await session.commit()
     await session.refresh(trade)
 
-    logger.info(f"Community trade shared: {req.direction} @ {req.entry_price} by user {req.telegram_id}")
+    logger.info(f"Community trade shared: {req.direction} @ {req.entry_price} by user {telegram_id}")
 
     return {
         "id": trade.id,

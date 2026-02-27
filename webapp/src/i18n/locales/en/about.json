@@ -133,6 +133,18 @@
     "phraseAnalysis": {
       "name": "Phrase Analysis (3)",
       "desc": "Top bullish/bearish phrase scores, net sentiment signal from news language patterns"
+    },
+    "cot": {
+      "name": "COT Analysis",
+      "desc": "CFTC Commitments of Traders data — commercial vs speculative positioning"
+    },
+    "sessionAnalysis": {
+      "name": "Session Analysis",
+      "desc": "London, NY, Asian session patterns and volume distribution"
+    },
+    "realYields": {
+      "name": "Real Yields",
+      "desc": "TIPS breakeven rates and real yield impact on gold pricing"
     }
   },
   "dataPipeline": {
@@ -359,6 +371,30 @@
     "referral": {
       "name": "Referral",
       "desc": "Partner and referral system — earn commissions, track referrals, and partner analytics dashboard"
+    },
+    "sessionMap": {
+      "name": "Trading Sessions",
+      "desc": "Live session tracker with OHLCV data for London, NY, and Asian markets"
+    },
+    "cotAnalysis": {
+      "name": "COT Analysis",
+      "desc": "Weekly CFTC positioning data with commercial and speculative breakdown"
+    },
+    "goldETF": {
+      "name": "Gold ETF Analysis",
+      "desc": "Track GLD, IAU, SGOL holdings, flows, and momentum signals"
+    },
+    "econCalendar": {
+      "name": "Economic Calendar",
+      "desc": "Upcoming economic events that impact gold with actual vs forecast data"
+    },
+    "tradingBot": {
+      "name": "Trading Bot",
+      "desc": "Connect your MT4/MT5 broker for automated signal execution"
+    },
+    "goldCalculators": {
+      "name": "Gold Calculators",
+      "desc": "Position size, pip value, profit/loss, and margin calculators"
     }
   },
   "features": {

@@ -77,6 +77,7 @@ from app.scheduler.jobs import (
     evaluate_game_predictions,
     reset_game_periods,
     check_central_bank_alerts,
+    collect_analyst_forecasts,
 )
 from app.scheduler.daily_briefing import generate_daily_briefing
 from app.advisor.feedback import run_training_feedback, run_adaptive_weight_learning
@@ -176,6 +177,7 @@ async def lifespan(app: FastAPI):
         scheduler.add_job(collect_central_bank_gold, "interval", hours=24, id="collect_cb_gold", **_job_defaults)
         scheduler.add_job(check_central_bank_alerts, "interval", hours=12, id="check_cb_alerts", **_job_defaults)
         scheduler.add_job(collect_economic_calendar, "interval", hours=6, id="collect_econ_calendar", **_job_defaults)
+        scheduler.add_job(collect_analyst_forecasts, "interval", hours=24, id="collect_analyst_forecasts", **_job_defaults)
 
         # Prediction jobs — time-aligned cron schedules (UTC)
         # 1h: every hour at :00
@@ -440,6 +442,7 @@ async def lifespan(app: FastAPI):
                 _safe_run(generate_quant_prediction(), "generate_quant_prediction"),
                 _safe_run(classify_news_events(), "classify_news_events"),
                 _safe_run(save_indicator_snapshot(), "save_indicator_snapshot"),
+                _safe_run(collect_analyst_forecasts(), "collect_analyst_forecasts"),
             )
 
         async def _startup_wrapper():

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../utils/api'
-import { formatNumber, formatPricePrecise, formatDate, safeFixed } from '../utils/format'
+import { formatNumber, formatPricePrecise, safeFixed } from '../utils/format'
 import ETFFlowWidget from '../components/ETFFlowWidget'
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, ComposedChart,
@@ -55,7 +55,7 @@ export default function GoldETF() {
   const fetchData = useCallback(async () => {
     try {
       const [etfResult, momentumResult] = await Promise.allSettled([
-        fetchETFData(),
+        api.getGoldETFLatest(),
         api.getETFMomentum(),
       ])
       if (etfResult.status === 'fulfilled') {
@@ -171,11 +171,11 @@ export default function GoldETF() {
       )}
 
       {/* Daily flow history */}
-      {dailyFlows.length > 1 && (
-        <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
-          <h4 className="text-text-primary text-sm font-semibold mb-3">
-            {t('goldEtf.dailyFlows', 'Daily Net Flows (tonnes)')}
-          </h4>
+      <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
+        <h4 className="text-text-primary text-sm font-semibold mb-3">
+          {t('goldEtf.dailyFlows', 'Daily Net Flows (tonnes)')}
+        </h4>
+        {dailyFlows.length > 1 ? (
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={dailyFlows.slice(-30)}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -200,15 +200,17 @@ export default function GoldETF() {
               </Bar>
             </BarChart>
           </ResponsiveContainer>
-        </div>
-      )}
+        ) : (
+          <p className="text-text-muted text-xs text-center py-8">{t('goldEtf.noFlowData', 'No daily flow data available yet')}</p>
+        )}
+      </div>
 
       {/* Total holdings trend */}
-      {holdingsTrend.length > 1 && (
-        <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
-          <h4 className="text-text-primary text-sm font-semibold mb-3">
-            {t('goldEtf.totalHoldings', 'Total Holdings Trend')}
-          </h4>
+      <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
+        <h4 className="text-text-primary text-sm font-semibold mb-3">
+          {t('goldEtf.totalHoldings', 'Total Holdings Trend')}
+        </h4>
+        {holdingsTrend.length > 1 ? (
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={holdingsTrend}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -229,15 +231,17 @@ export default function GoldETF() {
               <Line type="monotone" dataKey="holdings" stroke="#D4AF37" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-      )}
+        ) : (
+          <p className="text-text-muted text-xs text-center py-8">{t('goldEtf.noHoldingsData', 'No holdings trend data available yet')}</p>
+        )}
+      </div>
 
       {/* Price correlation */}
-      {flowVsPrice.length > 1 && (
-        <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
-          <h4 className="text-text-primary text-sm font-semibold mb-3">
-            {t('goldEtf.priceCorrelation', 'ETF Flows vs Gold Price')}
-          </h4>
+      <div className="bg-bg-card rounded-2xl p-4 border border-white/5">
+        <h4 className="text-text-primary text-sm font-semibold mb-3">
+          {t('goldEtf.priceCorrelation', 'ETF Flows vs Gold Price')}
+        </h4>
+        {flowVsPrice.length > 1 ? (
           <ResponsiveContainer width="100%" height={200}>
             <ComposedChart data={flowVsPrice.slice(-30)}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -261,8 +265,10 @@ export default function GoldETF() {
               <Line yAxisId="right" type="monotone" dataKey="price" stroke="#FFD700" strokeWidth={2} dot={false} name={t('goldEtf.goldPrice', 'Gold Price')} />
             </ComposedChart>
           </ResponsiveContainer>
-        </div>
-      )}
+        ) : (
+          <p className="text-text-muted text-xs text-center py-8">{t('goldEtf.noPriceData', 'No flow vs price data available yet')}</p>
+        )}
+      </div>
 
       {/* Per-ETF cards */}
       <h3 className="text-text-primary text-sm font-semibold">{t('goldEtf.perEtf', 'Per-ETF Breakdown')}</h3>
@@ -309,8 +315,3 @@ export default function GoldETF() {
   )
 }
 
-async function fetchETFData() {
-  const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/gold-etf/latest`)
-  if (!res.ok) throw new Error(`ETF API error: ${res.status}`)
-  return res.json()
-}
