@@ -788,10 +788,11 @@ async def check_central_bank_alerts():
 
     Queries CentralBankGold for the last 6 months per country.
     If any country's latest month change is 3x above their average,
-    logs an alert to AlertLog.
+    logs an alert to AlertLog and sends Telegram notifications to subscribed users.
     """
     try:
-        from app.database import async_session, CentralBankGold, AlertLog
+        from app.database import async_session, CentralBankGold, AlertLog, BotUser
+        from app.config import settings
         from sqlalchemy import select, desc
 
         six_months_ago = datetime.utcnow() - timedelta(days=180)
@@ -815,6 +816,7 @@ async def check_central_bank_alerts():
                 country_data.setdefault(r.country, []).append(r.monthly_change_tonnes)
 
         alerts_logged = 0
+        alert_messages = []
         async with async_session() as session:
             for country, changes in country_data.items():
                 if len(changes) < 2:
@@ -826,11 +828,16 @@ async def check_central_bank_alerts():
 
                 # Check acceleration: latest > 3x average (only for buying, i.e. positive)
                 if avg_change > 0 and latest_change > avg_change * 3:
+                    multiplier = latest_change / avg_change
                     alert_msg = (
                         f"CB_ACCELERATION: {country} bought {latest_change:.1f}t last month "
-                        f"vs {avg_change:.1f}t avg (6mo). {latest_change/avg_change:.1f}x acceleration."
+                        f"vs {avg_change:.1f}t avg (6mo). {multiplier:.1f}x acceleration."
                     )
                     logger.warning(alert_msg)
+                    alert_messages.append(
+                        f"<b>{country}</b>: {latest_change:.1f}t "
+                        f"(avg {avg_change:.1f}t, <b>{multiplier:.1f}x</b>)"
+                    )
 
                     # Log to AlertLog (use telegram_id=0 for system alerts)
                     alert_log = AlertLog(
@@ -845,6 +852,39 @@ async def check_central_bank_alerts():
             if alerts_logged:
                 await session.commit()
                 logger.info(f"Central bank alerts: {alerts_logged} acceleration alerts logged")
+
+        # Send Telegram notification to subscribed users
+        if alert_messages and settings.telegram_bot_token:
+            from aiogram import Bot
+
+            tg_text = (
+                "<b>Central Bank Gold Alert</b>\n\n"
+                "Acceleration detected in central bank gold buying:\n\n"
+                + "\n".join(alert_messages)
+                + "\n\n<i>A country buying 3x+ above its 6-month average is a strong bullish signal.</i>"
+            )
+
+            bot = Bot(token=settings.telegram_bot_token)
+            try:
+                async with async_session() as session:
+                    result = await session.execute(
+                        select(BotUser.telegram_id).where(
+                            BotUser.subscribed == True,
+                            BotUser.is_banned == False,
+                        )
+                    )
+                    user_ids = result.scalars().all()
+
+                sent = 0
+                for uid in user_ids:
+                    try:
+                        await bot.send_message(uid, tg_text, parse_mode="HTML")
+                        sent += 1
+                    except Exception:
+                        pass  # user blocked bot, etc.
+                logger.info(f"Central bank alerts: sent to {sent}/{len(user_ids)} users")
+            finally:
+                await bot.session.close()
 
     except Exception as e:
         logger.error(f"Central bank alert check error: {e}")
