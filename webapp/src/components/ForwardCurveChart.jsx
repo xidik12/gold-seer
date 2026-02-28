@@ -49,9 +49,9 @@ export default function ForwardCurveChart() {
     )
   }
 
-  const spotPrice = data?.spot_price ?? data?.spot ?? null
-  const contracts = data?.contracts || data?.forward_prices || data?.curve || []
-  const structure = data?.structure || data?.curve_type || null
+  const spotPrice = data?.spot ?? data?.spot_price ?? null
+  const contracts = data?.forwards || data?.contracts || data?.forward_prices || data?.curve || []
+  const structure = data?.curve_shape || data?.structure || data?.curve_type || null
 
   // Build chart data: spot first, then forward contracts
   const chartData = []

@@ -1,14 +1,38 @@
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 import { safeFixed } from '../utils/format'
+import { api } from '../utils/api'
 
 const ETF_NAMES = ['GLD', 'IAU', 'SGOL', 'GLDM']
 
-export default function ETFFlowWidget({ flows = [] }) {
+export default function ETFFlowWidget({ flows }) {
   const { t } = useTranslation()
+  const [fetched, setFetched] = useState(null)
+  const [loading, setLoading] = useState(!flows)
+
+  // Self-fetch when used standalone (no flows prop)
+  useEffect(() => {
+    if (flows) return
+    api.getGoldETFLatest()
+      .then((data) => setFetched(data?.etfs || []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [flows])
+
+  if (loading) {
+    return (
+      <div className="bg-bg-card rounded-2xl p-4 border border-white/5 animate-pulse">
+        <div className="h-4 w-28 bg-bg-hover rounded mb-3" />
+        <div className="h-24 bg-bg-hover rounded" />
+      </div>
+    )
+  }
+
+  const etfData = flows || fetched || []
 
   const chartData = ETF_NAMES.map((name) => {
-    const etf = flows.find((f) => f.ticker === name || f.name === name)
+    const etf = etfData.find((f) => f.ticker === name || f.name === name)
     return {
       name,
       flow: etf?.daily_flow ?? etf?.net_flow ?? 0,

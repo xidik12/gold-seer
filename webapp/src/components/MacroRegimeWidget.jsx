@@ -67,7 +67,7 @@ export default function MacroRegimeWidget() {
   const regimeKey = regime.toUpperCase().replace(/[\s-]+/g, '_')
   const colors = REGIME_COLORS[regimeKey] || REGIME_COLORS.NEUTRAL
   const confidence = data.confidence ?? null
-  const goldReturn = data.gold_avg_return ?? data.avg_return ?? null
+  const goldReturn = data.gold_historical_avg_return ?? data.gold_avg_return ?? data.avg_return ?? null
   const description = data.description || null
 
   return (

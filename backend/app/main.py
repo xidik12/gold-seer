@@ -10,6 +10,8 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from starlette.middleware.gzip import GZipMiddleware
+from starlette.responses import Response
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -476,6 +478,16 @@ async def lifespan(app: FastAPI):
     logger.info("Griffin Gold shut down")
 
 
+class CachedStaticFiles(StaticFiles):
+    """StaticFiles with immutable cache headers for hashed Vite assets."""
+
+    async def get_response(self, path: str, scope):
+        response = await super().get_response(path, scope)
+        if isinstance(response, (FileResponse, Response)):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return response
+
+
 app = FastAPI(
     title="Griffin Gold",
     description="Gold (XAUUSD) Trading Intelligence Platform with ML-powered signals",
@@ -497,6 +509,9 @@ _instrumentator = Instrumentator()
 _instrumentator.instrument(app)
 if os.getenv("EXPOSE_METRICS"):
     _instrumentator.expose(app, endpoint="/metrics")
+
+# GZip compression for all responses > 500 bytes
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 # CORS for Mini App
 _cors_origins = [
@@ -598,7 +613,7 @@ async def serve_root():
 
 
 if WEBAPP_DIST.exists():
-    app.mount("/assets", StaticFiles(directory=WEBAPP_DIST / "assets"), name="static")
+    app.mount("/assets", CachedStaticFiles(directory=WEBAPP_DIST / "assets"), name="static")
 
     # Handle 404s by serving static files or the SPA (for client-side routing)
     @app.exception_handler(StarletteHTTPException)

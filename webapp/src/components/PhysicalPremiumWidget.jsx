@@ -45,7 +45,7 @@ export default function PhysicalPremiumWidget() {
 
   const spotPrice = data.spot_price ?? data.spot_usd ?? null
   const cnyRate = data.cny_usd_rate ?? data.cny_rate ?? null
-  const premium = data.premium_pct ?? data.sge_premium ?? data.premium ?? null
+  const premium = data.estimated_sge_premium_pct ?? data.premium_pct ?? data.sge_premium ?? data.premium ?? null
   const light = getTrafficLight(premium)
 
   return (

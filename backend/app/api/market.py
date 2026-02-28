@@ -533,6 +533,11 @@ async def get_macro_data(session: AsyncSession = Depends(get_session)):
     result["fear_greed_label"] = macro.fear_greed_label
     result["timestamp"] = macro.timestamp.isoformat()
 
+    # Gold-specific fields (flat values, not structured items)
+    result["real_yield_10y"] = getattr(macro, "real_yield_10y", None)
+    result["real_yield_5y"] = getattr(macro, "real_yield_5y", None)
+    result["tips_breakeven"] = getattr(macro, "tips_breakeven", None)
+
     _set_cache("macro", result, 300)
     return result
 

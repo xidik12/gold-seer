@@ -582,15 +582,34 @@ async def collect_etf_flows():
                 )
                 if existing.scalar_one_or_none():
                     continue
+                price = record.get("price")
+                volume = record.get("volume")
+                oz_per_share = record.get("oz_per_share", 0.0926)
+
+                # Estimate holdings in tonnes from volume * oz_per_share
+                holdings_tonnes = None
+                daily_change_tonnes = None
+                if volume and oz_per_share:
+                    vol_oz = volume * oz_per_share
+                    daily_change_tonnes = round(vol_oz / 32150.7, 4)  # OZ_PER_TONNE
+                # Use daily_change_pct sign to make flow directional
+                pct = record.get("daily_change_pct") or 0
+                if daily_change_tonnes and pct < 0:
+                    daily_change_tonnes = -daily_change_tonnes
+
+                holdings_usd = None
+                if price and volume:
+                    holdings_usd = round(price * volume, 2)
+
                 etf = GoldETFFlow(
                     date=date,
                     ticker=ticker,
-                    holdings_tonnes=record.get("estimated_holdings_tonnes"),
-                    holdings_usd=None,
-                    daily_change_tonnes=None,
+                    holdings_tonnes=holdings_tonnes,
+                    holdings_usd=holdings_usd,
+                    daily_change_tonnes=daily_change_tonnes,
                     daily_change_usd=record.get("daily_change"),
-                    volume=record.get("volume"),
-                    price=record.get("price"),
+                    volume=volume,
+                    price=price,
                 )
                 session.add(etf)
             await session.commit()

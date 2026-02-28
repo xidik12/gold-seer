@@ -128,26 +128,32 @@ export default function GoldSentimentGauge() {
   const fetchData = useCallback(async () => {
     try {
       const macro = await api.getMacroData()
-      // Compute composite score from available data
-      // COT: net long % → scale -100..+100
-      const cotScore = macro?.cot_net_pct != null
-        ? Math.max(-100, Math.min(100, (macro.cot_net_pct - 50) * 2))
-        : 0
-      // ETF flows: positive = bullish
-      const etfScore = macro?.etf_flow_score != null
-        ? Math.max(-100, Math.min(100, macro.etf_flow_score))
-        : 0
-      // Real yield: negative = bullish for gold
-      const yieldVal = macro?.real_yield_10y ?? macro?.real_yield ?? 1.5
-      const yieldScore = Math.max(-100, Math.min(100, -yieldVal * 50))
-      // VIX: high = bullish for gold
-      const vix = macro?.vix ?? 20
-      const vixScore = Math.max(-100, Math.min(100, (vix - 20) * 5))
 
-      const composite = Math.round((cotScore + etfScore + yieldScore + vixScore) / 4)
+      // Extract raw numeric values — macro items are {price: X, change_1h, change_24h}
+      const vixRaw = macro?.vix?.price ?? 20
+      const realYield = macro?.real_yield_10y ?? 1.5
+      const dxyRaw = macro?.dxy?.price ?? null
+      const goldRaw = macro?.gold?.price ?? null
+
+      // VIX: high = safe-haven demand = bullish for gold
+      const vixScore = Math.round(Math.max(-100, Math.min(100, (vixRaw - 20) * 5)))
+
+      // Real yield: negative = bullish for gold, positive = bearish
+      const yieldScore = Math.round(Math.max(-100, Math.min(100, -realYield * 50)))
+
+      // DXY: weak dollar = bullish gold. DXY ~100 neutral, <95 bullish, >105 bearish
+      const dxyScore = dxyRaw != null
+        ? Math.round(Math.max(-100, Math.min(100, (100 - dxyRaw) * 10)))
+        : 0
+
+      // Gold momentum: recent 24h change as signal
+      const goldChange = macro?.gold?.change_24h ?? 0
+      const momentumScore = Math.round(Math.max(-100, Math.min(100, goldChange * 20)))
+
+      const composite = Math.round((vixScore + yieldScore + dxyScore + momentumScore) / 4)
 
       setScore(composite)
-      setBreakdown({ cot: cotScore, etf: etfScore, yield: yieldScore, vix: vixScore })
+      setBreakdown({ vix: vixScore, yield: yieldScore, dxy: dxyScore, momentum: momentumScore })
     } catch {
       // silent
     } finally {
@@ -196,10 +202,10 @@ export default function GoldSentimentGauge() {
       {breakdown && (
         <div className="grid grid-cols-2 gap-2 mt-3">
           {[
-            { key: 'cot', label: t('goldSentiment.cot', 'COT'), val: breakdown.cot },
-            { key: 'etf', label: t('goldSentiment.etf', 'ETF Flows'), val: breakdown.etf },
-            { key: 'yield', label: t('goldSentiment.yield', 'Real Yield'), val: breakdown.yield },
             { key: 'vix', label: t('goldSentiment.vix', 'VIX'), val: breakdown.vix },
+            { key: 'yield', label: t('goldSentiment.yield', 'Real Yield'), val: breakdown.yield },
+            { key: 'dxy', label: t('goldSentiment.dxy', 'USD (DXY)'), val: breakdown.dxy },
+            { key: 'momentum', label: t('goldSentiment.momentum', 'Momentum'), val: breakdown.momentum },
           ].map((item) => (
             <div key={item.key} className="flex items-center justify-between px-2 py-1 bg-bg-secondary/50 rounded-lg">
               <span className="text-text-muted text-[10px]">{item.label}</span>
