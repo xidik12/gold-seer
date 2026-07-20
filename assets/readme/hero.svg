@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="400" viewBox="0 0 1200 400"
+     role="img" aria-labelledby="title desc">
+  <title id="title">Griffin Gold</title>
+  <desc id="desc">Griffin Gold — an AI gold-trading intelligence platform delivered as a Telegram bot. It turns 60-plus live market signals into multi-horizon XAUUSD predictions, trading signals, and broker-executable trades. A sample BUY signal card shows entry, target, stop-loss, a confidence bar, and the four-model ensemble weights TFT 40, XGBoost 25, LSTM 20, TimesFM 15.</desc>
+
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFD700"/>
+      <stop offset="0.55" stop-color="#D4AF37"/>
+      <stop offset="1" stop-color="#B8860B"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c1c26"/>
+      <stop offset="1" stop-color="#141420"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="400" rx="26" fill="#0f0f14"/>
+  <rect x="1" y="1" width="1198" height="398" rx="25" fill="none" stroke="#2a2a38" stroke-width="1"/>
+
+  <!-- candlestick tape motif, low-contrast, along the base -->
+  <g opacity="0.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">
+    <g stroke-linecap="round">
+      <line x1="72"  y1="330" x2="72"  y2="372" stroke="#00d68f" stroke-width="1"/>
+      <rect x="67"  y="342" width="10" height="18" rx="1" fill="#00d68f"/>
+      <line x1="104" y1="336" x2="104" y2="376" stroke="#00d68f" stroke-width="1"/>
+      <rect x="99"  y="348" width="10" height="16" rx="1" fill="#00d68f"/>
+      <line x1="136" y1="332" x2="136" y2="378" stroke="#ff4d6a" stroke-width="1"/>
+      <rect x="131" y="346" width="10" height="20" rx="1" fill="#ff4d6a"/>
+      <line x1="168" y1="326" x2="168" y2="368" stroke="#00d68f" stroke-width="1"/>
+      <rect x="163" y="336" width="10" height="20" rx="1" fill="#00d68f"/>
+      <line x1="200" y1="330" x2="200" y2="374" stroke="#00d68f" stroke-width="1"/>
+      <rect x="195" y="340" width="10" height="22" rx="1" fill="#00d68f"/>
+      <line x1="232" y1="322" x2="232" y2="360" stroke="#ff4d6a" stroke-width="1"/>
+      <rect x="227" y="332" width="10" height="16" rx="1" fill="#ff4d6a"/>
+      <line x1="264" y1="316" x2="264" y2="356" stroke="#00d68f" stroke-width="1"/>
+      <rect x="259" y="326" width="10" height="20" rx="1" fill="#00d68f"/>
+      <line x1="296" y1="310" x2="296" y2="352" stroke="#00d68f" stroke-width="1"/>
+      <rect x="291" y="320" width="10" height="22" rx="1" fill="#00d68f"/>
+      <line x1="328" y1="316" x2="328" y2="358" stroke="#00d68f" stroke-width="1"/>
+      <rect x="323" y="326" width="10" height="18" rx="1" fill="#00d68f"/>
+      <line x1="360" y1="308" x2="360" y2="350" stroke="#00d68f" stroke-width="1"/>
+      <rect x="355" y="318" width="10" height="22" rx="1" fill="#00d68f"/>
+    </g>
+  </g>
+
+  <!-- title block -->
+  <g transform="translate(64 62)">
+    <text x="0" y="0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+          font-size="14" letter-spacing="3.5" fill="#D4AF37">AI GOLD TRADING INTELLIGENCE · TELEGRAM BOT</text>
+
+    <text x="-2" y="78" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+          font-size="88" font-weight="800" letter-spacing="-1" fill="url(#gold)">Griffin Gold</text>
+
+    <text x="0" y="128" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+          font-size="21" font-weight="600" fill="#f5f3ee">60+ live market signals → multi-horizon XAUUSD forecasts,</text>
+    <text x="0" y="157" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+          font-size="21" font-weight="600" fill="#f5f3ee">trading signals, and broker-executable trades.</text>
+
+    <text x="0" y="206" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+          font-size="13.5" letter-spacing="0.4" fill="#9090a8">XAUUSD · 1h / 4h / 24h · 4-model ensemble · FastAPI + React · Docker / Railway</text>
+  </g>
+
+  <!-- proof: sample signal card -->
+  <g transform="translate(760 52)">
+    <rect x="0" y="0" width="376" height="296" rx="16" fill="url(#panel)" stroke="#2f2f3e" stroke-width="1"/>
+
+    <!-- ticker row -->
+    <text x="22" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+          font-size="15" letter-spacing="1" fill="#c0c0d0">XAUUSD</text>
+    <text x="200" y="41" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+          font-size="22" font-weight="700" fill="#f5f3ee">$2,418.60</text>
+    <text x="354" y="41" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+          font-size="15" font-weight="700" fill="#00d68f">▲ 0.74%</text>
+
+    <line x1="22" y1="58" x2="354" y2="58" stroke="#2a2a38" stroke-width="1"/>
+
+    <!-- signal badge -->
+    <rect x="22" y="74" width="86" height="30" rx="7" fill="#00d68f" opacity="0.14"/>
+    <text x="65" y="94" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+          font-size="15" font-weight="800" letter-spacing="1" fill="#00d68f">BUY</text>
+    <text x="354" y="94" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+          font-size="13" fill="#9090a8">24h horizon</text>
+
+    <!-- entry / target / stop -->
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14">
+      <text x="22" y="132" fill="#9090a8">Entry</text>
+      <text x="354" y="132" text-anchor="end" font-weight="700" fill="#f5f3ee">$2,419</text>
+      <text x="22" y="158" fill="#9090a8">Target</text>
+      <text x="354" y="158" text-anchor="end" font-weight="700" fill="#00d68f">$2,447</text>
+      <text x="22" y="184" fill="#9090a8">Stop-loss</text>
+      <text x="354" y="184" text-anchor="end" font-weight="700" fill="#ff4d6a">$2,402</text>
+    </g>
+
+    <!-- confidence bar -->
+    <text x="22" y="216" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+          font-size="13" fill="#9090a8">Confidence</text>
+    <text x="354" y="216" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+          font-size="13" font-weight="700" fill="#D4AF37">71%</text>
+    <rect x="22" y="224" width="332" height="7" rx="3.5" fill="#25252f"/>
+    <rect x="22" y="224" width="236" height="7" rx="3.5" fill="url(#gold)"/>
+
+    <!-- ensemble weight chips -->
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11.5" font-weight="600">
+      <rect x="22"  y="250" width="74" height="26" rx="6" fill="#1f1f2b" stroke="#3a3a4a" stroke-width="1"/>
+      <text x="59"  y="267" text-anchor="middle" fill="#D4AF37">TFT 40</text>
+      <rect x="104" y="250" width="82" height="26" rx="6" fill="#1f1f2b" stroke="#3a3a4a" stroke-width="1"/>
+      <text x="145" y="267" text-anchor="middle" fill="#c0c0d0">XGB 25</text>
+      <rect x="194" y="250" width="82" height="26" rx="6" fill="#1f1f2b" stroke="#3a3a4a" stroke-width="1"/>
+      <text x="235" y="267" text-anchor="middle" fill="#c0c0d0">LSTM 20</text>
+      <rect x="284" y="250" width="70" height="26" rx="6" fill="#1f1f2b" stroke="#3a3a4a" stroke-width="1"/>
+      <text x="319" y="267" text-anchor="middle" fill="#9090a8">TFM 15</text>
+    </g>
+  </g>
+</svg>

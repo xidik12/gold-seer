@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="116" viewBox="0 0 1200 116"
+     role="img" aria-labelledby="t d">
+  <title id="t">Inside the bot</title>
+  <desc id="d">Section header: Inside the bot — Real commands, real outputs.</desc>
+  <defs>
+    <linearGradient id="g01" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFD700"/>
+      <stop offset="1" stop-color="#B8860B"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="116" rx="18" fill="#12121b"/>
+  <rect x="1" y="1" width="1198" height="114" rx="17" fill="none" stroke="#26263300" stroke-width="1"/>
+  <rect x="0" y="0" width="6" height="116" rx="3" fill="url(#g01)"/>
+  <text x="46" y="70" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+        font-size="34" font-weight="700" fill="#2f2f3e">01</text>
+  <text x="118" y="52" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+        font-size="30" font-weight="800" letter-spacing="-0.3" fill="#f5f3ee">Inside the bot</text>
+  <text x="119" y="82" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+        font-size="14" letter-spacing="1" fill="#9090a8">Real commands, real outputs</text>
+  <!-- candlestick tick motif, right -->
+  <g opacity="0.85">
+    <line x1="1052" y1="42" x2="1052" y2="78" stroke="#00d68f" stroke-width="1"/>
+    <rect x="1048" y="50" width="8" height="18" rx="1" fill="#00d68f"/>
+    <line x1="1080" y1="38" x2="1080" y2="74" stroke="#00d68f" stroke-width="1"/>
+    <rect x="1076" y="46" width="8" height="20" rx="1" fill="#00d68f"/>
+    <line x1="1108" y1="46" x2="1108" y2="82" stroke="#ff4d6a" stroke-width="1"/>
+    <rect x="1104" y="54" width="8" height="16" rx="1" fill="#ff4d6a"/>
+    <line x1="1136" y1="34" x2="1136" y2="70" stroke="#D4AF37" stroke-width="1"/>
+    <rect x="1132" y="42" width="8" height="22" rx="1" fill="url(#g01)"/>
+  </g>
+</svg>
